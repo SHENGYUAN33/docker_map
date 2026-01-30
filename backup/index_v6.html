@@ -1,0 +1,2729 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- html2canvas 庫 - 用於截圖功能 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <title>軍事兵推 AI 系統 v6.0 - Hermes-2-Pro Agent</title>
+  
+  <style>
+    /* ==================== 全局樣式 ==================== */
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
+    
+    body {
+      font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    }
+    
+    #app { 
+      display: flex; 
+      height: 100vh; 
+    }
+    
+    /* ==================== 系統管理按鈕 ==================== */
+    #admin-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9998;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: all 0.3s;
+    }
+    
+    #admin-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+    }
+    
+    /* ==================== 左側功能列 ==================== */
+    #sidebar {
+      width: 340px;
+      background: rgba(255, 255, 255, 0.98);
+      border-right: 1px solid rgba(0,0,0,0.1);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+    }
+    
+    /* 側邊欄捲軸樣式 */
+    #sidebar::-webkit-scrollbar { width: 10px; }
+    #sidebar::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 5px; }
+    #sidebar::-webkit-scrollbar-thumb { background: rgba(30, 60, 114, 0.3); border-radius: 5px; }
+    
+    /* 側邊欄標題 */
+    #sidebar-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #1e3c72;
+      text-align: center;
+    }
+    
+    #sidebar-subtitle {
+      font-size: 12px;
+      color: #7f8c8d;
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 8px;
+      background: rgba(30, 60, 114, 0.1);
+      border-radius: 8px;
+    }
+    
+    /* ==================== LLM 模型選擇器 ==================== */
+    .llm-selector {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+      border-radius: 10px;
+      border: 2px solid #4CAF50;
+    }
+    
+    .llm-selector-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #2e7d32;
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .llm-selector select {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #4CAF50;
+      border-radius: 5px;
+      font-size: 14px;
+      background: white;
+      cursor: pointer;
+    }
+    
+    /* ==================== 全域按鈕區 ==================== */
+    .global-buttons {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .global-btn {
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    /* 各個按鈕的顏色主題 */
+    .global-btn.btn-back { 
+      background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%); 
+      color: #424242; 
+    }
+    .global-btn.btn-save-chat { 
+      background: linear-gradient(135deg, #e3f2fd 0%, #90caf9 100%); 
+      color: #0d47a1; 
+    }
+    .global-btn.btn-save-cop { 
+      background: linear-gradient(135deg, #fff3e0 0%, #ffb74d 100%); 
+      color: #e65100; 
+    }
+    .global-btn.btn-clear-map { 
+      background: linear-gradient(135deg, #ffebee 0%, #ef5350 100%); 
+      color: #c62828; 
+    }
+    .global-btn.btn-clear-text { 
+      background: linear-gradient(135deg, #f3e5f5 0%, #ce93d8 100%); 
+      color: #6a1b9a; 
+    }
+    
+    .global-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    /* ==================== 功能區塊（折疊式） ==================== */
+    .function-section {
+      margin-bottom: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      overflow: visible;
+      background: white;
+      transition: all 0.3s;
+    }
+    
+    .function-section:hover {
+      border-color: #1e3c72;
+      box-shadow: 0 4px 12px rgba(30, 60, 114, 0.2);
+    }
+    
+    /* 功能區塊標題 */
+    .function-header {
+      padding: 15px;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      color: white;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      font-size: 15px;
+    }
+    
+    .function-header .icon {
+      font-size: 18px;
+      transition: transform 0.3s;
+    }
+    
+    .function-header.active .icon {
+      transform: rotate(90deg);
+    }
+    
+    /* 功能區塊內容 */
+    .function-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      padding: 0 15px;
+    }
+    
+    .function-content.active {
+      max-height: 200px;
+      padding: 15px;
+      padding-right: 25px; /* 為捲軸留空間 */
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    
+    /* 功能區塊內容捲軸樣式 */
+    .function-content::-webkit-scrollbar {
+      width: 10px;
+      display: block;
+    }
+    
+    .function-content::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 10px;
+    }
+    
+    .function-content::-webkit-scrollbar-thumb {
+      background: rgba(30, 60, 114, 0.3);
+      border-radius: 4px;
+    }
+    
+    .function-content::-webkit-scrollbar-thumb:hover {
+      background: rgba(30, 60, 114, 0.5);
+    }
+    
+    /* ==================== 模式按鈕 ==================== */
+    .mode-button {
+      margin-bottom: 12px;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #1e3c72;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .mode-button:hover {
+      background: #e3f2fd;
+      transform: translateX(5px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .mode-button.active {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      border-left: 4px solid #2196F3;
+    }
+    
+    .mode-button-title {
+      font-weight: 600;
+      color: #1e3c72;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+    
+    .mode-button-desc {
+      font-size: 12px;
+      color: #666;
+    }
+
+    /* ==================== 右側主區域 ==================== */
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 20px;
+      padding-top: 70px;
+    }
+    
+    #display-panel {
+      flex: 1;
+      min-height: 400px;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* ==================== Tab 切換按鈕 ==================== */
+    /* ==================== 舊 Tab 區（保留 class 名稱以免其他 JS 依賴，但在整合版 UI 隱藏） ==================== */
+    .tab-header {
+      display: none; /* ✅ 整合版 UI 不再顯示切換 */
+      background: #f5f5f5;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    /* ==================== 新 UI：上圖台 / 下文本，含可拖曳分隔線 ==================== */
+    #split-container {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #pane-map {
+      flex: 0 0 55%;
+      min-height: 180px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #pane-text {
+      flex: 1 1 auto;
+      min-height: 220px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #splitter {
+      height: 8px;
+      cursor: row-resize;
+      background: rgba(0,0,0,0.12);
+      border-top: 1px solid rgba(0,0,0,0.08);
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      position: relative;
+      user-select: none;
+      touch-action: none;
+    }
+
+    #splitter::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 64px;
+      height: 3px;
+      transform: translate(-50%, -50%);
+      border-radius: 2px;
+      background: rgba(30, 60, 114, 0.35);
+    }
+
+    /* 讓 map/text 內容在新佈局下永遠顯示（不再切換） */
+#map-content{
+  height: 100%;
+  display: block !important;
+}
+#text-content{
+  height: 100%;
+  display: flex !important;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+    
+    .tab-button {
+      flex: 1;
+      padding: 15px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      color: #666;
+      transition: all 0.3s;
+      border-bottom: 3px solid transparent;
+    }
+    
+    .tab-button.active {
+      color: #1e3c72;
+      background: white;
+      border-bottom: 3px solid #1e3c72;
+    }
+    
+    .tab-content {
+      flex: 1;
+      display: none;
+      overflow: auto;
+    }
+    
+    .tab-content.active {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* ==================== 圖台模式 ==================== */
+#map-content{ 
+  position: relative;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ✅ 讓 iframe 永遠填滿 map-content（避免只剩一條） */
+#folium-map{ 
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* ✅ placeholder 改成覆蓋層，不佔版面高度（避免把 iframe 擠到下面） */
+#map-placeholder{
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  max-width: calc(100% - 24px);
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(0,0,0,0.08);
+  color: #1e3c72;
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ==================== 文本模式 ==================== */
+    #text-content{
+  /* ✅ 下半部：聊天可滾動 + 輸入列固定底部 */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+    
+    #chat-container{
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  margin: 15px 20px 10px 20px;
+}
+    
+    /* ==================== 聊天訊息樣式 ==================== */
+    .chat-message {
+      margin-bottom: 15px;
+      display: flex;
+      gap: 10px;
+    }
+    
+    .chat-message.user { justify-content: flex-end; }
+    .chat-message.assistant { justify-content: flex-start; }
+    .chat-message.system { justify-content: center; }
+    
+    .message-bubble {
+      max-width: 70%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      word-wrap: break-word;
+      position: relative;
+      white-space: pre-wrap;
+    }
+    
+    .chat-message.user .message-bubble {
+      background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+      color: white;
+    }
+    
+    .chat-message.assistant .message-bubble {
+      background: white;
+      border: 1px solid #e0e0e0;
+      color: #333;
+    }
+    
+    .chat-message.system .message-bubble {
+      background: #fff3e0;
+      color: #e65100;
+      border: 1px solid #ffb74d;
+      font-size: 13px;
+      max-width: 85%;
+    }
+
+    /* ==================== RAG 功能按鈕 ==================== */
+    .rag-buttons {
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* RAG 基底按鈕樣式 */
+    .rag-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .2px;
+      border: 1px solid transparent;
+      background: #fff;
+      transition: transform .15s ease, box-shadow .15s ease, background .15s ease, color .15s ease, border-color .15s ease;
+      user-select: none;
+    }
+
+    .rag-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0,0,0,.12);
+    }
+
+    .rag-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 3px 10px rgba(0,0,0,.10);
+    }
+
+    /* RAG 複製按鈕 */
+    .rag-copy {
+      border-color: rgba(30,60,114,.35);
+      color: #1e3c72;
+      background: rgba(30,60,114,.06);
+    }
+
+    .rag-copy:hover {
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    /* RAG 來源按鈕 */
+    .rag-source {
+      border-color: rgba(76,175,80,.35);
+      color: #2e7d32;
+      background: rgba(76,175,80,.08);
+    }
+
+    .rag-source:hover {
+      background: linear-gradient(135deg, #2e7d32 0%, #4CAF50 100%);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    /* RAG 反饋按鈕 */
+    .rag-feedback {
+      border-color: rgba(255,152,0,.35);
+      color: #e65100;
+      background: rgba(255,152,0,.10);
+    }
+
+    .rag-feedback:hover {
+      background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    /* 複製成功狀態 */
+    .rag-btn.is-copied {
+      background: linear-gradient(135deg, #2e7d32 0%, #4CAF50 100%) !important;
+      color: #fff !important;
+      border-color: transparent !important;
+    }
+
+    /* ==================== 武器分派表格 ==================== */
+    .wta-table-container {
+      margin-top: 20px;
+      overflow-x: auto;
+      padding: 15px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .wta-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    
+    .wta-table thead {
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      color: white;
+    }
+    
+    .wta-table th,
+    .wta-table td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .wta-table tbody tr:hover {
+      background: #f5f5f5;
+    }
+    
+    .weapon-hf3 {
+      color: #D32F2F;
+      font-weight: 600;
+    }
+    
+    .weapon-hf2 {
+      color: #FF9800;
+      font-weight: 600;
+    }
+    
+    /* ==================== 輸入區域 ==================== */
+    #chat-input-area{
+  display: flex;
+  gap: 10px;
+  padding: 15px;
+  background: white;
+  border-top: 1px solid #e0e0e0;
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+}
+
+/* WTA 表格區：不影響輸入列固定 */
+#wta-table-container{
+  flex: 0 0 auto;
+  overflow: auto;
+  padding: 0 20px 10px 20px;
+}
+    
+    #chat-input {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      resize: none;
+      font-family: inherit;
+    }
+    
+    #send-button {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    #send-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+    }
+    
+    #send-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ==================== Modal 共用樣式 ==================== */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 10000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal.active { display: flex; }
+    
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      width: 500px;
+      max-width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    
+    .modal-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1e3c72;
+      margin-bottom: 10px;
+    }
+    
+    /* ==================== 系統管理面板 ==================== */
+    #admin-modal .setting-item {
+      padding: 15px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    /* Toggle 開關樣式 */
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 26px;
+    }
+    
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 26px;
+    }
+    
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .toggle-slider {
+      background-color: #4CAF50;
+    }
+    
+    input:checked + .toggle-slider:before {
+      transform: translateX(24px);
+    }
+    
+    /* ==================== 通知訊息 ==================== */
+    .notification {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 10001;
+      animation: slideIn 0.3s ease-out;
+      max-width: 400px;
+    }
+    
+    .notification.success { background: #4CAF50; }
+    .notification.error { background: #f44336; }
+    .notification.info { background: #2196F3; }
+    .notification.warning { background: #FF9800; }
+    
+    @keyframes slideIn {
+      from { transform: translateX(400px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    /* ==================== Loading 動畫 ==================== */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .loading-overlay.active { display: flex; }
+    
+    .loading-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #2196F3;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .progress-bar {
+      width: 300px;
+      height: 20px;
+      background: #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 15px auto;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+      width: 0%;
+      transition: width 0.3s;
+    }
+  </style>
+</head>
+<body>
+  <!-- ==================== 系統管理按鈕 ==================== -->
+  <button id="admin-btn" onclick="openAdminPanel()">⚙️ 系統管理</button>
+
+  <div id="app">
+    <!-- ==================== 左側功能列 ==================== -->
+    <div id="sidebar">
+      <div id="sidebar-title">🎖️ 軍事兵推 AI 系統</div>
+      <div id="sidebar-subtitle">Military war game AI system</div>
+
+
+<!-- ==================== LLM 模型選擇器 ==================== -->
+      <div class="llm-selector">
+        <label class="llm-selector-label">🤖 選擇 LLM 模型</label>
+        <select id="llm-model-selector" onchange="handleLLMChange()">
+          <!-- Ollama 本地模型 -->
+          <optgroup label="🏠 Ollama 本地模型">
+            <option value="ollama-llama3.2:3b" selected>Llama 3.2 3B (預設)</option>
+            
+            <!-- 🆕 新增的三個模型 -->
+            <option value="ollama-mistral:7b">Mistral 7B</option>
+            <option value="ollama-llama3:8b">Llama 3 8B</option>
+            <option value="ollama-llama3.1:70b">Llama 3.1 70B (大模型)</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <!-- ==================== SYSTEM PROMPT 配置選擇器 ==================== -->
+      <div class="llm-selector" style="margin-top: 15px;">
+        <label class="llm-selector-label">📝 SYSTEM PROMPT 配置</label>
+        <select id="prompt-config-selector" onchange="handlePromptConfigChange()">
+          <option value="預設配置" selected>預設配置</option>
+        </select>
+      </div>
+
+      <!-- 全域功能按鈕 -->
+      <div class="global-buttons">
+        <button class="global-btn btn-back" onclick="handleBack()">🔙 返回</button>
+        <button class="global-btn btn-save-chat" onclick="handleSaveConversation()">💾 儲存對話</button>
+        <button class="global-btn btn-save-cop" onclick="handleSaveCOP()">💾 儲存 COP</button>
+        <button class="global-btn btn-clear-map" onclick="clearMap()">🗑️ 清除地圖</button>
+        <button class="global-btn btn-clear-text" onclick="clearText()">🧹 清除文本</button>
+      </div>
+
+      <!-- 功能一：情境模擬 -->
+      <div class="function-section">
+        <div class="function-header" onclick="toggleFunction(this)">
+          <span>功能一：情境模擬</span>
+          <span class="icon">▶</span>
+        </div>
+        <div class="function-content">
+          <div class="mode-button" onclick="setMode('import_scenario')">
+            <div class="mode-button-title">📥 兵棋場景匯入</div>
+            <div class="mode-button-desc">取得敵我座標並繪製在地圖上</div>
+          </div>
+          <div class="mode-button" onclick="setMode('start_scenario')">
+            <div class="mode-button-title">▶️ 兵棋模擬</div>
+            <div class="mode-button-desc">執行 CMO 武器分派演算</div>
+          </div>
+          <div class="mode-button" onclick="setMode('get_wta')">
+            <div class="mode-button-title">📊 攻擊配對線繪製</div>
+            <div class="mode-button-desc">取得並繪製武器分派結果</div>
+          </div>
+          <div class="mode-button" onclick="setMode('get_track')">
+            <div class="mode-button-title">🛤️ 軌跡繪製功能</div>
+            <div class="mode-button-desc">顯示所有船艦的航行軌跡</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 功能二：軍事行動準據文本生成 -->
+      <div class="function-section">
+        <div class="function-header" onclick="toggleFunction(this)">
+          <span>功能二：軍事行動準據文本生成</span>
+          <span class="icon">▶</span>
+        </div>
+        <div class="function-content">
+          <div class="mode-button" onclick="setMode('text_generation')">
+            <div class="mode-button-title">📝 文本生成</div>
+            <div class="mode-button-desc">生成完整的軍事行動準據文本</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 功能三：軍事準則問答 -->
+      <div class="function-section">
+        <div class="function-header" onclick="toggleFunction(this)">
+          <span>功能三：軍事準則問答</span>
+          <span class="icon">▶</span>
+        </div>
+        <div class="function-content">
+          <div class="mode-button" onclick="setMode('military_qa')">
+            <div class="mode-button-title">💬 智能問答</div>
+            <div class="mode-button-desc">基於軍事知識的問答系統</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 右側主區域 ==================== -->
+    <div id="main">
+      <div id="display-panel">
+        <!-- ✅ 整合版：上圖台 / 下文本（同畫面），中間可拖曳調整比例 -->
+        <div id="split-container">
+          <div id="pane-map">
+            <div id="map-content">
+              <div id="map-placeholder">底圖已就緒（等待兵推地圖載入）。請選擇功能開始操作。</div>
+              <iframe
+                id="folium-map"
+                srcdoc="<!DOCTYPE html>&#10;<html><head>&#10;<meta charset='utf-8'/>&#10;<meta name='viewport' content='width=device-width,initial-scale=1'/>&#10;<link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/>&#10;<style>&#10;html,body{height:100%;margin:0}&#10;#m{height:100%}&#10;</style>&#10;</head>&#10;<body>&#10;<div id='m'></div>&#10;<script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>&#10;<script>&#10;(function(){&#10;  function fallback(msg){&#10;    document.body.innerHTML = '<div style=&quot;padding:16px;font-family:sans-serif;color:#1e3c72;&quot;>'+msg+'</div>';&#10;  }&#10;  if (typeof L === 'undefined') {&#10;    fallback('底圖載入失敗（可能是離線）。請直接執行功能產生 Folium 地圖。');&#10;    return;&#10;  }&#10;  try{&#10;    var map=L.map('m',{zoomControl:true}).setView([23.7,121.0],7);&#10;    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&amp;copy; OpenStreetMap'}).addTo(map);&#10;  }catch(e){&#10;    fallback('底圖初始化失敗。請直接執行功能產生 Folium 地圖。');&#10;  }&#10;})();&#10;</script>&#10;</body></html>"
+                style="width: 100%; height: 100%; border: none; display: block;">
+              </iframe>
+            </div>
+          </div>
+
+          <div id="splitter" title="拖曳調整圖台/文本大小"></div>
+
+          <div id="pane-text">
+            <div id="text-content">
+              <div id="chat-container"></div>
+              <div id="wta-table-container" style="display: none;"></div>
+              <div id="chat-input-area">
+                <textarea id="chat-input" rows="2" placeholder="請輸入指令或問題..."></textarea>
+                <button id="send-button" onclick="sendMessage()">發送</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Loading 覆蓋層 ==================== -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <div id="loading-message">處理中...</div>
+      <div class="progress-bar">
+        <div id="progress-fill" class="progress-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 系統管理面板 Modal ==================== -->
+  <div id="admin-modal" class="modal">
+    <div class="modal-content">
+      <h3 class="modal-title">⚙️ 系統管理</h3>
+      
+      <!-- 設定項目 -->
+      <div class="setting-item">
+        <label>顯示來源按鈕</label>
+        <label class="toggle-switch">
+          <input type="checkbox" id="setting-show-source" checked onchange="updateSettings()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <!-- 動畫生成開關 -->
+      <div class="setting-item">
+        <label>動畫生成開關</label>
+        <label class="toggle-switch">
+          <input type="checkbox" id="setting-enable-animation" onchange="updateSettings()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <!-- 查看反饋按鈕 -->
+      <div style="margin: 20px 0; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+        <button class="global-btn btn-save-chat" onclick="viewFeedbacks()" 
+                style="width: 100%; margin-bottom: 10px;">
+          📊 查看用戶反饋
+        </button>
+      </div>
+
+      <!-- SYSTEM PROMPT 管理按鈕 -->
+      <div style="margin-top: 20px;">
+        <button onclick="openPromptManager()" 
+                style="width: 100%; padding: 12px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(17, 153, 142, 0.3);">
+          📝 管理 SYSTEM PROMPT
+        </button>
+        <p style="font-size: 11px; color: #666; margin-top: 8px; text-align: center;">
+          編輯系統提示詞配置
+        </p>
+      </div>
+
+      <!-- 關閉按鈕 -->
+      <div style="text-align: right; margin-top: 20px;">
+        <button class="global-btn btn-save-chat" onclick="closeAdminPanel()">確定</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ==================== 全域狀態管理 ==================== */
+    const state = {
+      saveDirHandle: null,
+      currentMode: null,
+      currentTab: 'map',
+      selectedModel: 'hermes-2-pro-llama-3-8b',
+      selectedPromptConfig: '預設配置',
+      conversation: [],
+      simulationId: null,
+      pollingInterval: null,
+      systemSettings: { show_source_btn: true, enable_feedback: true, enable_animation: null }
+    };
+
+    const API_BASE = 'http://localhost:5000';
+    const NODE_API_BASE = 'http://localhost:3000';
+
+    /* ==================== 會話/分頁級 client_id（方案 B） ====================
+       - 每個瀏覽器分頁各自一個 client_id（sessionStorage）
+       - 透過 Header: X-Client-ID 傳給後端，後端依此維護獨立 MapState
+       - ✅ 不影響其他功能；僅避免不同分頁/不同使用者互相污染地圖狀態
+    */
+    (function initClientIdAndFetchHook() {
+      const KEY = 'cmo_client_id';
+      let cid = sessionStorage.getItem(KEY);
+      if (!cid) {
+        const rand = (window.crypto && crypto.randomUUID)
+          ? crypto.randomUUID()
+          : (Date.now().toString(16) + '-' + Math.random().toString(16).slice(2));
+        cid = `tab-${rand}`;
+        sessionStorage.setItem(KEY, cid);
+      }
+      window.CLIENT_ID = cid;
+
+      const _fetch = window.fetch.bind(window);
+      window.fetch = function(resource, init) {
+        try {
+          if (typeof resource === 'string' && resource.startsWith(API_BASE)) {
+            init = init || {};
+            const headers = new Headers(init.headers || {});
+            headers.set('X-Client-ID', cid);
+            init.headers = headers;
+          }
+        } catch (e) {
+          // 靜默忽略
+        }
+        return _fetch(resource, init);
+      };
+    })();
+
+
+    /* ==================== 本機資料夾儲存（File System Access API）==================== */
+    async function pickSaveDirectory() {
+      if (!window.showDirectoryPicker) {
+        showNotification('❌ 你的瀏覽器不支援「選資料夾並寫入」功能（請用 Chrome/Edge，並用 localhost 開啟）', 'error');
+        return null;
+      }
+      try {
+        const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+        return dirHandle;
+      } catch (e) {
+        // 使用者取消
+        return null;
+      }
+    }
+
+    async function ensureDirPermission(dirHandle) {
+      const perm = await dirHandle.queryPermission({ mode: 'readwrite' });
+      if (perm === 'granted') return true;
+      const req = await dirHandle.requestPermission({ mode: 'readwrite' });
+      return req === 'granted';
+    }
+
+    function dataURLToBlob(dataURL) {
+      const [meta, base64] = dataURL.split(',');
+      const mimeMatch = meta.match(/data:(.*?);base64/);
+      const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+      const binStr = atob(base64);
+      const len = binStr.length;
+      const u8 = new Uint8Array(len);
+      for (let i = 0; i < len; i++) u8[i] = binStr.charCodeAt(i);
+      return new Blob([u8], { type: mime });
+    }
+
+    async function writeFileToDir(dirHandle, filename, blob) {
+      const ok = await ensureDirPermission(dirHandle);
+      if (!ok) throw new Error('未取得資料夾寫入權限');
+
+      const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
+      const writable = await fileHandle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+    }
+
+    /* ==================== 初始化 ==================== */
+    window.onload = async function() {
+      console.log('軍事兵推 AI 系統 v6.0 已載入（Llama3.2 3B Agent）');
+      addSystemMessage('🎖️ 系統已就緒！請選擇功能模式開始使用。');
+      await loadSystemSettings();
+      
+      // 啟動模擬狀態監聽
+      startSimulationStatusPolling();
+
+      // ✅ 初始化：上圖台/下文本拖曳分隔線
+      initSplitLayout();
+    };
+
+    /* ==================== 上圖台/下文本：拖曳分隔線 ==================== */
+    function initSplitLayout() {
+      const splitter = document.getElementById('splitter');
+      const paneMap = document.getElementById('pane-map');
+      const paneText = document.getElementById('pane-text');
+      const container = document.getElementById('split-container');
+      const iframe = document.getElementById('folium-map');
+
+      if (!splitter || !paneMap || !paneText || !container) return;
+
+      // ✅ 透明遮罩：拖曳時覆蓋 iframe，避免事件被 iframe 吃掉導致「黏住 / 卡卡」
+      let dragOverlay = document.getElementById('drag-overlay');
+      if (!dragOverlay) {
+        dragOverlay = document.createElement('div');
+        dragOverlay.id = 'drag-overlay';
+        dragOverlay.style.position = 'absolute';
+        dragOverlay.style.left = '0';
+        dragOverlay.style.top = '0';
+        dragOverlay.style.right = '0';
+        dragOverlay.style.bottom = '0';
+        dragOverlay.style.zIndex = '9999';
+        dragOverlay.style.background = 'transparent';
+        dragOverlay.style.display = 'none';
+
+        const displayPanel = document.getElementById('display-panel');
+        if (displayPanel) {
+          if (!displayPanel.style.position) displayPanel.style.position = 'relative';
+          displayPanel.appendChild(dragOverlay);
+        } else {
+          document.body.appendChild(dragOverlay);
+          dragOverlay.style.position = 'fixed';
+        }
+      }
+
+      const MIN_MAP = 160;
+      const EXTRA_GAP = 30; // 安全緩衝，避免壓到輸入列
+
+      let dragging = false;
+      let pendingY = null;
+      let rafId = null;
+
+      function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+      // ✅ 下半部最小高度：一定要能容納輸入列（固定在底部）
+      function getMinTextHeight() {
+        const dock = document.getElementById('chat-input-area');
+        const dockH = dock ? dock.getBoundingClientRect().height : 80;
+        return Math.max(260, Math.ceil(dockH + EXTRA_GAP));
+      }
+
+      function tryInvalidateLeaflet() {
+        try {
+          if (!iframe || !iframe.contentWindow) return;
+          const w = iframe.contentWindow;
+          for (const k in w) {
+            const obj = w[k];
+            if (obj && typeof obj.invalidateSize === 'function' && typeof obj.getCenter === 'function') {
+              obj.invalidateSize(true);
+              break;
+            }
+          }
+        } catch (e) {
+          // ignore cross-origin / 尚未載入
+        }
+      }
+
+      function applyResize(y) {
+        const rect = container.getBoundingClientRect();
+        const splitterH = splitter.getBoundingClientRect().height;
+        const minText = getMinTextHeight();
+        const maxMap = rect.height - minText - splitterH;
+        const mapH = clamp(y, MIN_MAP, maxMap);
+        paneMap.style.flex = `0 0 ${mapH}px`;
+      }
+
+      function scheduleResize(y) {
+        pendingY = y;
+        if (rafId) return;
+        rafId = requestAnimationFrame(() => {
+          rafId = null;
+          if (pendingY == null) return;
+          applyResize(pendingY);
+          pendingY = null;
+        });
+      }
+
+      function endDrag() {
+        if (!dragging) return;
+        dragging = false;
+        dragOverlay.style.display = 'none';
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        document.body.style.pointerEvents = '';
+        // 結束時再補一次 invalidate，避免最後一幀不同步
+        setTimeout(tryInvalidateLeaflet, 50);
+      }
+
+      // ✅ Pointer Events + setPointerCapture：保證 pointerup 一定收到，不會黏住
+      splitter.addEventListener('pointerdown', (e) => {
+        dragging = true;
+        try { splitter.setPointerCapture(e.pointerId); } catch (_) {}
+
+        dragOverlay.style.display = 'block';
+        document.body.style.cursor = 'row-resize';
+        document.body.style.userSelect = 'none';
+
+        const rect = container.getBoundingClientRect();
+        scheduleResize(e.clientY - rect.top);
+
+        e.preventDefault();
+      });
+
+      splitter.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        const rect = container.getBoundingClientRect();
+        scheduleResize(e.clientY - rect.top);
+        e.preventDefault();
+      });
+
+      splitter.addEventListener('pointerup', (e) => {
+        endDrag();
+        e.preventDefault();
+      });
+
+      splitter.addEventListener('pointercancel', (e) => {
+        endDrag();
+        e.preventDefault();
+      });
+
+      // ✅ 保險：視窗失焦也結束拖曳
+      window.addEventListener('blur', endDrag);
+    }
+
+    /* ==================== 功能區塊折疊/展開 ==================== */
+    function toggleFunction(header) {
+      const content = header.nextElementSibling;
+      const icon = header.querySelector('.icon');
+      header.classList.toggle('active');
+      content.classList.toggle('active');
+      icon.textContent = content.classList.contains('active') ? '▼' : '▶';
+    }
+
+    /* ==================== Tab 切換 ==================== */
+    function switchTab(tab) {
+      state.currentTab = tab;
+      // ✅ 整合版 UI：圖台/文本同時顯示，不再做顯示/隱藏切換。
+      // 為了相容舊程式（仍可能呼叫 switchTab），此函式保留但改為「安全 no-op」。
+      const buttons = document.querySelectorAll('.tab-button');
+      const contents = document.querySelectorAll('.tab-content');
+      if (!buttons.length || !contents.length) return;
+
+      buttons.forEach(btn => btn.classList.remove('active'));
+      contents.forEach(content => content.classList.remove('active'));
+
+      if (tab === 'map') {
+        if (buttons[0]) buttons[0].classList.add('active');
+        const mc = document.getElementById('map-content');
+        if (mc) mc.classList.add('active');
+      } else {
+        if (buttons[1]) buttons[1].classList.add('active');
+        const tc = document.getElementById('text-content');
+        if (tc) tc.classList.add('active');
+      }
+    }
+
+    /* ==================== 模式選擇 ==================== */
+    function setMode(mode) {
+      state.currentMode = mode;
+      document.querySelectorAll('.mode-button').forEach(btn => btn.classList.remove('active'));
+      event.target.closest('.mode-button').classList.add('active');
+      
+      const modeNames = {
+        'import_scenario': '兵棋場景匯入',
+        'start_scenario': '兵棋模擬',
+        'get_wta': '攻擊配對線繪製',
+        'get_track': '軌跡繪製功能',
+        'text_generation': '軍事行動準據文本生成',
+        'military_qa': '軍事準則問答'
+      };
+      
+      const modeTips = {
+        'import_scenario': '💡 支援智能參數提取，例如繪製1101的座標',
+        'start_scenario': '💡 請輸入:兵棋模擬，\n將啟動 CMO 模擬，請等待約武器分派計算',
+        'get_wta': '💡 請輸入:攻擊配對線繪製',
+        'get_track': '💡 請輸入：顯示航跡、繪製軌跡等指令',
+        'text_generation': '💡 軍事行動準據文本，例如:雄三飛彈射程?',
+        'military_qa': '💡 提問任何軍事相關問題，例如：掩護種類有哪些？'
+      };
+      
+      addSystemMessage(`已切換到【${modeNames[mode]}】模式\n${modeTips[mode]}`);
+      
+      // 功能二和功能三自動切換到文本模式
+      if (mode === 'text_generation' || mode === 'military_qa') {
+        switchTab('text');
+      }
+    }
+
+    /* ==================== 清除地圖 ==================== */
+    async function clearMap() {
+      if (!confirm('確定要清除地圖上的所有標記和線條嗎？')) {
+        return;
+      }
+      
+      try {
+        await fetch(`${API_BASE}/api/clear_map`, { method: 'POST' });
+        showNotification('✅ 地圖已清除', 'success');
+        
+        // 重新載入地圖
+        const iframe = document.getElementById('folium-map');
+        iframe.src = 'about:blank';
+        document.getElementById('map-placeholder').style.display = 'block';
+        iframe.style.display = 'none';
+      } catch (error) {
+        showNotification('❌ 清除失敗', 'error');
+      }
+    }
+
+    /* ==================== 清除文本 ==================== */
+    function clearText() {
+      if (!confirm('確定要清除所有文本對話嗎？')) {
+        return;
+      }
+      
+      try {
+        // 清空聊天容器
+        const chatContainer = document.getElementById('chat-container');
+        if (chatContainer) {
+          chatContainer.innerHTML = '';
+        }
+        
+        // 清空WTA表格容器
+        const wtaContainer = document.getElementById('wta-table-container');
+        if (wtaContainer) {
+          wtaContainer.innerHTML = '';
+          wtaContainer.style.display = 'none';
+        }
+        
+        // 清空對話記錄
+        state.conversation = [];
+        
+        // 添加系統訊息
+        addSystemMessage('🧹 文本已清除！ \n 請重新選擇功能');
+        
+        showNotification('✅ 文本已清除', 'success');
+      } catch (error) {
+        console.error('清除文本失敗:', error);
+        showNotification('❌ 清除失敗', 'error');
+      }
+    }
+
+    /* ==================== 儲存 COP 截圖（使用後端 API）==================== */
+    async function handleSaveCOP() {
+      try {
+        // 獲取地圖 iframe
+        const mapIframe = document.getElementById('folium-map');
+        
+        if (!mapIframe || mapIframe.style.display === 'none') {
+          showNotification('⚠️ 請先切換到地圖顯示', 'warning');
+          return;
+        }
+        
+        // 檢查地圖是否已載入
+        if (!mapIframe.src || mapIframe.src === 'about:blank') {
+          showNotification('⚠️ 請先載入地圖（選擇功能並執行指令）', 'warning');
+          return;
+        }
+
+
+        // ✅ 做法2：每次儲存都跳選資料夾
+        state.saveDirHandle = null;
+        const dirHandle = await pickSaveDirectory();
+        if (!dirHandle) {
+          showNotification('⚠️ 已取消選擇資料夾', 'warning');
+          return;
+        }
+        
+        showLoading('正在截取地圖畫面...');
+        updateLoadingProgress(30, '正在處理截圖...');
+        
+        try {
+          // 調用後端 API 進行截圖
+          const response = await fetch(`${API_BASE}/api/save_cop`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+          });
+          
+          const result = await response.json();
+          
+          updateLoadingProgress(80, '準備下載...');
+          
+          if (result.success && result.image_base64) {
+            // 使用後端返回的 Base64 圖片
+            // ✅ 寫入使用者選擇的資料夾（不走下載）
+            const filename = result.filename || `COP_${Date.now()}.png`;
+            const blob = dataURLToBlob(result.image_base64);
+            await writeFileToDir(dirHandle, filename, blob);
+
+            // （可選）一起存 metadata（後端有回傳 metadata）
+            if (result.metadata) {
+              const metaName = filename.replace(/\.png$/i, '') + '_metadata.json';
+              const metaBlob = new Blob([JSON.stringify(result.metadata, null, 2)], { type: 'application/json;charset=utf-8' });
+              await writeFileToDir(dirHandle, metaName, metaBlob);
+            }
+hideLoading();
+            showNotification(`✅ COP 已儲存到選擇的資料夾: ${filename}`, 'success');
+          } else {
+            throw new Error(result.error || '截圖失敗');
+          }
+          
+        } catch (apiError) {
+          console.error('後端 API 錯誤:', apiError);
+          hideLoading();
+          showNotification('❌ 後端截圖失敗，請確認 Flask 服務正常運行', 'error');
+        }
+        
+      } catch (error) {
+        hideLoading();
+        showNotification('❌ 截圖失敗：' + error.message, 'error');
+        console.error('截圖錯誤:', error);
+      }
+    }
+
+    /* ==================== LLM 模型配置 ==================== */
+
+    // 模型資訊數據庫（用於顯示友好提示）
+    const llmModels = {
+      'ollama-llama3.2:3b': {
+        name: 'Llama 3.2 3B',
+        provider: 'Ollama',
+        size: '2.0 GB',
+        speed: '快速',
+        quality: '良好'
+      },
+      'ollama-mistral:7b': {
+        name: 'Mistral 7B',
+        provider: 'Ollama',
+        size: '4.1 GB',
+        speed: '中等',
+        quality: '優秀'
+      },
+      'ollama-llama3:8b': {
+        name: 'Llama 3 8B',
+        provider: 'Ollama',
+        size: '4.7 GB',
+        speed: '中等',
+        quality: '優秀'
+      },
+      'ollama-llama3.1:70b': {
+        name: 'Llama 3.1 70B',
+        provider: 'Ollama',
+        size: '40 GB',
+        speed: '較慢',
+        quality: '極佳'
+      }
+    };
+
+    // 處理 LLM 模型切換
+    function handleLLMChange() {
+      const selector = document.getElementById('llm-model-selector');
+      const selectedModel = selector.value;
+      
+      console.log(`🔄 切換 LLM 模型: ${selectedModel}`);
+      
+      // 獲取模型資訊
+      const modelInfo = llmModels[selectedModel];
+      
+      if (modelInfo) {
+        // 顯示詳細通知
+        showNotification(
+          `✅ 已切換至: ${modelInfo.name} (${modelInfo.size}, ${modelInfo.speed})`, 
+          'success'
+        );
+      } else {
+        // 簡單通知
+        const modelName = selector.options[selector.selectedIndex].text;
+        showNotification(`✅ 已切換至: ${modelName}`, 'success');
+        sessionStorage.setItem('selected_llm_model', selectedModel);
+      }
+      
+      // 保存選擇到 localStorage
+      localStorage.setItem('selected_llm_model', selectedModel);
+    }
+
+    // 頁面載入時恢復上次選擇的模型
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedModel = sessionStorage.getItem('selected_llm_model');
+      if (savedModel) {
+        const selector = document.getElementById('llm-model-selector');
+        if (selector) {
+          selector.value = savedModel;
+          console.log(`✅ 已恢復上次選擇的模型: ${savedModel}`);
+        }
+      }
+
+      // ✅ 每次重新開啟/重新整理 HTML，都清空該分頁的後端 MapState，避免殘留圖層
+      fetch(`${API_BASE}/api/clear_map`, { method: 'POST' })
+        .then(() => console.log('🧹 已清空本分頁地圖狀態 (client_id=', window.CLIENT_ID, ')'))
+        .catch(() => console.log('🧹 清空地圖狀態失敗 (可能後端尚未啟動)'));
+    });
+
+    // 獲取當前 LLM 資訊的輔助函數
+    function getCurrentLLMInfo() {
+      const selector = document.getElementById('llm-model-selector');
+      const selectedModel = selector.value;
+      
+      // 解析模型 ID (例如: "ollama-mistral:7b")
+      const [provider, ...modelParts] = selectedModel.split('-');
+      const modelName = modelParts.join('-');
+      
+      return {
+        provider: provider,      // "ollama"
+        modelName: modelName,    // "mistral:7b"
+        fullId: selectedModel    // "ollama-mistral:7b"
+      };
+    }
+
+
+    /* ==================== 進階 COP 截圖功能（使用後端 API）==================== */
+    async function saveCOPScreenshot() {
+      try {
+        console.log('🎨 開始截取 COP 地圖...');
+        
+        const mapIframe = document.getElementById('folium-map');
+        if (!mapIframe || mapIframe.style.display === 'none') {
+          showNotification('❌ 請先顯示地圖', 'error');
+          return;
+        }
+        
+        // 檢查地圖是否已載入
+        if (!mapIframe.src || mapIframe.src === 'about:blank') {
+          showNotification('⚠️ 請先載入地圖（選擇功能並執行指令）', 'warning');
+          return;
+        }
+        
+        showNotification('⏳ 正在截取地圖，請稍候...', 'info');
+        
+        try {
+          // 調用後端 API 進行截圖
+          const response = await fetch(`${API_BASE}/api/save_cop`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+          });
+          
+          const result = await response.json();
+          
+          if (result.success && result.image_base64) {
+            // 自動下載
+            const link = document.createElement('a');
+            link.href = result.image_base64;
+            link.download = result.filename || `COP_${Date.now()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification(`✅ 地圖截圖已保存: ${result.filename}`, 'success');
+            console.log('✅ 截圖成功:', result.filename);
+          } else {
+            throw new Error(result.error || '截圖失敗');
+          }
+          
+        } catch (apiError) {
+          console.error('❌ 後端 API 錯誤:', apiError);
+          showNotification('❌ 截圖失敗，請確認 Flask 服務正常', 'error');
+        }
+        
+      } catch (error) {
+        console.error('❌ 截圖失敗:', error);
+        showNotification('❌ 截圖失敗：' + error.message, 'error');
+      }
+    }
+
+    /* ==================== 查看反饋記錄 ==================== */
+    async function viewFeedbacks() {
+      try {
+        const response = await fetch(`${API_BASE}/api/get_feedbacks?limit=20`);
+        const result = await response.json();
+        
+        if (!result.success) {
+          showNotification('❌ 無法加載反饋', 'error');
+          return;
+        }
+        
+        const feedbacks = result.feedbacks;
+        const stats = result.stats;
+        
+        // 創建反饋查看視窗
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        
+        let feedbacksHtml = '';
+        if (feedbacks.length > 0) {
+          feedbacks.forEach((feedback, index) => {
+            const typeColor = {
+              'positive': '#4CAF50',
+              'negative': '#f44336',
+              'error': '#FF9800'
+            }[feedback.feedback_type] || '#666';
+            
+            const typeIcon = {
+              'positive': '👍',
+              'negative': '👎',
+              'error': '⚠️'
+            }[feedback.feedback_type] || '💬';
+            
+            feedbacksHtml += `
+              <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid ${typeColor};">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                  <strong style="color: #1e3c72;">${typeIcon} ${feedback.feedback_type.toUpperCase()}</strong>
+                  <span style="font-size: 12px; color: #666;">${new Date(feedback.timestamp).toLocaleString('zh-TW')}</span>
+                </div>
+                <p style="margin: 8px 0; color: #333;"><strong>問題：</strong>${escapeHtml(feedback.question)}</p>
+                ${feedback.feedback_text ? `<p style="margin: 8px 0; color: #666;"><strong>反饋：</strong>${escapeHtml(feedback.feedback_text)}</p>` : ''}
+              </div>
+            `;
+          });
+        } else {
+          feedbacksHtml = '<p style="text-align: center; color: #666; padding: 20px;">暫無反饋記錄</p>';
+        }
+        
+        modal.innerHTML = `
+          <div class="modal-content" style="max-width: 900px; max-height: 80vh; overflow-y: auto;">
+            <h3 class="modal-title">📊 用戶反饋統計</h3>
+            
+            <div style="display: flex; gap: 15px; margin: 20px 0;">
+              <div style="flex: 1; background: #e8f5e9; padding: 15px; border-radius: 8px; text-align: center;">
+                <div style="font-size: 24px; font-weight: bold; color: #4CAF50;">${stats.positive}</div>
+                <div style="font-size: 12px; color: #666;">正面反饋</div>
+              </div>
+              <div style="flex: 1; background: #ffebee; padding: 15px; border-radius: 8px; text-align: center;">
+                <div style="font-size: 24px; font-weight: bold; color: #f44336;">${stats.negative}</div>
+                <div style="font-size: 12px; color: #666;">負面反饋</div>
+              </div>
+              <div style="flex: 1; background: #fff3e0; padding: 15px; border-radius: 8px; text-align: center;">
+                <div style="font-size: 24px; font-weight: bold; color: #FF9800;">${stats.error}</div>
+                <div style="font-size: 12px; color: #666;">錯誤報告</div>
+              </div>
+            </div>
+            
+            <h4 style="margin: 20px 0 10px 0; color: #1e3c72;">最近反饋：</h4>
+            ${feedbacksHtml}
+            
+            <div style="text-align: right; margin-top: 20px;">
+              <button class="global-btn btn-save-chat" onclick="this.closest('.modal').remove()">關閉</button>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // 點擊背景關閉
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            modal.remove();
+          }
+        });
+        
+      } catch (error) {
+        showNotification('❌ 加載反饋失敗', 'error');
+        console.error('反饋加載錯誤:', error);
+      }
+    }
+
+    /* ==================== 發送訊息 ==================== */
+    async function sendMessage() {
+      const input = document.getElementById('chat-input');
+      const sendBtn = document.getElementById('send-button');
+      const message = input.value.trim();
+      
+      if (!message) return; 
+      
+      if (!state.currentMode) {
+        showNotification('請先選擇功能模式', 'warning');
+        return;
+      }
+      
+      addUserMessage(message);
+      input.value = '';
+      sendBtn.disabled = true;
+      
+      try {
+
+        // ✅ 獲取當前選擇的 LLM 模型
+        const llmInfo = getCurrentLLMInfo();
+        console.log('🤖 使用 LLM 模型:', llmInfo.modelName);
+
+
+        // 根據模式選擇 API
+        let apiEndpoint;
+        if (state.currentMode === 'text_generation' || state.currentMode === 'military_qa') {
+          apiEndpoint = '/api/get_answer';
+        } else {
+          apiEndpoint = {
+            'import_scenario': '/api/import_scenario',
+            'start_scenario': '/api/start_scenario',
+            'get_wta': '/api/get_wta',
+            'get_track': '/api/get_track',
+          }[state.currentMode];
+        }
+        
+        showLoading('AI 正在分析您的需求...');
+
+        const response = await fetch(`${API_BASE}${apiEndpoint}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_input: message,
+            llm_model: llmInfo.modelName, 
+            prompt_config: state.selectedPromptConfig,
+            mode: state.currentMode
+          })
+        });
+        
+        const result = await response.json();
+        hideLoading();
+        
+        if (result.success) {
+          // 顯示 AI 回答
+          if (result.answer) {
+            const messageOptions = {};
+            
+            // 如果有表格 HTML（武器分派）
+            if (result.wta_table_html) {
+              messageOptions.tableHtml = result.wta_table_html;
+            }
+            
+            // 如果需要顯示 RAG 按鈕（功能二、三）
+            if (result.show_rag_buttons) {
+              messageOptions.showRagButtons = true;
+              messageOptions.question = result.question;
+              messageOptions.sources = result.sources || [];
+              messageOptions.ragId = result.rag_id;
+              messageOptions.datetime = result.datetime;
+            }
+            
+            addAssistantMessage(result.answer, messageOptions);
+          }
+          
+          // 功能一：顯示地圖
+          if (result.map_url) {
+            showMap(result.map_url);
+            if (state.currentMode === 'import_scenario' || state.currentMode === 'get_wta' || state.currentMode === 'get_track') {
+              switchTab('map');
+              
+              // 動畫模式提示
+              if (state.currentMode === 'get_wta' && result.animation_mode) {
+                addSystemMessage('🎬 動畫已啟動，攻擊線將依序出現在地圖中（每條約2-3秒）', 'success');
+              }
+            }
+          }
+          
+          // 處理兵棋模擬
+          if (state.currentMode === 'start_scenario' && result.simulation_id) {
+            state.simulationId = result.simulation_id;
+            startPolling(result.simulation_id);
+          }
+          
+        } else {
+          addSystemMessage(`❌ ${result.error || '執行失敗'}`, 'error');
+        }
+        
+      } catch (error) {
+        hideLoading();
+        console.error('發送訊息錯誤:', error);
+        addSystemMessage(`❌ 系統錯誤：${error.message}`, 'error');
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+      
+
+    /* ==================== 兵推模擬輪詢 ==================== */
+    function startPolling(simulationId) {
+      state.pollingInterval = setInterval(async () => {
+        try {
+          const response = await fetch(`${API_BASE}/api/check_simulation_status/${simulationId}`);
+          const status = await response.json();
+          
+          updateLoadingProgress(status.progress || 0, status.message || '計算中...');
+          
+          if (status.status === 'completed') {
+            clearInterval(state.pollingInterval);
+            hideLoading();
+            addSystemMessage(`✅ ${status.message}\n📊 模擬已完成，可以執行「攻擊配對線繪製」查看結果`);
+            showNotification('兵棋模擬完成！', 'success');
+          } else if (status.status === 'failed') {
+            clearInterval(state.pollingInterval);
+            hideLoading();
+            addSystemMessage(`❌ 模擬失敗`, 'error');
+          }
+        } catch (error) {
+          console.error('輪詢錯誤:', error);
+        }
+      }, 2000);
+    }
+
+    /* ==================== 問題三修正：監聽 CMO 模擬完成狀態 ==================== */
+    async function startSimulationStatusPolling() {
+      // ✅ 先獲取當前狀態作為基準，避免頁面載入時誤判
+      let lastCompletedStatus = false;
+      
+      try {
+        const response = await fetch(`${NODE_API_BASE}/api/v1/get_simulation_status`);
+        const result = await response.json();
+        if (result.success && result.simulation_status) {
+          lastCompletedStatus = result.simulation_status.is_completed;
+          console.log('📊 初始化模擬狀態基準:', lastCompletedStatus);
+        }
+      } catch (error) {
+        console.log('⚠️ 無法獲取初始模擬狀態（後端可能未啟動）');
+      }
+      
+      // 每 3 秒檢查一次模擬狀態
+      setInterval(async () => {
+        try {
+          const response = await fetch(`${NODE_API_BASE}/api/v1/get_simulation_status`);
+          const result = await response.json();
+          
+          if (result.success && result.simulation_status) {
+            const currentStatus = result.simulation_status.is_completed;
+            
+            // ✅ 只在狀態從 false 變成 true 時才通知（真正的狀態改變）
+            if (currentStatus && !lastCompletedStatus && result.simulation_status.last_message) {
+              console.log('🎯 檢測到模擬完成！觸發通知');
+              showCMOCompletionDialog(result.simulation_status.last_message);
+            }
+            
+            // 更新上一次狀態
+            lastCompletedStatus = currentStatus;
+          }
+        } catch (error) {
+          // ✅ 靜默處理錯誤，避免在後端未啟動時不斷報錯
+          // 只在開發模式下輸出日誌
+          if (window.location.hostname === 'localhost') {
+            console.log('📡 輪詢檢查中... (後端服務可能未啟動)');
+          }
+        }
+      }, 3000);
+    }
+
+    /* ==================== 問題三修正：顯示 CMO 完成對話框 ==================== */
+    function showCMOCompletionDialog(message) {
+      const modal = document.createElement('div');
+      modal.className = 'modal active';
+      modal.innerHTML = `
+        <div class="modal-content" style="max-width: 600px;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 64px; margin-bottom: 10px;">🎯</div>
+            <h2 style="color: #4CAF50; margin-bottom: 10px;">模擬完成</h2>
+            <p style="color: #666; font-size: 14px;">${new Date().toLocaleString('zh-TW')}</p>
+          </div>
+          
+          <div style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+            <h3 style="color: #2e7d32; margin-bottom: 10px; font-size: 16px;">✅ 模擬狀態</h3>
+            <p style="color: #1b5e20; font-size: 15px; line-height: 1.6;">
+              ${message || '武器分派演算已完成'}
+            </p>
+          </div>
+          
+          <div style="background: #fff3e0; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #FF9800;">
+            <h3 style="color: #e65100; margin-bottom: 10px; font-size: 16px;">✅ 接下來可以...</h3>
+            <ul style="color: #666; font-size: 14px; line-height: 1.8; margin-left: 20px;">
+              <li>開始進行<strong>攻擊配對線繪製</strong></li>
+              <li>查詢<strong>武器分派結果</strong></li>
+              <li>查看<strong>地圖視覺化呈現</strong></li>
+            </ul>
+          </div>
+          
+          <div style="text-align: right;">
+            <button onclick="this.closest('.modal').remove()" 
+                    style="padding: 12px 24px; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);">
+              ✓ 我知道了
+            </button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      
+      // 同時在聊天區域添加系統訊息
+      addSystemMessage(`🎯 CMO 模擬完成！\n${message || '武器分派演算已完成'}\n\n您現在可以開始進行攻擊配對線繪製。`);
+      
+      // 播放通知音效（如果瀏覽器支持）
+      try {
+        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGGS57OihUhELTKXh8bllHAU2jdXvzn0pBSl+zPLaizsKHGjE5+m8b2vGAAAA');
+        audio.play();
+      } catch (e) {
+        // 忽略音效錯誤
+      }
+    }
+
+    /* ==================== 顯示地圖 ==================== */
+    function showMap(mapUrl) {
+      const iframe = document.getElementById('folium-map');
+      const placeholder = document.getElementById('map-placeholder');
+      if (!iframe) return;
+
+      // ✅ 關鍵修正：iframe 一開始使用 srcdoc 顯示預設底圖。
+      // 若 srcdoc 屬性仍存在，瀏覽器會「永遠優先顯示 srcdoc」，
+      // 即使你設定 iframe.src 也不會切到後端 Folium 地圖。
+      // 所以這裡必須先移除 srcdoc。
+      try { iframe.removeAttribute('srcdoc'); } catch (e) {}
+
+      // 強制刷新：先清空再載入（避免某些瀏覽器快取/不重刷）
+      const targetUrl = `${API_BASE}${mapUrl}?t=${Date.now()}`;
+      iframe.src = 'about:blank';
+      setTimeout(() => {
+        iframe.src = targetUrl;
+      }, 30);
+
+      iframe.style.display = 'block';
+      if (placeholder) placeholder.style.display = 'none';
+    }
+
+    /* ==================== 顯示武器分派表格 ==================== */
+    function displayWTATable(wtaData) {
+      const container = document.getElementById('wta-table-container');
+      if (!container) {
+        console.error('找不到 wta-table-container 元素');
+        return;
+      }
+      
+      // 清空容器
+      container.innerHTML = '';
+      
+      if (!wtaData || !wtaData.wta_results || wtaData.wta_results.length === 0) {
+        container.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">暫無武器分派數據</p>';
+        container.style.display = 'block';
+        return;
+      }
+      
+      // 創建表格標題
+      let tableHtml = '<h3 style="color: #1e3c72; margin-bottom: 15px;">📊 武器分派結果</h3>';
+      tableHtml += '<table class="wta-table">';
+      tableHtml += '<thead><tr>';
+      
+      // 表頭
+      const columns = wtaData.wta_table_columns || [
+        { "attack_wave": "波次" },
+        { "enemy_unit": "敵艦船型" },
+        { "roc_unit": "我方單位" },
+        { "weapon": "飛彈種類" },
+        { "launched_number": "發射數量" },
+        { "launched_time": "發射時間" }
+      ];
+      
+      columns.forEach(col => {
+        const key = Object.keys(col)[0];
+        const label = col[key];
+        tableHtml += `<th>${label}</th>`;
+      });
+      
+      tableHtml += '</tr></thead><tbody>';
+      
+      // 表格內容
+      wtaData.wta_results.forEach(row => {
+        tableHtml += '<tr>';
+        tableHtml += `<td>${row.attack_wave || '-'}</td>`;
+        tableHtml += `<td>${row.enemy_unit || '-'}</td>`;
+        tableHtml += `<td>${row.roc_unit || '-'}</td>`;
+        
+        // 飛彈種類加上顏色
+        let weaponClass = '';
+        if (row.weapon && row.weapon.includes('雄三')) {
+          weaponClass = 'weapon-hf3';
+        } else if (row.weapon && row.weapon.includes('雄二')) {
+          weaponClass = 'weapon-hf2';
+        }
+        tableHtml += `<td class="${weaponClass}">${row.weapon || '-'}</td>`;
+        
+        tableHtml += `<td>${row.launched_number || '-'}</td>`;
+        tableHtml += `<td>${row.launched_time || '-'}</td>`;
+        tableHtml += '</tr>';
+      });
+      
+      tableHtml += '</tbody></table>';
+      
+      container.innerHTML = tableHtml;
+      container.style.display = 'block';
+      
+      console.log(`✅ 武器分派表格已顯示，共 ${wtaData.wta_results.length} 筆記錄`);
+    }
+
+    /* ==================== 聊天訊息顯示 ==================== */
+    function addUserMessage(text) {
+      const container = document.getElementById('chat-container');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'chat-message user';
+      msgDiv.innerHTML = `<div class="message-bubble">${escapeHtml(text)}</div>`;
+      container.appendChild(msgDiv);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function addAssistantMessage(text, options = {}) {
+      const container = document.getElementById('chat-container');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'chat-message assistant';
+      
+      let bubbleHtml = `<div class="message-bubble">${escapeHtml(text)}`;
+      
+      // 如果包含表格 HTML，直接插入（不轉義）
+      if (options.tableHtml) {
+        bubbleHtml += options.tableHtml;
+      }
+      
+      // 如果需要顯示 RAG 按鈕
+      if (options.showRagButtons) {
+        bubbleHtml += `
+          <div class="rag-buttons">
+            <button class="rag-btn rag-copy" onclick="copyAnswer(this)">📋 複製</button>
+            <button class="rag-btn rag-source" onclick="showSource(this)">📚 來源</button>
+            <button class="rag-btn rag-feedback" onclick="showFeedback(this)">💬 反饋</button>
+          </div>
+        `;
+      }
+      
+      bubbleHtml += `</div>`;
+      msgDiv.innerHTML = bubbleHtml;
+      
+      // 儲存原始內容（供複製功能使用）
+      if (options.showRagButtons) {
+        msgDiv.dataset.answerText = text;
+        msgDiv.dataset.question = options.question || '';
+        msgDiv.dataset.sources = JSON.stringify(options.sources || []);
+        msgDiv.dataset.ragId = options.ragId || '';
+        msgDiv.dataset.datetime = options.datetime || '';
+      }
+      
+      container.appendChild(msgDiv);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function addSystemMessage(text) {
+      const container = document.getElementById('chat-container');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'chat-message system';
+      msgDiv.innerHTML = `<div class="message-bubble">${escapeHtml(text)}</div>`;
+      container.appendChild(msgDiv);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    /* ==================== RAG 按鈕功能 ==================== */
+    // 複製答案
+    function copyAnswer(button) {
+      const messageDiv = button.closest('.chat-message');
+      const answerText = messageDiv.dataset.answerText;
+      
+      navigator.clipboard.writeText(answerText).then(() => {
+        showNotification('✅ 已複製到剪貼簿', 'success');
+        button.textContent = '✓ 已複製';
+        button.classList.add('is-copied');
+        
+        setTimeout(() => {
+          button.textContent = '📋 複製';
+          button.classList.remove('is-copied');
+        }, 2000);
+      }).catch(err => {
+        showNotification('❌ 複製失敗', 'error');
+        console.error('複製錯誤:', err);
+      });
+    }
+
+    // 顯示來源
+    function showSource(button) {
+      const messageDiv = button.closest('.chat-message');
+      const sourcesJson = messageDiv.dataset.sources || '[]';
+      const sources = JSON.parse(sourcesJson);
+      const question = messageDiv.dataset.question || '';
+      
+      // 檢查系統設定
+      if (!state.systemSettings.show_source_btn) {
+        showNotification('⚠️ 管理員已關閉來源顯示功能', 'warning');
+        return;
+      }
+      
+      const modal = document.createElement('div');
+      modal.className = 'modal active';
+      
+      let sourcesHtml = '';
+      if (sources && sources.length > 0) {
+        sources.forEach((source, index) => {
+          sourcesHtml += `
+            <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #2196F3;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <strong style="color: #1e3c72;">來源 ${source.index || index + 1}</strong>
+                <span style="background: #e3f2fd; padding: 4px 12px; border-radius: 12px; font-size: 12px; color: #1976d2;">
+                  相似度: ${(source.score * 100).toFixed(1)}%
+                </span>
+              </div>
+              <p style="margin: 8px 0; color: #333; line-height: 1.6;">${escapeHtml(source.content)}</p>
+              <p style="margin: 4px 0; font-size: 12px; color: #666;">
+                📄 路徑: <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">${escapeHtml(source.path)}</code>
+              </p>
+            </div>
+          `;
+        });
+      } else {
+        sourcesHtml = '<p style="color: #666; text-align: center; padding: 20px;">無來源資訊</p>';
+      }
+      
+      modal.innerHTML = `
+        <div class="modal-content" style="max-width: 800px; max-height: 80vh; overflow-y: auto;">
+          <h3 class="modal-title">📚 文本引用來源</h3>
+          <div style="margin: 20px 0;">
+            <h4 style="color: #1e3c72; margin-bottom: 10px;">問題：</h4>
+            <p style="background: #f5f5f5; padding: 12px; border-radius: 6px; margin-bottom: 20px;">${escapeHtml(question)}</p>
+            
+            <h4 style="color: #1e3c72; margin-bottom: 15px;">檢索來源（共 ${sources.length} 筆）：</h4>
+            ${sourcesHtml}
+            
+            <p style="margin-top: 15px; font-size: 12px; color: #666; border-top: 1px solid #e0e0e0; padding-top: 15px;">
+              💡 提示：相似度分數越高，表示來源內容與問題越相關。
+            </p>
+          </div>
+          <div style="text-align: right;">
+            <button class="global-btn btn-save-chat" onclick="this.closest('.modal').remove()" style="padding: 10px 20px;">
+              關閉
+            </button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.remove();
+        }
+      });
+    }
+
+    // 顯示反饋
+    function showFeedback(button) {
+      const messageDiv = button.closest('.chat-message');
+      const question = messageDiv.dataset.question || '';
+      const answerText = messageDiv.dataset.answerText || '';
+      const sources = messageDiv.dataset.sources || '[]';
+      const ragId = messageDiv.dataset.ragId || '';
+      const datetime = messageDiv.dataset.datetime || '';
+      
+      // 創建 modal
+      const modal = document.createElement('div');
+      modal.className = 'modal active';
+      modal.innerHTML = `
+        <div class="modal-content">
+          <h3 style="margin-bottom: 15px; color: #1e3c72;">💬 提供反饋</h3>
+          <p style="margin-bottom: 15px; color: #666;">請告訴我們您對這個回答的看法：</p>
+          
+          <textarea 
+            id="feedback-text" 
+            placeholder="請輸入您的意見或建議（選填）..." 
+            style="width: 100%; min-height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; resize: vertical; font-family: inherit; margin-bottom: 15px;"
+          ></textarea>
+          
+          <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button class="rag-btn rag-source feedback-positive-btn">👍 有幫助</button>
+            <button class="rag-btn rag-feedback feedback-negative-btn">👎 沒幫助</button>
+            <button class="rag-btn feedback-cancel-btn" style="background: #95a5a6; color: white;">取消</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      
+      // 使用事件監聽器綁定按鈕（避免字符串轉義問題）
+      const positiveBtn = modal.querySelector('.feedback-positive-btn');
+      const negativeBtn = modal.querySelector('.feedback-negative-btn');
+      const cancelBtn = modal.querySelector('.feedback-cancel-btn');
+      
+      positiveBtn.addEventListener('click', () => {
+        submitFeedback('positive', question, answerText, sources, ragId, datetime);
+      });
+      
+      negativeBtn.addEventListener('click', () => {
+        submitFeedback('negative', question, answerText, sources, ragId, datetime);
+      });
+      
+      cancelBtn.addEventListener('click', () => {
+        modal.remove();
+      });
+    }
+
+    // 提交反饋
+    async function submitFeedback(type, question, answer = '', sources = '[]', ragId = '', datetime = '') {
+      const feedbackTextElement = document.getElementById('feedback-text');
+      const feedbackText = feedbackTextElement ? feedbackTextElement.value.trim() : '';
+      
+      // 檢查：如果是 negative，必須輸入反饋文字
+      if (type === 'negative' && !feedbackText) {
+        showNotification('⚠️ 請輸入您認為不正確的原因', 'warning');
+        return;
+      }
+      
+      // positive 可以空白，但如果空白就填入預設文字
+      let finalFeedbackText = feedbackText;
+      if (type === 'positive' && !feedbackText) {
+        finalFeedbackText = '用戶認為此回答有幫助';
+      }
+      
+      // 解析 sources（如果是字串）
+      let parsedSources = [];
+      try {
+        parsedSources = typeof sources === 'string' ? JSON.parse(sources) : sources;
+      } catch (e) {
+        console.warn('無法解析 sources:', e);
+        parsedSources = [];
+      }
+      
+      try {
+        showLoading('正在提交反饋...');
+        
+        const response = await fetch(`${API_BASE}/api/submit_feedback`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question: question,
+            feedback_type: type,
+            feedback_text: finalFeedbackText,
+            answer: answer,  // 使用傳入的 answer
+            sources: parsedSources,
+            rag_id: ragId || Date.now().toString(),
+            datetime: datetime || new Date().toISOString()
+          })
+        });
+        
+        const result = await response.json();
+        
+        hideLoading();
+        
+        if (result.success) {
+          showNotification('✅ 反饋已送出，感謝您的回饋！', 'success');
+          document.querySelector('.modal.active')?.remove();
+          console.log('✅ 反饋提交成功:', result);
+        } else {
+          showNotification('❌ 反饋送出失敗：' + (result.error || '未知錯誤'), 'error');
+          console.error('❌ 反饋提交失敗:', result);
+        }
+      } catch (error) {
+        hideLoading();
+        showNotification('❌ 反饋送出失敗：' + error.message, 'error');
+        console.error('❌ 反饋錯誤:', error);
+      }
+    }
+
+    /* ==================== 系統設定 ==================== */
+    async function loadSystemSettings() {
+      try {
+        const response = await fetch(`${API_BASE}/api/admin/settings`);
+        const result = await response.json();
+        if (result.success) {
+          state.systemSettings = result.settings;
+          // 設置顯示原始碼按鈕開關
+          document.getElementById('setting-show-source').checked = result.settings.show_source_btn !== false;
+          // 設置動畫生成開關（嚴格按照 config.json 的值）
+          if (document.getElementById('setting-enable-animation')) {
+            // 如果 config.json 有設定值，使用該值；否則默認為 false
+            const animationEnabled = result.settings.enable_animation === true;
+            document.getElementById('setting-enable-animation').checked = animationEnabled;
+            console.log('🎬 動畫生成開關設定為:', animationEnabled, '(來自 config.json)');
+          }
+          console.log('✅ 系統設定已載入:', result.settings);
+        }
+      } catch (error) {
+        console.error('❌ 載入設定錯誤:', error);
+        // API 失敗時使用保底默認值（動畫關閉更安全）
+        state.systemSettings = { show_source_btn: true, enable_feedback: true, enable_animation: false };
+        document.getElementById('setting-show-source').checked = true;
+        if (document.getElementById('setting-enable-animation')) {
+          document.getElementById('setting-enable-animation').checked = false;
+          console.log('⚠️ 使用默認值：動畫生成關閉');
+        }
+      }
+    }
+
+    function openAdminPanel() {
+      document.getElementById('admin-modal').classList.add('active');
+    }
+
+    function closeAdminPanel() {
+      document.getElementById('admin-modal').classList.remove('active');
+    }
+
+    async function updateSettings() {
+      const showSourceBtn = document.getElementById('setting-show-source').checked;
+      const enableAnimationEl = document.getElementById('setting-enable-animation');
+      const enableAnimation = enableAnimationEl ? enableAnimationEl.checked : true;
+      
+      try {
+        const response = await fetch(`${API_BASE}/api/admin/settings`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            show_source_btn: showSourceBtn,
+            enable_animation: enableAnimation
+          })
+        });
+        const result = await response.json();
+        if (result.success) {
+          state.systemSettings = result.settings;
+          showNotification('設定已更新', 'success');
+        }
+      } catch (error) {
+        console.error('更新設定錯誤:', error);
+        showNotification('設定更新失敗，但不影響使用', 'warning');
+      }
+    }
+
+    /* ==================== 輔助功能 ==================== */
+    function handleBack() { 
+      showNotification('返回功能尚未實作', 'info'); 
+    }
+
+    async function handleSaveConversation() {
+      (async () => {
+        try {
+          // ✅ 做法2：每次儲存都跳選資料夾
+          state.saveDirHandle = null;
+          const dirHandle = await pickSaveDirectory();
+          if (!dirHandle) {
+            showNotification('⚠️ 已取消選擇資料夾', 'warning');
+            return;
+          }
+
+          const chatContainer = document.getElementById('chat-container');
+          const messages = chatContainer.innerText || '';
+
+          const filename = `對話記錄_${new Date().toLocaleString('zh-TW').replace(/[/:]/g, '-')}.txt`;
+          const blob = new Blob([messages], { type: 'text/plain;charset=utf-8' });
+
+          await writeFileToDir(dirHandle, filename, blob);
+          showNotification(`✅ 對話已儲存到資料夾：${filename}`, 'success');
+        } catch (e) {
+          showNotification('❌ 儲存對話失敗：' + (e.message || e), 'error');
+          console.error('儲存對話錯誤:', e);
+        }
+      })();
+    }
+
+    function showLoading(message) {
+      document.getElementById('loading-message').textContent = message;
+      document.getElementById('progress-fill').style.width = '0%';
+      document.getElementById('loading-overlay').classList.add('active');
+    }
+
+    function hideLoading() {
+      document.getElementById('loading-overlay').classList.remove('active');
+    }
+
+    function updateLoadingProgress(progress, message) {
+      document.getElementById('loading-message').textContent = message;
+      document.getElementById('progress-fill').style.width = progress + '%';
+    }
+
+    function showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 3000);
+    }
+
+    function escapeHtml(text) {
+      const map = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'};
+      // 先轉義 HTML 特殊字元，然後將 \n 轉換為 <br>
+      return String(text).replace(/[&<>"']/g, m => map[m]).replace(/\\n/g, '<br>');
+    }
+
+    /* ==================== 鍵盤事件 ==================== */
+    document.addEventListener('DOMContentLoaded', function() {
+      const chatInput = document.getElementById('chat-input');
+      if (chatInput) {
+        chatInput.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+          }
+        });
+      }
+      
+      // 載入 PROMPT 配置列表
+      loadPromptConfigs();
+    });
+    
+    /* ==================== SYSTEM PROMPT 配置管理 ==================== */
+    
+    // 載入所有配置列表到下拉選單
+    async function loadPromptConfigs() {
+      try {
+        const response = await fetch(`${API_BASE}/api/prompts/list`);
+        const result = await response.json();
+        
+        if (result.success) {
+          const selector = document.getElementById('prompt-config-selector');
+          selector.innerHTML = '';
+          
+          result.configs.forEach(configName => {
+            const option = document.createElement('option');
+            option.value = configName;
+            option.textContent = configName;
+            if (configName === result.default_config) {
+              option.selected = true;
+              state.selectedPromptConfig = configName;
+            }
+            selector.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error('載入配置列表失敗:', error);
+      }
+    }
+    
+    // 處理配置選擇變更
+    function handlePromptConfigChange() {
+      const selector = document.getElementById('prompt-config-selector');
+      state.selectedPromptConfig = selector.value;
+      console.log('選擇 PROMPT 配置:', state.selectedPromptConfig);
+      showNotification(`已切換至配置: ${state.selectedPromptConfig}`, 'success');
+    }
+    
+    // 打開 PROMPT 管理器
+    function openPromptManager() {
+      const modal = document.createElement('div');
+      modal.id = 'prompt-manager-modal';
+      modal.className = 'modal';
+      modal.style.display = 'flex';  // 改為 flex 讓內容居中
+      modal.style.alignItems = 'center';
+      modal.style.justifyContent = 'center';
+      
+      modal.innerHTML = `
+        <div class="modal-content" style="max-width: 1400px; width: 95%; max-height: 90vh; overflow-y: auto; padding: 25px;">
+          <h3 class="modal-title" style="font-size: 22px; margin-bottom: 20px;">📝 SYSTEM PROMPT 管理</h3>
+          
+          <div style="margin-bottom: 20px; padding: 15px; background: #f0f8ff; border-radius: 8px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <label style="font-weight: 600; font-size: 14px;">配置：</label>
+            <select id="pm-config-sel" onchange="loadPromptConfigToEditor()" style="flex: 1; min-width: 200px; padding: 8px; border: 2px solid #1e3c72; border-radius: 6px; font-size: 14px;">
+            </select>
+            <button onclick="createNewConfig()" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">➕ 新增</button>
+            <button onclick="renameConfig()" style="padding: 8px 16px; background: #17a2b8; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">✏️ 重命名</button>
+            <button onclick="deleteConfig()" style="padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">🗑️ 刪除</button>
+          </div>
+          
+          <div style="display: flex; gap: 20px; min-height: 500px;">
+            <div style="width: 200px; border-right: 2px solid #e0e0e0; padding-right: 15px;">
+              <h4 style="margin-bottom: 15px; font-size: 16px;">功能選擇</h4>
+              <button class="pm-func-btn active" data-func="import_scenario" onclick="selectFunction('import_scenario')">🚢 兵棋場景匯入</button>
+              <button class="pm-func-btn" data-func="star_scenario" onclick="selectFunction('star_scenario')">▶️ 兵棋模擬</button>
+              <button class="pm-func-btn" data-func="get_wta" onclick="selectFunction('get_wta')">🎯 攻擊配對線</button>
+              <button class="pm-func-btn" data-func="get_track" onclick="selectFunction('get_track')">🛤️ 航跡繪製功能</button>
+              <button class="pm-func-btn" data-func="text_generation" onclick="selectFunction('text_generation')">📄 軍事行動準據</button>
+              <button class="pm-func-btn" data-func="military_rag" onclick="selectFunction('military_rag')">❓ 軍事準則問答</button>
+            </div>
+            
+            <div style="flex: 1; display: flex; flex-direction: column;">
+              <h4 style="margin-bottom: 12px; font-size: 16px;">SYSTEM PROMPT 內容</h4>
+              <label style="font-weight: 600; color: #28a745; display: block; margin: 10px 0 6px; font-size: 14px;">✏️ 可編輯區域</label>
+              <textarea id="pm-edit" style="width: 100%; height: 150px; padding: 12px; border: 2px solid #28a745; border-radius: 6px; font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; resize: vertical;"></textarea>
+              
+              <div style="border-top: 3px dashed #dc3545; margin: 15px 0; padding-top: 8px; position: relative;">
+                <span style="position: absolute; top: -12px; background: white; padding: 0 10px; color: #dc3545; font-size: 12px; font-weight: 600;">⚠️ 以下內容不可編輯（規則與範例）</span>
+              </div>
+              
+              <label style="font-weight: 600; color: #dc3545; display: block; margin: 6px 0; font-size: 14px;">🔒 規則與範例（不可編輯）</label>
+              <textarea id="pm-fixed" readonly style="width: 100%; height: 280px; padding: 12px; border: 2px solid #dc3545; border-radius: 6px; background: #f8f9fa; color: #666; font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; resize: vertical;"></textarea>
+            </div>
+            
+            <div style="width: 180px; padding-left: 15px; border-left: 2px solid #e0e0e0;">
+              <h4 style="margin-bottom: 15px; font-size: 16px;">操作</h4>
+              <button onclick="saveCurrentPrompt()" style="width: 100%; padding: 12px; margin-bottom: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); transition: transform 0.2s;">💾 保存修改</button>
+              <button onclick="resetToDefault()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); transition: transform 0.2s;">🔄 還原預設</button>
+              <div id="pm-status" style="margin-top: 15px; padding: 12px; background: #e3f2fd; border-radius: 6px; font-size: 12px; text-align: center; font-weight: 600;">狀態: 未修改</div>
+            </div>
+          </div>
+          
+          <div style="margin-top: 20px; text-align: right; padding-top: 20px; border-top: 2px solid #e0e0e0;">
+            <button onclick="closePromptManager()" style="padding: 12px 30px; background: #6c757d; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">關閉</button>
+          </div>
+        </div>
+        <style>
+          .pm-func-btn { 
+            display: block; 
+            width: 100%; 
+            padding: 10px; 
+            margin-bottom: 8px; 
+            background: white; 
+            border: 2px solid #e0e0e0; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 13px; 
+            font-weight: 600; 
+            text-align: left; 
+            transition: all 0.3s;
+          }
+          .pm-func-btn:hover { 
+            background: #f8f9fa; 
+            border-color: #1e3c72; 
+            transform: translateX(3px);
+          }
+          .pm-func-btn.active { 
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); 
+            color: white; 
+            border-color: #1e3c72;
+            box-shadow: 0 4px 8px rgba(30, 60, 114, 0.3);
+          }
+          button[onclick^="save"]:hover,
+          button[onclick^="reset"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+          }
+        </style>
+      `;
+      
+      document.body.appendChild(modal);
+      loadPromptManagerConfigs();
+    }
+    
+    let currentConfigData = null;
+    let currentFunction = 'import_scenario';
+    
+    async function loadPromptManagerConfigs() {
+      try {
+        const response = await fetch(`${API_BASE}/api/prompts/list`);
+        const result = await response.json();
+        if (result.success) {
+          const selector = document.getElementById('pm-config-sel');
+          selector.innerHTML = '';
+          result.configs.forEach(configName => {
+            const option = document.createElement('option');
+            option.value = configName;
+            option.textContent = configName;
+            selector.appendChild(option);
+          });
+          if (result.configs.length > 0) loadPromptConfigToEditor();
+        }
+      } catch (error) {
+        console.error('載入失敗:', error);
+      }
+    }
+    
+    async function loadPromptConfigToEditor() {
+      const selector = document.getElementById('pm-config-sel');
+      const configName = selector.value;
+      if (!configName) return;
+      try {
+        const response = await fetch(`${API_BASE}/api/prompts/get?config_name=${encodeURIComponent(configName)}`);
+        const result = await response.json();
+        if (result.success) {
+          currentConfigData = result.config;
+          selectFunction(currentFunction);
+        }
+      } catch (error) {
+        console.error('載入失敗:', error);
+      }
+    }
+    
+    function selectFunction(functionName) {
+      currentFunction = functionName;
+      document.querySelectorAll('.pm-func-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`[data-func="${functionName}"]`).classList.add('active');
+      if (currentConfigData && currentConfigData[functionName]) {
+        document.getElementById('pm-edit').value = currentConfigData[functionName].editable || '';
+        document.getElementById('pm-fixed').value = currentConfigData[functionName].fixed || '';
+      }
+    }
+    
+    async function saveCurrentPrompt() {
+      const configName = document.getElementById('pm-config-sel').value;
+      const editableText = document.getElementById('pm-edit').value;
+      if (editableText.includes('【規則】') || editableText.includes('【範例】')) {
+        showNotification('錯誤：可編輯區域不能包含【規則】或【範例】', 'error');
+        return;
+      }
+      if (!currentConfigData[currentFunction]) currentConfigData[currentFunction] = {};
+      currentConfigData[currentFunction].editable = editableText;
+      const saveData = { config_name: configName, prompts: {} };
+      ['import_scenario', 'star_scenario', 'get_wta', 'get_track', 'text_generation', 'military_rag'].forEach(func => {
+        if (currentConfigData[func]) {
+          saveData.prompts[func] = { editable: currentConfigData[func].editable, fixed: currentConfigData[func].fixed };
+        }
+      });
+      try {
+        const response = await fetch(`${API_BASE}/api/prompts/save`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(saveData)
+        });
+        const result = await response.json();
+        if (result.success) {
+          showNotification('配置已保存', 'success');
+          document.getElementById('pm-status').innerHTML = '<span style="color: #28a745;">✅ 已保存</span>';
+          await loadPromptConfigs();
+        } else {
+          showNotification('保存失敗: ' + result.error, 'error');
+        }
+      } catch (error) {
+        showNotification('保存失敗', 'error');
+      }
+    }
+    
+    async function resetToDefault() {
+      if (!confirm('確定要還原到預設配置嗎？')) return;
+      try {
+        const response = await fetch(`${API_BASE}/api/prompts/get?config_name=預設配置`);
+        const result = await response.json();
+        if (result.success && result.config[currentFunction]) {
+          const defaultPrompt = result.config[currentFunction];
+          document.getElementById('pm-edit').value = defaultPrompt.editable || '';
+          if (!currentConfigData[currentFunction]) currentConfigData[currentFunction] = {};
+          currentConfigData[currentFunction].editable = defaultPrompt.editable;
+          showNotification('已還原到預設值', 'success');
+          document.getElementById('pm-status').innerHTML = '<span style="color: #ffc107;">⚠️ 未保存</span>';
+        }
+      } catch (error) {
+        showNotification('還原失敗', 'error');
+      }
+    }
+    
+    async function createNewConfig() {
+      const configName = prompt('請輸入新配置的名稱：');
+      if (!configName || configName.trim() === '') return;
+      try {
+        const response = await fetch(`${API_BASE}/api/prompts/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ config_name: configName.trim() })
+        });
+        const result = await response.json();
+        if (result.success) {
+          showNotification('配置已創建', 'success');
+          await loadPromptManagerConfigs();
+          await loadPromptConfigs();
+          document.getElementById('pm-config-sel').value = configName.trim();
+          await loadPromptConfigToEditor();
+        } else {
+          showNotification('創建失敗: ' + result.error, 'error');
+        }
+      } catch (error) {
+        showNotification('創建失敗', 'error');
+      }
+    }
+    
+    async function renameConfig() {
+      const oldName = document.getElementById('pm-config-sel').value;
+      if (oldName === '預設配置') {
+        showNotification('不能重命名預設配置', 'error');
+        return;
+      }
+      const newName = prompt('請輸入新的配置名稱：', oldName);
+      if (!newName || newName.trim() === '' || newName === oldName) return;
+      try {
+        const response = await fetch(`${API_BASE}/api/prompts/rename`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ old_name: oldName, new_name: newName.trim() })
+        });
+        const result = await response.json();
+        if (result.success) {
+          showNotification('配置已重命名', 'success');
+          await loadPromptManagerConfigs();
+          await loadPromptConfigs();
+          document.getElementById('pm-config-sel').value = newName.trim();
+          await loadPromptConfigToEditor();
+        } else {
+          showNotification('重命名失敗: ' + result.error, 'error');
+        }
+      } catch (error) {
+        showNotification('重命名失敗', 'error');
+      }
+    }
+    
+    async function deleteConfig() {
+      const configName = document.getElementById('pm-config-sel').value;
+      if (configName === '預設配置') {
+        showNotification('不能刪除預設配置', 'error');
+        return;
+      }
+      if (!confirm(`確定要刪除配置「${configName}」嗎？`)) return;
+      try {
+        const response = await fetch(`${API_BASE}/api/prompts/delete?config_name=${encodeURIComponent(configName)}`, {
+          method: 'DELETE'
+        });
+        const result = await response.json();
+        if (result.success) {
+          showNotification('配置已刪除', 'success');
+          await loadPromptManagerConfigs();
+          await loadPromptConfigs();
+        } else {
+          showNotification('刪除失敗: ' + result.error, 'error');
+        }
+      } catch (error) {
+        showNotification('刪除失敗', 'error');
+      }
+    }
+    
+    function closePromptManager() {
+      const modal = document.getElementById('prompt-manager-modal');
+      if (modal) modal.remove();
+    }
+  </script>
+</body>
+</html>

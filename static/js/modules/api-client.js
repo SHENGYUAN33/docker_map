@@ -1,0 +1,316 @@
+/**
+ * API 客戶端模組
+ * 封裝所有後端 API 調用
+ */
+
+import { API_BASE, NODE_API_BASE, CLIENT_ID_KEY } from '../utils/constants.js';
+import { generateClientId } from '../utils/helpers.js';
+
+/**
+ * API 客戶端類別
+ */
+export class APIClient {
+  constructor() {
+    this.apiBase = API_BASE;
+    this.nodeApiBase = NODE_API_BASE;
+    this.clientId = this.initClientId();
+    this.setupFetchHook();
+  }
+
+  /**
+   * 初始化 Client ID
+   * @returns {string} Client ID
+   */
+  initClientId() {
+    let cid = sessionStorage.getItem(CLIENT_ID_KEY);
+    if (!cid) {
+      cid = generateClientId();
+      sessionStorage.setItem(CLIENT_ID_KEY, cid);
+    }
+    window.CLIENT_ID = cid;
+    return cid;
+  }
+
+  /**
+   * 設置 Fetch Hook，自動添加 Client ID Header
+   */
+  setupFetchHook() {
+    const _fetch = window.fetch.bind(window);
+    const clientId = this.clientId;
+    const apiBase = this.apiBase;
+
+    window.fetch = function(resource, init) {
+      try {
+        if (typeof resource === 'string' && resource.startsWith(apiBase)) {
+          init = init || {};
+          const headers = new Headers(init.headers || {});
+          headers.set('X-Client-ID', clientId);
+          init.headers = headers;
+        }
+      } catch (e) {
+        // 靜默忽略
+      }
+      return _fetch(resource, init);
+    };
+  }
+
+  /**
+   * 通用 POST 請求
+   * @param {string} endpoint - API 端點
+   * @param {Object} data - 請求數據
+   * @returns {Promise<Object>} 響應數據
+   */
+  async post(endpoint, data = {}) {
+    const response = await fetch(`${this.apiBase}${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return await response.json();
+  }
+
+  /**
+   * 通用 GET 請求
+   * @param {string} endpoint - API 端點
+   * @returns {Promise<Object>} 響應數據
+   */
+  async get(endpoint) {
+    const response = await fetch(`${this.apiBase}${endpoint}`);
+    return await response.json();
+  }
+
+  /**
+   * 通用 DELETE 請求
+   * @param {string} endpoint - API 端點
+   * @returns {Promise<Object>} 響應數據
+   */
+  async delete(endpoint) {
+    const response = await fetch(`${this.apiBase}${endpoint}`, {
+      method: 'DELETE'
+    });
+    return await response.json();
+  }
+
+  // ==================== 情境模擬相關 API ====================
+
+  /**
+   * 匯入場景
+   * @param {string} userInput - 用戶輸入
+   * @param {string} llmModel - LLM 模型
+   * @param {string} promptConfig - Prompt 配置
+   * @param {string} mode - 模式
+   * @returns {Promise<Object>} 響應數據
+   */
+  async importScenario(userInput, llmModel, promptConfig, mode) {
+    return await this.post('/api/import_scenario', {
+      user_input: userInput,
+      llm_model: llmModel,
+      prompt_config: promptConfig,
+      mode: mode
+    });
+  }
+
+  /**
+   * 啟動場景
+   * @param {string} userInput - 用戶輸入
+   * @param {string} llmModel - LLM 模型
+   * @param {string} promptConfig - Prompt 配置
+   * @param {string} mode - 模式
+   * @returns {Promise<Object>} 響應數據
+   */
+  async startScenario(userInput, llmModel, promptConfig, mode) {
+    return await this.post('/api/start_scenario', {
+      user_input: userInput,
+      llm_model: llmModel,
+      prompt_config: promptConfig,
+      mode: mode
+    });
+  }
+
+  /**
+   * 獲取武器分派結果
+   * @param {string} userInput - 用戶輸入
+   * @param {string} llmModel - LLM 模型
+   * @param {string} promptConfig - Prompt 配置
+   * @param {string} mode - 模式
+   * @returns {Promise<Object>} 響應數據
+   */
+  async getWTA(userInput, llmModel, promptConfig, mode) {
+    return await this.post('/api/get_wta', {
+      user_input: userInput,
+      llm_model: llmModel,
+      prompt_config: promptConfig,
+      mode: mode
+    });
+  }
+
+  /**
+   * 獲取軌跡
+   * @param {string} userInput - 用戶輸入
+   * @param {string} llmModel - LLM 模型
+   * @param {string} promptConfig - Prompt 配置
+   * @param {string} mode - 模式
+   * @returns {Promise<Object>} 響應數據
+   */
+  async getTrack(userInput, llmModel, promptConfig, mode) {
+    return await this.post('/api/get_track', {
+      user_input: userInput,
+      llm_model: llmModel,
+      prompt_config: promptConfig,
+      mode: mode
+    });
+  }
+
+  /**
+   * 獲取答案（文本生成/問答）
+   * @param {string} userInput - 用戶輸入
+   * @param {string} llmModel - LLM 模型
+   * @param {string} promptConfig - Prompt 配置
+   * @param {string} mode - 模式
+   * @returns {Promise<Object>} 響應數據
+   */
+  async getAnswer(userInput, llmModel, promptConfig, mode) {
+    return await this.post('/api/get_answer', {
+      user_input: userInput,
+      llm_model: llmModel,
+      prompt_config: promptConfig,
+      mode: mode
+    });
+  }
+
+  /**
+   * 檢查模擬狀態
+   * @param {string} simulationId - 模擬 ID
+   * @returns {Promise<Object>} 響應數據
+   */
+  async checkSimulationStatus(simulationId) {
+    return await this.get(`/api/check_simulation_status/${simulationId}`);
+  }
+
+  // ==================== 地圖相關 API ====================
+
+  /**
+   * 清除地圖
+   * @returns {Promise<Object>} 響應數據
+   */
+  async clearMap() {
+    return await this.post('/api/clear_map');
+  }
+
+  /**
+   * 保存 COP 截圖
+   * @returns {Promise<Object>} 響應數據
+   */
+  async saveCOP() {
+    return await this.post('/api/save_cop', {});
+  }
+
+  // ==================== 反饋相關 API ====================
+
+  /**
+   * 提交反饋
+   * @param {Object} feedbackData - 反饋數據
+   * @returns {Promise<Object>} 響應數據
+   */
+  async submitFeedback(feedbackData) {
+    return await this.post('/api/submit_feedback', feedbackData);
+  }
+
+  /**
+   * 獲取反饋列表
+   * @param {number} limit - 限制數量
+   * @returns {Promise<Object>} 響應數據
+   */
+  async getFeedbacks(limit = 20) {
+    return await this.get(`/api/get_feedbacks?limit=${limit}`);
+  }
+
+  // ==================== 系統設置相關 API ====================
+
+  /**
+   * 獲取系統設置
+   * @returns {Promise<Object>} 響應數據
+   */
+  async getSystemSettings() {
+    return await this.get('/api/admin/settings');
+  }
+
+  /**
+   * 更新系統設置
+   * @param {Object} settings - 設置數據
+   * @returns {Promise<Object>} 響應數據
+   */
+  async updateSystemSettings(settings) {
+    return await this.post('/api/admin/settings', settings);
+  }
+
+  // ==================== Prompt 配置相關 API ====================
+
+  /**
+   * 獲取 Prompt 配置列表
+   * @returns {Promise<Object>} 響應數據
+   */
+  async listPromptConfigs() {
+    return await this.get('/api/prompts/list');
+  }
+
+  /**
+   * 獲取指定 Prompt 配置
+   * @param {string} configName - 配置名稱
+   * @returns {Promise<Object>} 響應數據
+   */
+  async getPromptConfig(configName) {
+    return await this.get(`/api/prompts/get?config_name=${encodeURIComponent(configName)}`);
+  }
+
+  /**
+   * 保存 Prompt 配置
+   * @param {Object} configData - 配置數據
+   * @returns {Promise<Object>} 響應數據
+   */
+  async savePromptConfig(configData) {
+    return await this.post('/api/prompts/save', configData);
+  }
+
+  /**
+   * 創建新 Prompt 配置
+   * @param {string} configName - 配置名稱
+   * @returns {Promise<Object>} 響應數據
+   */
+  async createPromptConfig(configName) {
+    return await this.post('/api/prompts/create', { config_name: configName });
+  }
+
+  /**
+   * 重命名 Prompt 配置
+   * @param {string} oldName - 舊名稱
+   * @param {string} newName - 新名稱
+   * @returns {Promise<Object>} 響應數據
+   */
+  async renamePromptConfig(oldName, newName) {
+    return await this.post('/api/prompts/rename', { old_name: oldName, new_name: newName });
+  }
+
+  /**
+   * 刪除 Prompt 配置
+   * @param {string} configName - 配置名稱
+   * @returns {Promise<Object>} 響應數據
+   */
+  async deletePromptConfig(configName) {
+    return await this.delete(`/api/prompts/delete?config_name=${encodeURIComponent(configName)}`);
+  }
+
+  // ==================== Node.js API（模擬狀態監聽）====================
+
+  /**
+   * 獲取模擬狀態（Node.js 後端）
+   * @returns {Promise<Object>} 響應數據
+   */
+  async getSimulationStatus() {
+    const response = await fetch(`${this.nodeApiBase}/api/v1/get_simulation_status`);
+    return await response.json();
+  }
+}
+
+// 導出單例
+export const apiClient = new APIClient();
