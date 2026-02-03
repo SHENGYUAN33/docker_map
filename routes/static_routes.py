@@ -2,7 +2,7 @@
 靜態文件路由藍圖
 用途：處理地圖文件服務和首頁訪問
 """
-from flask import Blueprint, send_file
+from flask import Blueprint, send_file, render_template
 import os
 
 from config import MAP_DIR
@@ -35,42 +35,14 @@ def index():
     用途：返回前端應用的入口頁面
 
     流程：
-    1. 嘗試從多個可能的位置讀取 index_v6.html
-    2. 如果找到，返回文件內容
-    3. 如果找不到，返回錯誤提示頁面
+    1. 使用 Flask render_template 載入 templates/index.html
+    2. 如果找不到，返回錯誤提示頁面
 
     返回：
         前端 HTML 文件或錯誤提示頁面
     """
     try:
-        # 嘗試從多個可能的位置讀取 index_v6.html
-        possible_paths = [
-            'index_v6.html',                    # 當前目錄
-            'static/index_v6.html',             # static 目錄
-            os.path.join(os.path.dirname(os.path.dirname(__file__)), 'index_v6.html'),  # 專案根目錄
-        ]
-
-        for path in possible_paths:
-            if os.path.exists(path):
-                print(f"✅ 找到前端文件: {path}")
-                return send_file(path)
-
-        # 如果都找不到，返回錯誤提示
-        return """
-        <html>
-        <head><title>文件未找到</title></head>
-        <body style="font-family: Arial; padding: 50px; text-align: center;">
-            <h1>❌ 找不到 index_v6.html</h1>
-            <p>請確認 index_v6.html 文件在以下任一位置：</p>
-            <ul style="text-align: left; display: inline-block;">
-                <li>專案根目錄</li>
-                <li>在 static/ 子目錄下</li>
-            </ul>
-            <p style="margin-top: 30px; color: #666;">當前工作目錄: {}</p>
-        </body>
-        </html>
-        """.format(os.getcwd()), 404
-
+        return render_template('index.html')
     except Exception as e:
         print(f"❌ 載入前端頁面失敗: {e}")
         import traceback
