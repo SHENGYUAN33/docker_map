@@ -5,6 +5,7 @@ LLM 服務模組
 import requests
 import json
 from utils.parser import parse_function_arguments
+from config import OLLAMA_URL, DEFAULT_LLM_MODEL, LLM_API_TIMEOUT
 
 
 class LLMService:
@@ -13,28 +14,29 @@ class LLMService:
     用途：提供統一的 LLM 調用介面，封裝與 Ollama API 的所有互動邏輯
     """
 
-    def __init__(self, ollama_url="http://localhost:11434/api/chat"):
+    def __init__(self, ollama_url=None):
         """
         初始化 LLM 服務
 
         參數:
-            ollama_url: Ollama API 的端點 URL
+            ollama_url: Ollama API 的端點 URL（預設使用 config.OLLAMA_URL）
         """
-        self.ollama_url = ollama_url
+        self.ollama_url = ollama_url or OLLAMA_URL
 
-    def call_import_scenario(self, user_prompt, model='llama3.2:3b', custom_prompt=None):
+    def call_import_scenario(self, user_prompt, model=None, custom_prompt=None):
         """
         場景匯入參數提取（Function Calling）
         用途：從用戶指令中提取要在地圖上標示的船艦資訊
 
         參數:
             user_prompt: 用戶輸入的提示詞（例如："繪製052D座標"）
-            model: LLM 模型名稱（例如：'llama3.2:3b', 'mistral:7b'）
+            model: LLM 模型名稱（預設使用 config.DEFAULT_LLM_MODEL）
             custom_prompt: 自定義的 system prompt（可選）
 
         返回:
             dict: {"tool": "import_scenario", "parameters": {"enemy": [...], "roc": [...]}} 或 None
         """
+        model = model or DEFAULT_LLM_MODEL
         if custom_prompt:
             system_prompt = custom_prompt
         else:
@@ -96,7 +98,7 @@ class LLMService:
             print(f"   模型: {model}")
             print(f"   API: {self.ollama_url}")
 
-            response = requests.post(self.ollama_url, json=payload, timeout=300)
+            response = requests.post(self.ollama_url, json=payload, timeout=LLM_API_TIMEOUT)
 
             if response.status_code != 200:
                 print(f"❌ Ollama API 錯誤 (狀態碼: {response.status_code})")
@@ -145,19 +147,20 @@ class LLMService:
             print(f"❌ LLM 調用錯誤: {type(e).__name__}: {e}")
             return None
 
-    def call_star_scenario(self, user_prompt, model='llama3.2:3b', custom_prompt=None):
+    def call_star_scenario(self, user_prompt, model=None, custom_prompt=None):
         """
         識別是否為啟動模擬指令（Function Calling）
         用途：判斷用戶是否要求啟動軍事兵棋推演模擬
 
         參數:
             user_prompt: 用戶輸入的提示詞（例如："開始進行兵推"）
-            model: LLM 模型名稱
+            model: LLM 模型名稱（預設使用 config.DEFAULT_LLM_MODEL）
             custom_prompt: 自定義的 system prompt（可選）
 
         返回:
             dict: {"tool": "star_scenario", "parameters": {}} 或 {"tool": "unknown", "parameters": {}}
         """
+        model = model or DEFAULT_LLM_MODEL
         if custom_prompt:
             system_prompt = custom_prompt
         else:
@@ -208,7 +211,7 @@ class LLMService:
             print(f"   模型: {model}")
             print(f"   API: {self.ollama_url}")
 
-            response = requests.post(self.ollama_url, json=payload, timeout=300)
+            response = requests.post(self.ollama_url, json=payload, timeout=LLM_API_TIMEOUT)
 
             if response.status_code != 200:
                 print(f"❌ Ollama API 錯誤 (狀態碼: {response.status_code})")
@@ -246,19 +249,20 @@ class LLMService:
             print(f"❌ LLM 調用錯誤: {type(e).__name__}: {e}")
             return None
 
-    def call_get_wta(self, user_prompt, model='llama3.2:3b', custom_prompt=None):
+    def call_get_wta(self, user_prompt, model=None, custom_prompt=None):
         """
         提取武器分派查詢參數（Function Calling）
         用途：從用戶指令中提取要查詢武器分派結果的敵方船艦
 
         參數:
             user_prompt: 用戶輸入的提示詞（例如："查看052D的武器分派"）
-            model: LLM 模型名稱
+            model: LLM 模型名稱（預設使用 config.DEFAULT_LLM_MODEL）
             custom_prompt: 自定義的 system prompt（可選）
 
         返回:
             dict: {"tool": "get_wta", "parameters": {"enemy": [...]}} 或 None
         """
+        model = model or DEFAULT_LLM_MODEL
         if custom_prompt:
             system_prompt = custom_prompt
         else:
@@ -309,7 +313,7 @@ class LLMService:
             print(f"   模型: {model}")
             print(f"   API: {self.ollama_url}")
 
-            response = requests.post(self.ollama_url, json=payload, timeout=300)
+            response = requests.post(self.ollama_url, json=payload, timeout=LLM_API_TIMEOUT)
 
             if response.status_code != 200:
                 print(f"❌ Ollama API 錯誤 (狀態碼: {response.status_code})")
@@ -350,19 +354,20 @@ class LLMService:
             print(f"❌ LLM 調用錯誤: {type(e).__name__}: {e}")
             return None
 
-    def call_get_track(self, user_prompt, model='llama3.2:3b', custom_prompt=None):
+    def call_get_track(self, user_prompt, model=None, custom_prompt=None):
         """
         航跡繪製指令識別（Function Calling）
         用途：判斷用戶是否要求顯示船艦航跡/軌跡
 
         參數:
             user_prompt: 用戶輸入的提示詞（例如："顯示航跡"）
-            model: LLM 模型名稱
+            model: LLM 模型名稱（預設使用 config.DEFAULT_LLM_MODEL）
             custom_prompt: 自定義的 system prompt（可選）
 
         返回:
             dict: {"tool": "get_track", "parameters": {}} 或 None
         """
+        model = model or DEFAULT_LLM_MODEL
         if custom_prompt:
             system_prompt = custom_prompt
         else:
@@ -413,7 +418,7 @@ class LLMService:
             print(f"   模型: {model}")
             print(f"   API: {self.ollama_url}")
 
-            response = requests.post(self.ollama_url, json=payload, timeout=300)
+            response = requests.post(self.ollama_url, json=payload, timeout=LLM_API_TIMEOUT)
 
             if response.status_code != 200:
                 print(f"❌ Ollama API 錯誤 (狀態碼: {response.status_code})")
@@ -462,19 +467,20 @@ class LLMService:
             print(f"❌ LLM 調用錯誤: {type(e).__name__}: {e}")
             return None
 
-    def call_get_answer(self, user_prompt, model='llama3.2:3b', custom_prompt=None):
+    def call_get_answer(self, user_prompt, model=None, custom_prompt=None):
         """
         提取 RAG 問題（Function Calling）
         用途：從用戶的軍事相關問題中提取完整問題，準備查詢知識庫
 
         參數:
             user_prompt: 用戶輸入的問題（例如："雄三飛彈的射程是多少？"）
-            model: LLM 模型名稱
+            model: LLM 模型名稱（預設使用 config.DEFAULT_LLM_MODEL）
             custom_prompt: 自定義的 system prompt（可選）
 
         返回:
             dict: {"tool": "get_answer", "parameters": {"question": "..."}} 或 None
         """
+        model = model or DEFAULT_LLM_MODEL
         if custom_prompt:
             system_prompt = custom_prompt
         else:
@@ -523,7 +529,7 @@ class LLMService:
             print(f"   模型: {model}")
             print(f"   API: {self.ollama_url}")
 
-            response = requests.post(self.ollama_url, json=payload, timeout=300)
+            response = requests.post(self.ollama_url, json=payload, timeout=LLM_API_TIMEOUT)
 
             if response.status_code != 200:
                 print(f"❌ Ollama API 錯誤 (狀態碼: {response.status_code})")

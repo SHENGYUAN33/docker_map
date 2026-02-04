@@ -6,7 +6,7 @@ from flask import Blueprint, request, jsonify
 import requests
 import json
 
-from config import NODE_API_BASE
+from config import NODE_API_BASE, RAG_DEFAULT_MODE, RAG_DEFAULT_MODEL, RAG_DEFAULT_PROMPT, RAG_MAX_SOURCES
 
 # 創建 RAG 問答藍圖
 answer_bp = Blueprint('answer', __name__)
@@ -46,11 +46,11 @@ def get_answer():
     try:
         data = request.json
         user_input = data.get('user_input', '')
-        mode = data.get('mode', 'military_qa')
+        mode = data.get('mode', RAG_DEFAULT_MODE)
 
         # 從前端獲取 LLM 模型和 system prompt
-        selected_model = data.get('model', 'TAIDE8B')
-        system_prompt = data.get('system_prompt', '請回答軍事問題')
+        selected_model = data.get('model', RAG_DEFAULT_MODEL)
+        system_prompt = data.get('system_prompt', RAG_DEFAULT_PROMPT)
 
         print(f"\n【RAG 問答】收到問題: {user_input}")
         print(f"【使用模型】: {selected_model}")
@@ -109,7 +109,7 @@ def get_answer():
         sources = api_data.get('sources', [])
         sources_formatted = []
 
-        for i, source in enumerate(sources[:5], 1):  # 只取前5個來源
+        for i, source in enumerate(sources[:RAG_MAX_SOURCES], 1):  # 只取前 N 個來源
             sources_formatted.append({
                 'index': i,
                 'content': source.get('chunk', ''),

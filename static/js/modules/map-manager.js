@@ -3,7 +3,7 @@
  * 處理地圖顯示和清除功能
  */
 
-import { API_BASE, WTA_TABLE_COLUMNS } from '../utils/constants.js';
+import { API_BASE, WTA_TABLE_COLUMNS, THEME_COLORS } from '../utils/constants.js';
 
 /**
  * 地圖管理器類別
@@ -76,13 +76,13 @@ export class MapManager {
     container.innerHTML = '';
 
     if (!wtaData || !wtaData.wta_results || wtaData.wta_results.length === 0) {
-      container.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">暫無武器分派數據</p>';
+      container.innerHTML = `<p style="padding: 20px; text-align: center; color: ${THEME_COLORS.textMuted};">暫無武器分派數據</p>`;
       container.style.display = 'block';
       return;
     }
 
     // 創建表格標題
-    let tableHtml = '<h3 style="color: #1e3c72; margin-bottom: 15px;">📊 武器分派結果</h3>';
+    let tableHtml = `<h3 style="color: ${THEME_COLORS.primary}; margin-bottom: 15px;">📊 武器分派結果</h3>`;
     tableHtml += '<table class="wta-table">';
     tableHtml += '<thead><tr>';
 

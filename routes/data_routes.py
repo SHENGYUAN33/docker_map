@@ -8,7 +8,7 @@ import requests
 import os
 import json
 
-from config import NODE_API_BASE, MAP_DIR, _STATE_LOCK, _STATES
+from config import NODE_API_BASE, MAP_DIR, _STATE_LOCK, _STATES, DEFAULT_LLM_MODEL, DEFAULT_PROMPT_CONFIG, WEAPON_COLORS, ENABLE_ANIMATION_DEFAULT
 from services import get_system_prompt, load_config
 from services.llm_service import LLMService
 from services.map_service import MapService
@@ -57,8 +57,8 @@ def get_wta():
         data = request.json
         user_input = data.get('user_input', '')
 
-        llm_model = data.get('llm_model', 'llama3.2:3b')
-        prompt_config = data.get('prompt_config', '預設配置')
+        llm_model = data.get('llm_model', DEFAULT_LLM_MODEL)
+        prompt_config = data.get('prompt_config', DEFAULT_PROMPT_CONFIG)
 
         print(f"\n【功能五：武器分派】收到指令: {user_input}")
         print(f"【使用模型】: {llm_model}")
@@ -109,7 +109,7 @@ def get_wta():
         map_service.add_wta_to_map(api_data['wta_results'], map_state)
 
         # 步驟 3.5: 檢查動畫開關設定（安全版本）
-        enable_animation = True  # 默認開啟動畫
+        enable_animation = ENABLE_ANIMATION_DEFAULT  # 使用配置預設值
         try:
             config = load_config()
             enable_animation = config.get('enable_animation', True)
@@ -123,31 +123,7 @@ def get_wta():
             # 準備動畫數據
             wta_animation_data = {
                 'wta_results': [],
-                'weapon_colors': {
-                    # 使用用戶定義的顏色
-                    '雄三飛彈': '#FF0000',      # 紅色
-                    '雄風三型': '#FF0000',      # 紅色
-                    '雄三': '#FF0000',          # 紅色（簡稱）
-                    '標準二型飛彈': '#0066FF',  # 藍色
-                    '標準二型': '#0066FF',      # 藍色（簡稱）
-                    '標準': '#0066FF',          # 藍色（通用）
-                    '雄二飛彈': '#FF6600',      # 橙色
-                    '雄風二型': '#FF6600',      # 橙色
-                    '雄二': '#FF6600',          # 橙色（簡稱）
-                    '天劍飛彈': '#9900CC',      # 紫色
-                    '天劍': '#9900CC',          # 紫色（簡稱）
-                    '魚叉飛彈': '#00CC66',      # 綠色
-                    '魚叉': '#00CC66',          # 綠色（簡稱）
-                    '標準三型': '#FF00FF',      # 品紅色
-                    '愛國者': '#FFFF00',        # 黃色
-                    '海麻雀': '#00FFFF',        # 青色
-                    # 英文名稱
-                    'SM-2': '#0066FF',          # 標準二型
-                    'SM-3': '#FF00FF',          # 標準三型
-                    'Patriot': '#FFFF00',       # 愛國者
-                    'Sea Sparrow': '#00FFFF',   # 海麻雀
-                    'Harpoon': '#00CC66'        # 魚叉
-                }
+                'weapon_colors': WEAPON_COLORS  # 使用 config.py 的統一飛彈顏色映射
             }
 
             # 從 api_data 提取動畫所需數據
@@ -293,8 +269,8 @@ def get_track():
         user_input = data.get('user_input', '')
 
         # 從前端獲取模型選擇和 Prompt 配置
-        llm_model = data.get('llm_model', 'llama3.2:3b')
-        prompt_config = data.get('prompt_config', '預設配置')
+        llm_model = data.get('llm_model', DEFAULT_LLM_MODEL)
+        prompt_config = data.get('prompt_config', DEFAULT_PROMPT_CONFIG)
 
         print(f"\n{'='*80}")
         print(f"🚀 [API 請求] /api/get_track")

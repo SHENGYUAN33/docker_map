@@ -1,0 +1,25 @@
+# 環境變數（包含敏感配置）
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# 生成的檔案
+maps/
+cops/
+feedbacks/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

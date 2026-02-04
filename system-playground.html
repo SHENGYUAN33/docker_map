@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Military War Game AI System v6.0 - Architecture Explorer</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--bg2:#1a1d27;--bg3:#242836;--bg4:#2e3345;
+  --border:#333a4d;--text:#e0e0e8;--text2:#a0a4b8;--text3:#6b7089;
+  --blue:#3b82f6;--green:#10b981;--orange:#f59e0b;--purple:#a855f7;
+  --red:#ef4444;--cyan:#06b6d4;--pink:#ec4899;
+  --critical:#dc2626;--high:#ea580c;--medium:#d97706;--low:#2563eb;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;font-size:14px}
+.app{display:flex;flex-direction:column;height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.header h1{font-size:16px;font-weight:600;letter-spacing:.5px}
+.header h1 span{color:var(--blue);font-size:12px;margin-left:8px;font-weight:400}
+.tabs{display:flex;gap:2px}
+.tab{padding:8px 18px;background:var(--bg3);border:1px solid transparent;border-radius:6px 6px 0 0;cursor:pointer;color:var(--text2);font-size:13px;transition:all .2s}
+.tab:hover{background:var(--bg4);color:var(--text)}
+.tab.active{background:var(--bg);border-color:var(--border);border-bottom-color:var(--bg);color:var(--blue);font-weight:600}
+.main{flex:1;display:flex;overflow:hidden}
+.sidebar{width:260px;min-width:260px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.sidebar h3{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);padding:14px 14px 8px}
+.control-group{padding:4px 14px 12px;border-bottom:1px solid var(--border)}
+.control-group label{display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:13px;color:var(--text2);transition:color .15s}
+.control-group label:hover{color:var(--text)}
+.control-group label input[type="checkbox"]{accent-color:var(--blue)}
+.color-dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0}
+.preset-btn{display:block;width:100%;padding:7px 12px;margin:3px 0;background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--text2);font-size:12px;cursor:pointer;text-align:left;transition:all .15s}
+.preset-btn:hover{background:var(--bg4);color:var(--text);border-color:var(--blue)}
+.preset-btn.active{border-color:var(--blue);color:var(--blue);background:rgba(59,130,246,.1)}
+.canvas-area{flex:1;position:relative;overflow:hidden;background:var(--bg)}
+.canvas-area svg{width:100%;height:100%}
+.zoom-controls{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:4px;z-index:10}
+.zoom-btn{width:32px;height:32px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.zoom-btn:hover{background:var(--bg4);border-color:var(--blue)}
+.legend{position:absolute;bottom:12px;left:12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;z-index:10;font-size:11px}
+.legend-row{display:flex;align-items:center;gap:8px;padding:2px 0}
+.legend-line{width:24px;height:2px;border-radius:1px}
+
+/* Security tab */
+.security-container{flex:1;overflow-y:auto;padding:24px}
+.severity-section{margin-bottom:28px}
+.severity-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.severity-badge{padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.severity-badge.critical{background:rgba(220,38,38,.15);color:var(--critical);border:1px solid rgba(220,38,38,.3)}
+.severity-badge.high{background:rgba(234,88,12,.15);color:var(--high);border:1px solid rgba(234,88,12,.3)}
+.severity-badge.medium{background:rgba(217,119,6,.15);color:var(--medium);border:1px solid rgba(217,119,6,.3)}
+.severity-badge.low{background:rgba(37,99,235,.15);color:var(--low);border:1px solid rgba(37,99,235,.3)}
+.severity-header h2{font-size:15px;font-weight:600}
+.vuln-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px}
+.vuln-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;transition:all .2s;cursor:pointer;position:relative;overflow:hidden}
+.vuln-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%}
+.vuln-card.critical::before{background:var(--critical)}
+.vuln-card.high::before{background:var(--high)}
+.vuln-card.medium::before{background:var(--medium)}
+.vuln-card.low::before{background:var(--low)}
+.vuln-card:hover{border-color:var(--blue);transform:translateY(-1px)}
+.vuln-card h4{font-size:14px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.vuln-card h4 .num{font-size:11px;color:var(--text3);font-weight:400}
+.vuln-card p{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:8px}
+.vuln-meta{display:flex;gap:8px;flex-wrap:wrap}
+.vuln-tag{font-size:10px;padding:2px 8px;border-radius:3px;background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
+.vuln-fix{display:none;margin-top:12px;padding:12px;background:var(--bg);border-radius:6px;border:1px solid var(--border)}
+.vuln-fix.show{display:block}
+.vuln-fix h5{font-size:12px;color:var(--green);margin-bottom:6px}
+.vuln-fix p{font-size:12px;color:var(--text2);line-height:1.5}
+.sec-stats{display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 20px;min-width:140px}
+.stat-card .num{font-size:28px;font-weight:700}
+.stat-card .label{font-size:11px;color:var(--text3);margin-top:2px}
+.stat-card.critical .num{color:var(--critical)}
+.stat-card.high .num{color:var(--high)}
+.stat-card.medium .num{color:var(--medium)}
+.stat-card.low .num{color:var(--low)}
+.filter-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.filter-chip{padding:5px 14px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--text2);transition:all .15s}
+.filter-chip:hover{border-color:var(--blue)}
+.filter-chip.active{background:rgba(59,130,246,.15);border-color:var(--blue);color:var(--blue)}
+
+/* Flow tab */
+.flow-container{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.flow-tabs{display:flex;gap:2px;padding:12px 16px 0;background:var(--bg2);border-bottom:1px solid var(--border)}
+.flow-tab{padding:8px 16px;background:var(--bg3);border:1px solid transparent;border-radius:6px 6px 0 0;cursor:pointer;color:var(--text2);font-size:12px;transition:all .2s}
+.flow-tab:hover{background:var(--bg4);color:var(--text)}
+.flow-tab.active{background:var(--bg);border-color:var(--border);border-bottom-color:var(--bg);color:var(--cyan);font-weight:600}
+.flow-canvas{flex:1;overflow:auto;position:relative}
+.flow-canvas svg{min-width:100%;min-height:100%}
+
+/* Prompt area */
+.prompt-area{background:var(--bg2);border-top:1px solid var(--border);padding:12px 16px;max-height:160px;overflow-y:auto}
+.prompt-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.prompt-bar span{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.copy-btn{padding:4px 14px;background:var(--blue);color:#fff;border:none;border-radius:4px;font-size:12px;cursor:pointer;transition:all .15s}
+.copy-btn:hover{opacity:.85}
+.prompt-text{font-family:'SF Mono',Consolas,monospace;font-size:12px;color:var(--text2);line-height:1.6;white-space:pre-wrap}
+
+/* Comments sidebar */
+.comment-list{padding:8px 14px}
+.comment-item{background:var(--bg3);border-radius:6px;padding:8px 10px;margin-bottom:6px;position:relative}
+.comment-item .target{font-size:11px;color:var(--blue);font-weight:600}
+.comment-item .text{font-size:12px;color:var(--text2);margin-top:3px}
+.comment-item .del{position:absolute;top:6px;right:8px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px}
+.comment-item .del:hover{color:var(--red)}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:none;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;width:400px;max-width:90vw}
+.modal h3{font-size:15px;margin-bottom:4px}
+.modal .subtitle{font-size:12px;color:var(--text3);margin-bottom:12px}
+.modal textarea{width:100%;height:80px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:10px;font-family:inherit;font-size:13px;resize:vertical}
+.modal textarea:focus{outline:none;border-color:var(--blue)}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.modal-actions button{padding:6px 16px;border-radius:5px;border:1px solid var(--border);cursor:pointer;font-size:13px}
+.modal-actions .cancel{background:var(--bg3);color:var(--text2)}
+.modal-actions .save{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* Tooltip */
+.tooltip{position:absolute;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:12px;color:var(--text);pointer-events:none;z-index:50;max-width:260px;box-shadow:0 4px 12px rgba(0,0,0,.4);display:none}
+.tooltip.show{display:block}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+
+.hidden{display:none !important}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>軍事兵棋推演 AI 系統 <span>v6.0 Architecture Explorer</span></h1>
+    <div class="tabs">
+      <div class="tab active" data-tab="arch">架構圖 Architecture</div>
+      <div class="tab" data-tab="sec">安全漏洞 Security</div>
+      <div class="tab" data-tab="flow">流程圖 Flows</div>
+    </div>
+  </div>
+  <div class="main">
+    <!-- ===== ARCHITECTURE TAB ===== -->
+    <div id="tab-arch" class="tab-content" style="display:flex;flex:1;overflow:hidden">
+      <div class="sidebar" id="arch-sidebar">
+        <h3>Presets</h3>
+        <div class="control-group" id="presets"></div>
+        <h3>Layers</h3>
+        <div class="control-group" id="layers"></div>
+        <h3>Connections</h3>
+        <div class="control-group" id="conn-filters"></div>
+        <h3>Comments (<span id="comment-count">0</span>)</h3>
+        <div class="comment-list" id="comment-list"></div>
+      </div>
+      <div class="canvas-area" id="arch-canvas">
+        <div class="zoom-controls">
+          <button class="zoom-btn" onclick="zoomIn()">+</button>
+          <button class="zoom-btn" onclick="zoomOut()">&minus;</button>
+          <button class="zoom-btn" onclick="zoomReset()" style="font-size:11px">1:1</button>
+        </div>
+        <svg id="arch-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="legend" id="arch-legend"></div>
+      </div>
+    </div>
+
+    <!-- ===== SECURITY TAB ===== -->
+    <div id="tab-sec" class="tab-content hidden" style="display:flex;flex:1;overflow:hidden">
+      <div class="security-container" id="sec-container"></div>
+    </div>
+
+    <!-- ===== FLOW TAB ===== -->
+    <div id="tab-flow" class="tab-content hidden" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+      <div class="flow-tabs" id="flow-tabs"></div>
+      <div class="flow-canvas" id="flow-canvas">
+        <svg id="flow-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prompt area -->
+  <div class="prompt-area">
+    <div class="prompt-bar">
+      <span>Generated Prompt</span>
+      <button class="copy-btn" onclick="copyPrompt()">Copy</button>
+    </div>
+    <div class="prompt-text" id="prompt-output"></div>
+  </div>
+</div>
+
+<!-- Comment Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3 id="modal-title"></h3>
+    <div class="subtitle" id="modal-subtitle"></div>
+    <textarea id="modal-input" placeholder="Add your comment about this component..."></textarea>
+    <div class="modal-actions">
+      <button class="cancel" onclick="closeModal()">Cancel</button>
+      <button class="save" onclick="saveComment()">Save Comment</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tooltip -->
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const state = {
+  currentTab: 'arch',
+  currentFlow: 0,
+  layers: { frontend: true, backend: true, external: true, storage: true },
+  connTypes: { 'data-flow': true, 'api-call': true, 'file-io': true },
+  comments: [],
+  zoom: 1,
+  panX: 0, panY: 0,
+  secFilter: 'all',
+  commentTarget: null
+};
+
+// ============================================================
+// ARCHITECTURE DATA
+// ============================================================
+const archNodes = [
+  // Frontend Layer (y: 20-100)
+  { id:'main-js', label:'main.js', subtitle:'Entry Point', x:420, y:30, w:120, h:40, layer:'frontend', color:'#1e3a5f' },
+  { id:'api-client', label:'api-client.js', subtitle:'API Client + X-Client-ID', x:220, y:90, w:150, h:40, layer:'frontend', color:'#1e3a5f' },
+  { id:'map-mgr', label:'map-manager.js', subtitle:'Map Display', x:410, y:90, w:140, h:40, layer:'frontend', color:'#1e3a5f' },
+  { id:'ui-mgr', label:'ui-manager.js', subtitle:'UI Controls', x:590, y:90, w:130, h:40, layer:'frontend', color:'#1e3a5f' },
+  { id:'msg-mgr', label:'message-manager.js', subtitle:'Chat Messages', x:60, y:90, w:130, h:40, layer:'frontend', color:'#1e3a5f' },
+  { id:'sim-mgr', label:'simulation-manager.js', subtitle:'Simulation Control', x:760, y:90, w:160, h:40, layer:'frontend', color:'#1e3a5f' },
+  { id:'fb-mgr', label:'feedback-manager.js', subtitle:'User Feedback', x:60, y:155, w:145, h:40, layer:'frontend', color:'#1e3a5f' },
+  { id:'cop-mgr', label:'cop-manager.js', subtitle:'COP Screenshots', x:240, y:155, w:140, h:40, layer:'frontend', color:'#1e3a5f' },
+  { id:'prompt-mgr', label:'prompt-manager.js', subtitle:'Prompt Config UI', x:420, y:155, w:150, h:40, layer:'frontend', color:'#1e3a5f' },
+  { id:'settings-mgr', label:'settings-manager.js', subtitle:'System Settings', x:610, y:155, w:150, h:40, layer:'frontend', color:'#1e3a5f' },
+  { id:'milsymbol', label:'milsymbol.js', subtitle:'MIL-STD-2525', x:800, y:155, w:130, h:40, layer:'frontend', color:'#1e3a5f' },
+  { id:'constants', label:'constants.js', subtitle:'API URLs & Config', x:80, y:30, w:120, h:40, layer:'frontend', color:'#1e3a5f' },
+  { id:'fe-helpers', label:'helpers.js', subtitle:'escapeHtml & Utils', x:240, y:30, w:130, h:40, layer:'frontend', color:'#1e3a5f' },
+
+  // Backend - Routes (y: 240-280)
+  { id:'app-py', label:'app.py', subtitle:'Flask Entry (Port 5000)', x:420, y:240, w:140, h:42, layer:'backend', color:'#1a3d2e' },
+  { id:'scenario-rt', label:'scenario_routes', subtitle:'Import/Start/Clear', x:60, y:300, w:135, h:40, layer:'backend', color:'#1a3d2e' },
+  { id:'data-rt', label:'data_routes', subtitle:'WTA/Track/Status', x:220, y:300, w:125, h:40, layer:'backend', color:'#1a3d2e' },
+  { id:'answer-rt', label:'answer_routes', subtitle:'RAG Q&A', x:370, y:300, w:120, h:40, layer:'backend', color:'#1a3d2e' },
+  { id:'feedback-rt', label:'feedback_routes', subtitle:'Feedback CRUD', x:515, y:300, w:130, h:40, layer:'backend', color:'#1a3d2e' },
+  { id:'cop-rt', label:'cop_routes', subtitle:'COP Screenshots', x:670, y:300, w:120, h:40, layer:'backend', color:'#1a3d2e' },
+  { id:'prompt-rt', label:'prompt_routes', subtitle:'Prompt CRUD', x:815, y:300, w:120, h:40, layer:'backend', color:'#1a3d2e' },
+  { id:'admin-rt', label:'admin_routes', subtitle:'Health & Settings', x:60, y:360, w:125, h:40, layer:'backend', color:'#1a3d2e' },
+  { id:'static-rt', label:'static_routes', subtitle:'File Serving', x:210, y:360, w:120, h:40, layer:'backend', color:'#1a3d2e' },
+
+  // Backend - Services (y: 360-420)
+  { id:'llm-svc', label:'llm_service.py', subtitle:'LLM Function Calling', x:380, y:370, w:140, h:40, layer:'backend', color:'#2d2a1a' },
+  { id:'map-svc', label:'map_service.py', subtitle:'Folium Map Rendering', x:555, y:370, w:150, h:40, layer:'backend', color:'#2d2a1a' },
+  { id:'config-svc', label:'config_service.py', subtitle:'Prompt/Config Mgmt', x:740, y:370, w:145, h:40, layer:'backend', color:'#2d2a1a' },
+
+  // Backend - Utils/Handlers (y: 430)
+  { id:'map-state', label:'map_state.py', subtitle:'MapState Model', x:555, y:435, w:130, h:40, layer:'backend', color:'#2d2a1a' },
+  { id:'be-helpers', label:'helpers.py', subtitle:'Session & Client ID', x:380, y:435, w:140, h:40, layer:'backend', color:'#2d2a1a' },
+  { id:'parser', label:'parser.py', subtitle:'LLM Arg Parsing', x:280, y:435, w:120, h:38, layer:'backend', color:'#2d2a1a' },
+  { id:'fallback', label:'fallback_handler.py', subtitle:'Rule-based Fallback', x:120, y:435, w:145, h:40, layer:'backend', color:'#2d2a1a' },
+
+  // External Services (y: 530)
+  { id:'ollama', label:'Ollama LLM', subtitle:'Port 11434 (llama3.2/mistral)', x:120, y:540, w:165, h:44, layer:'external', color:'#3d2a1a' },
+  { id:'nodejs', label:'Node.js CMO API', subtitle:'Port 3000 (WTA/RAG)', x:380, y:540, w:165, h:44, layer:'external', color:'#3d2a1a' },
+  { id:'selenium', label:'Chrome Selenium', subtitle:'Headless Screenshots', x:640, y:540, w:155, h:44, layer:'external', color:'#3d2a1a' },
+
+  // Data Storage (y: 630)
+  { id:'db-ships', label:'db_v2.json', subtitle:'Ship Database', x:60, y:640, w:120, h:40, layer:'storage', color:'#2a1a3d' },
+  { id:'db-track', label:'track_data.json', subtitle:'Navigation Tracks', x:210, y:640, w:135, h:40, layer:'storage', color:'#2a1a3d' },
+  { id:'db-prompts', label:'prompts_config.json', subtitle:'LLM Prompts', x:375, y:640, w:150, h:40, layer:'storage', color:'#2a1a3d' },
+  { id:'db-config', label:'config.json', subtitle:'Runtime Settings', x:555, y:640, w:125, h:40, layer:'storage', color:'#2a1a3d' },
+  { id:'dir-maps', label:'maps/', subtitle:'Generated Map HTML', x:710, y:640, w:115, h:40, layer:'storage', color:'#2a1a3d' },
+  { id:'dir-fb', label:'feedbacks/', subtitle:'Feedback JSON', x:855, y:640, w:115, h:40, layer:'storage', color:'#2a1a3d' },
+  { id:'dir-cops', label:'cops/', subtitle:'COP Screenshots', x:855, y:540, w:110, h:40, layer:'storage', color:'#2a1a3d' },
+];
+
+const archConns = [
+  // Frontend internal
+  { from:'main-js', to:'api-client', type:'data-flow', label:'init' },
+  { from:'main-js', to:'map-mgr', type:'data-flow', label:'init' },
+  { from:'main-js', to:'ui-mgr', type:'data-flow', label:'init' },
+  { from:'main-js', to:'msg-mgr', type:'data-flow', label:'init' },
+  { from:'main-js', to:'sim-mgr', type:'data-flow', label:'init' },
+  { from:'constants', to:'api-client', type:'data-flow', label:'URLs' },
+
+  // Frontend → Backend
+  { from:'api-client', to:'app-py', type:'api-call', label:'HTTP + X-Client-ID' },
+
+  // app.py → Routes
+  { from:'app-py', to:'scenario-rt', type:'data-flow', label:'Blueprint' },
+  { from:'app-py', to:'data-rt', type:'data-flow', label:'Blueprint' },
+  { from:'app-py', to:'answer-rt', type:'data-flow', label:'Blueprint' },
+  { from:'app-py', to:'feedback-rt', type:'data-flow', label:'Blueprint' },
+  { from:'app-py', to:'cop-rt', type:'data-flow', label:'Blueprint' },
+  { from:'app-py', to:'prompt-rt', type:'data-flow', label:'Blueprint' },
+  { from:'app-py', to:'admin-rt', type:'data-flow', label:'Blueprint' },
+  { from:'app-py', to:'static-rt', type:'data-flow', label:'Blueprint' },
+
+  // Routes → Services
+  { from:'scenario-rt', to:'llm-svc', type:'api-call', label:'call_import_scenario()' },
+  { from:'scenario-rt', to:'map-svc', type:'api-call', label:'add_ships_to_map()' },
+  { from:'data-rt', to:'llm-svc', type:'api-call', label:'call_get_wta()' },
+  { from:'data-rt', to:'map-svc', type:'api-call', label:'add_wta_to_map()' },
+  { from:'prompt-rt', to:'config-svc', type:'api-call', label:'CRUD prompts' },
+  { from:'cop-rt', to:'selenium', type:'api-call', label:'Screenshot capture' },
+
+  // Routes → Utils
+  { from:'scenario-rt', to:'fallback', type:'data-flow', label:'LLM fail' },
+  { from:'scenario-rt', to:'be-helpers', type:'data-flow', label:'get_map_state()' },
+  { from:'llm-svc', to:'parser', type:'data-flow', label:'parse args' },
+
+  // Services → External
+  { from:'llm-svc', to:'ollama', type:'api-call', label:'POST /api/chat' },
+  { from:'scenario-rt', to:'nodejs', type:'api-call', label:'GET /get_ships' },
+  { from:'data-rt', to:'nodejs', type:'api-call', label:'POST /get_wta' },
+  { from:'answer-rt', to:'nodejs', type:'api-call', label:'POST /get_answer' },
+
+  // Services → MapState
+  { from:'map-svc', to:'map-state', type:'data-flow', label:'create_map()' },
+
+  // Services/Routes → Storage
+  { from:'map-svc', to:'dir-maps', type:'file-io', label:'Save HTML' },
+  { from:'feedback-rt', to:'dir-fb', type:'file-io', label:'Save JSON' },
+  { from:'cop-rt', to:'dir-cops', type:'file-io', label:'Save PNG' },
+  { from:'config-svc', to:'db-prompts', type:'file-io', label:'Read/Write' },
+  { from:'config-svc', to:'db-config', type:'file-io', label:'Read/Write' },
+  { from:'map-svc', to:'db-ships', type:'file-io', label:'Read ships' },
+  { from:'map-svc', to:'db-track', type:'file-io', label:'Read tracks' },
+
+  // Map manager ← map files
+  { from:'map-mgr', to:'milsymbol', type:'data-flow', label:'Military symbols' },
+];
+
+const layerMeta = {
+  frontend: { label: 'Frontend (JS)', color: '#3b82f6', border: '#2563eb' },
+  backend: { label: 'Backend (Flask)', color: '#10b981', border: '#059669' },
+  external: { label: 'External Services', color: '#f59e0b', border: '#d97706' },
+  storage: { label: 'Data Storage', color: '#a855f7', border: '#7c3aed' }
+};
+
+const connMeta = {
+  'data-flow': { label: 'Data Flow', color: '#3b82f6', dash: '' },
+  'api-call': { label: 'API Call', color: '#10b981', dash: '8,4' },
+  'file-io': { label: 'File I/O', color: '#a855f7', dash: '4,4' }
+};
+
+const presets = [
+  { id:'full', label:'Full System 完整系統', layers:{ frontend:true, backend:true, external:true, storage:true }, conns:{ 'data-flow':true, 'api-call':true, 'file-io':true }},
+  { id:'fe', label:'Frontend Only 前端', layers:{ frontend:true, backend:false, external:false, storage:false }, conns:{ 'data-flow':true, 'api-call':false, 'file-io':false }},
+  { id:'be', label:'Backend Only 後端', layers:{ frontend:false, backend:true, external:false, storage:false }, conns:{ 'data-flow':true, 'api-call':true, 'file-io':false }},
+  { id:'data', label:'Data Flow 資料流', layers:{ frontend:true, backend:true, external:true, storage:true }, conns:{ 'data-flow':false, 'api-call':true, 'file-io':true }},
+  { id:'ext', label:'External Integration 外部整合', layers:{ frontend:false, backend:true, external:true, storage:true }, conns:{ 'data-flow':false, 'api-call':true, 'file-io':true }},
+];
+
+// ============================================================
+// SECURITY DATA
+// ============================================================
+const vulns = [
+  { id:1, sev:'critical', title:'No Authentication/Authorization 無認證授權', desc:'System has zero authentication. Anyone can access all 22 API endpoints. No login, no API keys, no tokens.', component:'All Routes', fix:'Implement JWT or API key authentication. Add role-based access control (RBAC). Use Flask-Login or Flask-JWT-Extended.' },
+  { id:2, sev:'critical', title:'CORS Fully Open 跨域完全開放', desc:'CORS(app) with no origin restrictions allows any website to make requests to the backend API.', component:'app.py', fix:'Configure CORS with specific allowed origins: CORS(app, origins=["http://localhost:5000"]). Block all other origins.' },
+  { id:3, sev:'critical', title:'Hardcoded Service URLs 硬編碼服務位址', desc:'All service URLs (Ollama, Node.js) are hardcoded in config.py with no environment variable support.', component:'config.py', fix:'Use environment variables: os.environ.get("OLLAMA_URL", "http://localhost:11434"). Use python-dotenv for .env file support.' },
+  { id:4, sev:'high', title:'No HTTPS 無加密傳輸', desc:'Running on plain HTTP (port 5000). All data including military information transmitted in cleartext.', component:'app.py', fix:'Deploy behind a reverse proxy (Nginx) with TLS/SSL certificates. Use Flask-Talisman for HTTPS enforcement.' },
+  { id:5, sev:'high', title:'Flask Debug Mode 除錯模式', desc:'app.run(debug=True) exposes Werkzeug interactive debugger, enabling Remote Code Execution (RCE).', component:'app.py', fix:'Set debug=False in production. Use environment variable: app.run(debug=os.environ.get("FLASK_DEBUG","false")=="true").' },
+  { id:6, sev:'high', title:'No Rate Limiting 無速率限制', desc:'No rate limiting on any endpoint. Vulnerable to brute force, abuse, and denial-of-service attacks.', component:'All Routes', fix:'Add Flask-Limiter: limiter = Limiter(app, default_limits=["60/minute"]). Apply stricter limits to LLM endpoints.' },
+  { id:7, sev:'high', title:'IP Address Logging 記錄IP位址', desc:'Feedback endpoint captures user IP addresses in metadata without explicit consent.', component:'feedback_routes.py', fix:'Remove IP logging or add explicit user consent. Hash IPs if needed for analytics. Add privacy policy.' },
+  { id:8, sev:'high', title:'Selenium Code Injection Selenium注入風險', desc:'COP screenshot uses file:// protocol with dynamically generated HTML paths. Malicious HTML could execute code.', component:'cop_routes.py', fix:'Sanitize HTML content before rendering. Use --disable-javascript in Chrome. Validate file paths strictly.' },
+  { id:9, sev:'medium', title:'Client ID Spoofing 客戶端ID偽造', desc:'Client ID from X-Client-ID header can be easily forged to access other users\' session states.', component:'utils/helpers.py', fix:'Use server-side session tokens (Flask-Session). Bind sessions to authenticated users. Use signed cookies.' },
+  { id:10, sev:'medium', title:'No Input Length Validation 無輸入長度驗證', desc:'User input sent directly to LLM endpoints with no length limits. Can cause resource exhaustion.', component:'All POST Routes', fix:'Add max length validation: if len(user_input) > 5000: abort(413). Validate on both frontend and backend.' },
+  { id:11, sev:'medium', title:'File Path Traversal 路徑穿越風險', desc:'Map and COP file serving may be vulnerable to path traversal (e.g., ../../etc/passwd) if filenames are not validated.', component:'static_routes.py, cop_routes.py', fix:'Use werkzeug.utils.secure_filename(). Validate filenames match expected patterns. Use os.path.basename().' },
+  { id:12, sev:'medium', title:'In-Memory State Loss 記憶體狀態遺失', desc:'All session state stored in Python dict _STATES, completely lost on server restart.', component:'utils/helpers.py', fix:'Use Redis or database for session storage. Implement state persistence to disk. Add graceful shutdown handlers.' },
+  { id:13, sev:'medium', title:'No CSRF Protection 無CSRF防護', desc:'No CSRF tokens on any POST endpoint. Vulnerable to cross-site request forgery attacks.', component:'All POST Routes', fix:'Add Flask-WTF CSRF protection. Include CSRF tokens in all forms. Validate Origin/Referer headers.' },
+  { id:14, sev:'low', title:'Session Cleanup Race Condition 清理競爭條件', desc:'LRU cleanup deletes 50 oldest sessions when >200 states exist. Potential race condition under concurrent access.', component:'utils/helpers.py', fix:'Use proper locking around cleanup. Consider using collections.OrderedDict. Add cleanup in a background thread.' },
+  { id:15, sev:'low', title:'Error Message Info Leak 錯誤訊息洩漏', desc:'Stack traces may leak file paths, internal structure, and dependency versions to clients.', component:'All Routes', fix:'Add global error handler: @app.errorhandler(500) returning generic messages. Log details server-side only.' },
+  { id:16, sev:'low', title:'No Content Security Policy 無CSP', desc:'No CSP headers set. iframe-based map display could be exploited for XSS or clickjacking.', component:'All Responses', fix:'Add CSP headers via Flask-Talisman. Set frame-ancestors, script-src directives. Add X-Frame-Options header.' },
+];
+
+// ============================================================
+// FLOW DATA
+// ============================================================
+const flows = [
+  {
+    id: 'import', label: '情境匯入 Scene Import',
+    nodes: [
+      { id:'f1-input', label:'User Input\n使用者輸入', x:60, y:180, w:110, h:50, color:'#1e3a5f', type:'start' },
+      { id:'f1-api', label:'POST\n/api/import_scenario', x:210, y:180, w:140, h:50, color:'#1a3d2e' },
+      { id:'f1-llm', label:'LLMService\ncall_import_scenario()', x:395, y:180, w:155, h:50, color:'#2d2a1a' },
+      { id:'f1-check', label:'LLM\nSuccess?', x:595, y:180, w:80, h:50, color:'#3d2a1a', type:'diamond' },
+      { id:'f1-fallback', label:'FallbackHandler\nfallback_import()', x:595, y:70, w:150, h:50, color:'#3d1a1a' },
+      { id:'f1-extract', label:'Extract Params\n提取參數', x:730, y:180, w:120, h:50, color:'#2d2a1a' },
+      { id:'f1-node', label:'Node.js API\nGET /get_ships', x:895, y:180, w:130, h:50, color:'#3d2a1a' },
+      { id:'f1-map', label:'MapService\nadd_ships_to_map()', x:895, y:290, w:150, h:50, color:'#2d2a1a' },
+      { id:'f1-state', label:'MapState\ncreate_map()', x:700, y:290, w:130, h:50, color:'#2d2a1a' },
+      { id:'f1-save', label:'Save HTML\nmaps/ folder', x:530, y:290, w:115, h:50, color:'#2a1a3d' },
+      { id:'f1-return', label:'Return\nmap URL', x:370, y:290, w:105, h:50, color:'#1a3d2e' },
+      { id:'f1-display', label:'Frontend\niframe 顯示', x:210, y:290, w:110, h:50, color:'#1e3a5f', type:'end' },
+    ],
+    edges: [
+      { from:'f1-input', to:'f1-api' },
+      { from:'f1-api', to:'f1-llm' },
+      { from:'f1-llm', to:'f1-check' },
+      { from:'f1-check', to:'f1-extract', label:'Yes' },
+      { from:'f1-check', to:'f1-fallback', label:'No' },
+      { from:'f1-fallback', to:'f1-extract', label:'' },
+      { from:'f1-extract', to:'f1-node' },
+      { from:'f1-node', to:'f1-map' },
+      { from:'f1-map', to:'f1-state' },
+      { from:'f1-state', to:'f1-save' },
+      { from:'f1-save', to:'f1-return' },
+      { from:'f1-return', to:'f1-display' },
+    ]
+  },
+  {
+    id: 'wta', label: '武器目標分配 WTA',
+    nodes: [
+      { id:'f2-input', label:'User Input\n使用者輸入', x:60, y:180, w:110, h:50, color:'#1e3a5f', type:'start' },
+      { id:'f2-api', label:'POST\n/api/get_wta', x:210, y:180, w:130, h:50, color:'#1a3d2e' },
+      { id:'f2-llm', label:'LLMService\ncall_get_wta()', x:385, y:180, w:140, h:50, color:'#2d2a1a' },
+      { id:'f2-extract', label:'Extract\nenemy params', x:570, y:180, w:115, h:50, color:'#2d2a1a' },
+      { id:'f2-node', label:'Node.js CMO\nPOST /get_wta', x:730, y:180, w:140, h:50, color:'#3d2a1a' },
+      { id:'f2-result', label:'WTA Results\n攻擊波次/武器', x:915, y:180, w:130, h:50, color:'#3d2a1a' },
+      { id:'f2-map', label:'MapService\nadd_wta_to_map()', x:915, y:290, w:150, h:50, color:'#2d2a1a' },
+      { id:'f2-table', label:'generate\nwta_table_html()', x:720, y:290, w:140, h:50, color:'#2d2a1a' },
+      { id:'f2-state', label:'MapState\ncreate_map()\n+ animation', x:530, y:290, w:135, h:55, color:'#2d2a1a' },
+      { id:'f2-return', label:'Return\nmap + table', x:350, y:290, w:120, h:50, color:'#1a3d2e' },
+      { id:'f2-display', label:'Frontend\n顯示地圖+表格', x:180, y:290, w:120, h:50, color:'#1e3a5f', type:'end' },
+    ],
+    edges: [
+      { from:'f2-input', to:'f2-api' },
+      { from:'f2-api', to:'f2-llm' },
+      { from:'f2-llm', to:'f2-extract' },
+      { from:'f2-extract', to:'f2-node' },
+      { from:'f2-node', to:'f2-result' },
+      { from:'f2-result', to:'f2-map' },
+      { from:'f2-map', to:'f2-table' },
+      { from:'f2-table', to:'f2-state' },
+      { from:'f2-state', to:'f2-return' },
+      { from:'f2-return', to:'f2-display' },
+    ]
+  },
+  {
+    id: 'rag', label: '軍事問答 RAG Q&A',
+    nodes: [
+      { id:'f3-input', label:'User Question\n使用者提問', x:60, y:180, w:120, h:50, color:'#1e3a5f', type:'start' },
+      { id:'f3-api', label:'POST\n/api/get_answer', x:225, y:180, w:130, h:50, color:'#1a3d2e' },
+      { id:'f3-forward', label:'Forward to\nNode.js API', x:400, y:180, w:120, h:50, color:'#1a3d2e' },
+      { id:'f3-rag', label:'RAG System\n處理查詢', x:570, y:180, w:120, h:50, color:'#3d2a1a' },
+      { id:'f3-result', label:'Answer\n+ 5 Sources', x:740, y:180, w:120, h:50, color:'#3d2a1a' },
+      { id:'f3-display', label:'Frontend\n顯示答案+來源', x:740, y:290, w:135, h:50, color:'#1e3a5f' },
+      { id:'f3-feedback', label:'User Feedback\n使用者回饋', x:530, y:290, w:130, h:50, color:'#1e3a5f' },
+      { id:'f3-save', label:'Save to\nfeedbacks/', x:340, y:290, w:120, h:50, color:'#2a1a3d', type:'end' },
+    ],
+    edges: [
+      { from:'f3-input', to:'f3-api' },
+      { from:'f3-api', to:'f3-forward' },
+      { from:'f3-forward', to:'f3-rag' },
+      { from:'f3-rag', to:'f3-result' },
+      { from:'f3-result', to:'f3-display' },
+      { from:'f3-display', to:'f3-feedback' },
+      { from:'f3-feedback', to:'f3-save' },
+    ]
+  },
+  {
+    id: 'cop', label: '共同作戰圖截圖 COP',
+    nodes: [
+      { id:'f4-click', label:'User Click\nSave COP', x:60, y:200, w:110, h:50, color:'#1e3a5f', type:'start' },
+      { id:'f4-api', label:'POST\n/api/save_cop', x:215, y:200, w:120, h:50, color:'#1a3d2e' },
+      { id:'f4-selenium', label:'Selenium\nHeadless Chrome', x:385, y:200, w:140, h:50, color:'#3d2a1a' },
+      { id:'f4-load', label:'Load Map HTML\nfile:// protocol', x:575, y:200, w:135, h:50, color:'#3d2a1a' },
+      { id:'f4-wait', label:'Wait for\nMap Render', x:760, y:200, w:115, h:50, color:'#3d2a1a' },
+      { id:'f4-screenshot', label:'save_screenshot()\n截圖', x:760, y:310, w:130, h:50, color:'#2d2a1a' },
+      { id:'f4-save', label:'Save PNG\ncops/ folder', x:575, y:310, w:120, h:50, color:'#2a1a3d' },
+      { id:'f4-return', label:'Return\nfilename', x:400, y:310, w:115, h:50, color:'#1a3d2e' },
+      { id:'f4-success', label:'Frontend\n顯示成功', x:230, y:310, w:110, h:50, color:'#1e3a5f', type:'end' },
+    ],
+    edges: [
+      { from:'f4-click', to:'f4-api' },
+      { from:'f4-api', to:'f4-selenium' },
+      { from:'f4-selenium', to:'f4-load' },
+      { from:'f4-load', to:'f4-wait' },
+      { from:'f4-wait', to:'f4-screenshot' },
+      { from:'f4-screenshot', to:'f4-save' },
+      { from:'f4-save', to:'f4-return' },
+      { from:'f4-return', to:'f4-success' },
+    ]
+  },
+];
+
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    state.currentTab = t.dataset.tab;
+    document.querySelectorAll('.tab-content').forEach(c => { c.classList.add('hidden'); c.style.display = 'none'; });
+    const el = document.getElementById('tab-' + state.currentTab);
+    el.classList.remove('hidden');
+    if (state.currentTab === 'arch') el.style.display = 'flex';
+    else if (state.currentTab === 'sec') el.style.display = 'flex';
+    else if (state.currentTab === 'flow') el.style.display = 'flex';
+    updateAll();
+  });
+});
+
+// ============================================================
+// RENDER: ARCHITECTURE
+// ============================================================
+function renderArch() {
+  const svg = document.getElementById('arch-svg');
+  const W = 1020, H = 720;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+  let html = `<defs>
+    <marker id="ah-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="${connMeta['data-flow'].color}"/></marker>
+    <marker id="ah-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="${connMeta['api-call'].color}"/></marker>
+    <marker id="ah-purple" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="${connMeta['file-io'].color}"/></marker>
+    <filter id="glow"><feGaussianBlur stdDeviation="2" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>`;
+
+  // Layer background bands
+  const bands = [
+    { y:10, h:200, label:'Frontend Layer (JavaScript ES6)', layer:'frontend', color:'rgba(59,130,246,.06)' },
+    { y:220, h:280, label:'Backend Layer (Flask Python)', layer:'backend', color:'rgba(16,185,129,.06)' },
+    { y:520, h:80, label:'External Services', layer:'external', color:'rgba(245,158,11,.06)' },
+    { y:615, h:80, label:'Data Storage (JSON Files)', layer:'storage', color:'rgba(168,85,247,.06)' },
+  ];
+  bands.forEach(b => {
+    if (!state.layers[b.layer]) return;
+    html += `<rect x="5" y="${b.y}" width="${W-10}" height="${b.h}" rx="8" fill="${b.color}" stroke="rgba(255,255,255,.04)" stroke-width="1"/>`;
+    html += `<text x="16" y="${b.y+18}" font-size="11" fill="rgba(255,255,255,.2)" font-weight="600">${b.label}</text>`;
+  });
+
+  // Draw connections
+  const markerMap = { 'data-flow':'ah-blue', 'api-call':'ah-green', 'file-io':'ah-purple' };
+  archConns.forEach(c => {
+    if (!state.connTypes[c.type]) return;
+    const from = archNodes.find(n => n.id === c.from);
+    const to = archNodes.find(n => n.id === c.to);
+    if (!from || !to) return;
+    if (!state.layers[from.layer] || !state.layers[to.layer]) return;
+    const meta = connMeta[c.type];
+    const x1 = from.x + from.w/2, y1 = from.y + from.h;
+    const x2 = to.x + to.w/2, y2 = to.y;
+    const mx = (x1+x2)/2, my = (y1+y2)/2;
+    const dy = Math.abs(y2-y1);
+    const cy1 = y1 + dy*0.4, cy2 = y2 - dy*0.4;
+    const dashAttr = meta.dash ? ` stroke-dasharray="${meta.dash}"` : '';
+    html += `<path d="M${x1},${y1} C${x1},${cy1} ${x2},${cy2} ${x2},${y2}" fill="none" stroke="${meta.color}" stroke-width="1.5" opacity="0.5" marker-end="url(#${markerMap[c.type]})"${dashAttr}/>`;
+  });
+
+  // Draw nodes
+  archNodes.forEach(n => {
+    if (!state.layers[n.layer]) return;
+    const lm = layerMeta[n.layer];
+    const hasComment = state.comments.some(c => c.target === n.id);
+    const borderColor = hasComment ? '#f59e0b' : lm.border;
+    const bw = hasComment ? 2.5 : 1.5;
+    html += `<g class="arch-node" data-id="${n.id}" style="cursor:pointer">
+      <rect x="${n.x}" y="${n.y}" width="${n.w}" height="${n.h}" rx="6" fill="${n.color}" stroke="${borderColor}" stroke-width="${bw}" opacity="0.9"/>
+      <text x="${n.x+n.w/2}" y="${n.y+16}" text-anchor="middle" font-size="11" fill="${lm.color}" font-weight="600">${n.label}</text>
+      <text x="${n.x+n.w/2}" y="${n.y+30}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.4)">${n.subtitle}</text>
+      ${hasComment ? `<circle cx="${n.x+n.w-6}" cy="${n.y+6}" r="5" fill="#f59e0b"/><text x="${n.x+n.w-6}" y="${n.y+9.5}" text-anchor="middle" font-size="8" fill="#000" font-weight="700">${state.comments.filter(c=>c.target===n.id).length}</text>` : ''}
+    </g>`;
+  });
+
+  svg.innerHTML = html;
+
+  // Attach click events
+  svg.querySelectorAll('.arch-node').forEach(g => {
+    g.addEventListener('click', (e) => {
+      const id = g.dataset.id;
+      const node = archNodes.find(n => n.id === id);
+      if (node) openModal(node);
+    });
+    g.addEventListener('mouseenter', (e) => {
+      const rect = g.querySelector('rect');
+      if (rect) rect.setAttribute('filter', 'url(#glow)');
+    });
+    g.addEventListener('mouseleave', (e) => {
+      const rect = g.querySelector('rect');
+      if (rect) rect.removeAttribute('filter');
+    });
+  });
+
+  // Legend
+  const legend = document.getElementById('arch-legend');
+  let lhtml = '';
+  Object.entries(connMeta).forEach(([k,v]) => {
+    if (!state.connTypes[k]) return;
+    const dashStyle = v.dash ? `background:repeating-linear-gradient(90deg,${v.color} 0,${v.color} 4px,transparent 4px,transparent 7px)` : `background:${v.color}`;
+    lhtml += `<div class="legend-row"><div class="legend-line" style="${dashStyle};height:2px"></div>${v.label}</div>`;
+  });
+  legend.innerHTML = lhtml;
+}
+
+// ============================================================
+// RENDER: SECURITY
+// ============================================================
+function renderSecurity() {
+  const container = document.getElementById('sec-container');
+  const counts = { critical:0, high:0, medium:0, low:0 };
+  vulns.forEach(v => counts[v.sev]++);
+
+  const filtered = state.secFilter === 'all' ? vulns : vulns.filter(v => v.sev === state.secFilter);
+
+  let html = `
+  <div class="sec-stats">
+    <div class="stat-card critical"><div class="num">${counts.critical}</div><div class="label">Critical 嚴重</div></div>
+    <div class="stat-card high"><div class="num">${counts.high}</div><div class="label">High 高</div></div>
+    <div class="stat-card medium"><div class="num">${counts.medium}</div><div class="label">Medium 中</div></div>
+    <div class="stat-card low"><div class="num">${counts.low}</div><div class="label">Low 低</div></div>
+    <div class="stat-card"><div class="num" style="color:var(--text)">${vulns.length}</div><div class="label">Total 總計</div></div>
+  </div>
+  <div class="filter-bar">
+    <div class="filter-chip ${state.secFilter==='all'?'active':''}" data-filter="all">All 全部</div>
+    <div class="filter-chip ${state.secFilter==='critical'?'active':''}" data-filter="critical">Critical</div>
+    <div class="filter-chip ${state.secFilter==='high'?'active':''}" data-filter="high">High</div>
+    <div class="filter-chip ${state.secFilter==='medium'?'active':''}" data-filter="medium">Medium</div>
+    <div class="filter-chip ${state.secFilter==='low'?'active':''}" data-filter="low">Low</div>
+  </div>`;
+
+  const groups = {};
+  filtered.forEach(v => {
+    if (!groups[v.sev]) groups[v.sev] = [];
+    groups[v.sev].push(v);
+  });
+
+  const sevOrder = ['critical','high','medium','low'];
+  const sevLabels = { critical:'Critical 嚴重', high:'High 高風險', medium:'Medium 中風險', low:'Low 低風險' };
+  sevOrder.forEach(sev => {
+    if (!groups[sev]) return;
+    html += `<div class="severity-section">
+      <div class="severity-header"><span class="severity-badge ${sev}">${sev.toUpperCase()}</span><h2>${sevLabels[sev]}</h2></div>
+      <div class="vuln-grid">`;
+    groups[sev].forEach(v => {
+      html += `<div class="vuln-card ${v.sev}" data-vid="${v.id}">
+        <h4><span class="num">#${v.id}</span> ${v.title}</h4>
+        <p>${v.desc}</p>
+        <div class="vuln-meta"><span class="vuln-tag">${v.component}</span><span class="vuln-tag" style="cursor:pointer;color:var(--green)">Show Fix</span></div>
+        <div class="vuln-fix" id="fix-${v.id}"><h5>Recommended Fix 建議修復</h5><p>${v.fix}</p></div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+
+  container.innerHTML = html;
+
+  // Filter clicks
+  container.querySelectorAll('.filter-chip').forEach(c => {
+    c.addEventListener('click', () => {
+      state.secFilter = c.dataset.filter;
+      renderSecurity();
+      updatePrompt();
+    });
+  });
+
+  // Card click → toggle fix
+  container.querySelectorAll('.vuln-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const fixEl = card.querySelector('.vuln-fix');
+      fixEl.classList.toggle('show');
+    });
+  });
+}
+
+// ============================================================
+// RENDER: FLOWS
+// ============================================================
+function renderFlowTabs() {
+  const tabsEl = document.getElementById('flow-tabs');
+  tabsEl.innerHTML = flows.map((f, i) =>
+    `<div class="flow-tab ${i===state.currentFlow?'active':''}" data-idx="${i}">${f.label}</div>`
+  ).join('');
+  tabsEl.querySelectorAll('.flow-tab').forEach(t => {
+    t.addEventListener('click', () => {
+      state.currentFlow = parseInt(t.dataset.idx);
+      renderFlowTabs();
+      renderFlow();
+      updatePrompt();
+    });
+  });
+}
+
+function renderFlow() {
+  const flow = flows[state.currentFlow];
+  const svg = document.getElementById('flow-svg');
+  const W = 1100, H = 420;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+  let html = `<defs>
+    <marker id="fah" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#06b6d4"/></marker>
+    <marker id="fah-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#ef4444"/></marker>
+    <filter id="fglow"><feGaussianBlur stdDeviation="3" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>`;
+
+  // Title
+  html += `<text x="${W/2}" y="30" text-anchor="middle" font-size="16" fill="var(--cyan)" font-weight="700">${flow.label}</text>`;
+
+  // Draw edges
+  flow.edges.forEach(e => {
+    const from = flow.nodes.find(n => n.id === e.from);
+    const to = flow.nodes.find(n => n.id === e.to);
+    if (!from || !to) return;
+
+    let x1, y1, x2, y2;
+    const fCx = from.x + from.w/2, fCy = from.y + from.h/2;
+    const tCx = to.x + to.w/2, tCy = to.y + to.h/2;
+
+    // Determine exit/entry sides
+    if (Math.abs(tCx - fCx) > Math.abs(tCy - fCy)) {
+      if (tCx > fCx) { x1 = from.x+from.w; y1 = fCy; x2 = to.x; y2 = tCy; }
+      else { x1 = from.x; y1 = fCy; x2 = to.x+to.w; y2 = tCy; }
+    } else {
+      if (tCy > fCy) { x1 = fCx; y1 = from.y+from.h; x2 = tCx; y2 = to.y; }
+      else { x1 = fCx; y1 = from.y; x2 = tCx; y2 = to.y+to.h; }
+    }
+
+    const isNo = e.label === 'No';
+    const color = isNo ? '#ef4444' : '#06b6d4';
+    const marker = isNo ? 'fah-red' : 'fah';
+    const mx = (x1+x2)/2, my = (y1+y2)/2;
+    const dx = x2-x1, dy = y2-y1;
+    const cx1 = x1 + dx*0.4, cy1 = y1 + dy*0.1;
+    const cx2 = x1 + dx*0.6, cy2 = y1 + dy*0.9;
+
+    html += `<path d="M${x1},${y1} C${cx1},${cy1} ${cx2},${cy2} ${x2},${y2}" fill="none" stroke="${color}" stroke-width="2" opacity="0.6" marker-end="url(#${marker})"/>`;
+    if (e.label) {
+      html += `<text x="${mx}" y="${my-6}" text-anchor="middle" font-size="10" fill="${color}" font-weight="600">${e.label}</text>`;
+    }
+  });
+
+  // Draw nodes
+  flow.nodes.forEach(n => {
+    const lines = n.label.split('\n');
+    if (n.type === 'diamond') {
+      const cx = n.x + n.w/2, cy = n.y + n.h/2;
+      html += `<polygon points="${cx},${n.y} ${n.x+n.w},${cy} ${cx},${n.y+n.h} ${n.x},${cy}" fill="${n.color}" stroke="#f59e0b" stroke-width="2" opacity="0.9"/>`;
+      lines.forEach((line, i) => {
+        html += `<text x="${cx}" y="${cy - 4 + i*14}" text-anchor="middle" font-size="10" fill="#f59e0b" font-weight="600">${line}</text>`;
+      });
+    } else {
+      const rx = (n.type === 'start' || n.type === 'end') ? 20 : 8;
+      const stroke = n.type === 'start' ? '#10b981' : n.type === 'end' ? '#ef4444' : '#06b6d4';
+      html += `<rect x="${n.x}" y="${n.y}" width="${n.w}" height="${n.h}" rx="${rx}" fill="${n.color}" stroke="${stroke}" stroke-width="1.5" opacity="0.9"/>`;
+      lines.forEach((line, i) => {
+        const yOff = lines.length === 1 ? 4 : (i === 0 ? -3 : 12);
+        html += `<text x="${n.x+n.w/2}" y="${n.y+n.h/2+yOff}" text-anchor="middle" font-size="10" fill="#e0e0e8" font-weight="${i===0?600:400}">${line}</text>`;
+      });
+    }
+  });
+
+  svg.innerHTML = html;
+}
+
+// ============================================================
+// CONTROLS SETUP
+// ============================================================
+function setupControls() {
+  // Presets
+  const presetsEl = document.getElementById('presets');
+  presetsEl.innerHTML = presets.map(p =>
+    `<button class="preset-btn" data-preset="${p.id}">${p.label}</button>`
+  ).join('');
+  presetsEl.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = presets.find(x => x.id === btn.dataset.preset);
+      state.layers = { ...p.layers };
+      state.connTypes = { ...p.conns };
+      presetsEl.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      syncCheckboxes();
+      updateAll();
+    });
+  });
+
+  // Layer checkboxes
+  const layersEl = document.getElementById('layers');
+  layersEl.innerHTML = Object.entries(layerMeta).map(([k,v]) =>
+    `<label><input type="checkbox" data-layer="${k}" ${state.layers[k]?'checked':''}><span class="color-dot" style="background:${v.color}"></span>${v.label}</label>`
+  ).join('');
+  layersEl.querySelectorAll('input').forEach(cb => {
+    cb.addEventListener('change', () => {
+      state.layers[cb.dataset.layer] = cb.checked;
+      updateAll();
+    });
+  });
+
+  // Connection checkboxes
+  const connEl = document.getElementById('conn-filters');
+  connEl.innerHTML = Object.entries(connMeta).map(([k,v]) =>
+    `<label><input type="checkbox" data-conn="${k}" ${state.connTypes[k]?'checked':''}><span class="color-dot" style="background:${v.color}"></span>${v.label}</label>`
+  ).join('');
+  connEl.querySelectorAll('input').forEach(cb => {
+    cb.addEventListener('change', () => {
+      state.connTypes[cb.dataset.conn] = cb.checked;
+      updateAll();
+    });
+  });
+}
+
+function syncCheckboxes() {
+  document.querySelectorAll('[data-layer]').forEach(cb => {
+    cb.checked = state.layers[cb.dataset.layer];
+  });
+  document.querySelectorAll('[data-conn]').forEach(cb => {
+    cb.checked = state.connTypes[cb.dataset.conn];
+  });
+}
+
+// ============================================================
+// ZOOM
+// ============================================================
+function zoomIn() { state.zoom = Math.min(state.zoom * 1.2, 3); applyZoom(); }
+function zoomOut() { state.zoom = Math.max(state.zoom / 1.2, 0.3); applyZoom(); }
+function zoomReset() { state.zoom = 1; applyZoom(); }
+function applyZoom() {
+  const svg = document.getElementById('arch-svg');
+  svg.style.transform = `scale(${state.zoom})`;
+  svg.style.transformOrigin = 'top left';
+}
+
+// ============================================================
+// COMMENTS
+// ============================================================
+function openModal(node) {
+  state.commentTarget = node;
+  document.getElementById('modal-title').textContent = node.label;
+  document.getElementById('modal-subtitle').textContent = node.subtitle + ' (' + node.layer + ')';
+  document.getElementById('modal-input').value = '';
+  document.getElementById('modal').classList.add('show');
+  setTimeout(() => document.getElementById('modal-input').focus(), 100);
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+  state.commentTarget = null;
+}
+
+function saveComment() {
+  const text = document.getElementById('modal-input').value.trim();
+  if (!text || !state.commentTarget) return;
+  state.comments.push({
+    id: Date.now(),
+    target: state.commentTarget.id,
+    targetLabel: state.commentTarget.label,
+    targetFile: state.commentTarget.subtitle,
+    text
+  });
+  closeModal();
+  updateAll();
+}
+
+function renderComments() {
+  const list = document.getElementById('comment-list');
+  document.getElementById('comment-count').textContent = state.comments.length;
+  if (state.comments.length === 0) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:8px 0">Click a node to add comments</div>';
+    return;
+  }
+  list.innerHTML = state.comments.map(c =>
+    `<div class="comment-item"><div class="target">${c.targetLabel}</div><div class="text">${c.text}</div><button class="del" data-cid="${c.id}">&times;</button></div>`
+  ).join('');
+  list.querySelectorAll('.del').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      state.comments = state.comments.filter(c => c.id !== parseInt(btn.dataset.cid));
+      updateAll();
+    });
+  });
+}
+
+// ============================================================
+// PROMPT
+// ============================================================
+function updatePrompt() {
+  const parts = [];
+  if (state.currentTab === 'arch') {
+    const visLayers = Object.entries(state.layers).filter(([k,v])=>v).map(([k])=>layerMeta[k].label);
+    parts.push(`This is the Military War Game AI System v6.0 architecture, showing: ${visLayers.join(', ')}.`);
+    const visConns = Object.entries(state.connTypes).filter(([k,v])=>v).map(([k])=>connMeta[k].label);
+    if (visConns.length < 3) parts.push(`Connection types visible: ${visConns.join(', ')}.`);
+    if (state.comments.length > 0) {
+      parts.push('\nFeedback on specific components:\n');
+      state.comments.forEach(c => {
+        parts.push(`**${c.targetLabel}** (${c.targetFile}):\n${c.text}\n`);
+      });
+    }
+  } else if (state.currentTab === 'sec') {
+    const showing = state.secFilter === 'all' ? 'all severity levels' : state.secFilter + ' severity';
+    parts.push(`Security analysis of Military War Game AI System v6.0, showing ${showing}.`);
+    parts.push(`Found: 3 Critical, 5 High, 5 Medium, 3 Low vulnerabilities across 16 issues.`);
+    parts.push(`\nKey priorities:\n1. Add authentication/authorization to all 22 API endpoints\n2. Restrict CORS origins\n3. Disable Flask debug mode in production\n4. Add HTTPS via reverse proxy\n5. Implement rate limiting`);
+  } else if (state.currentTab === 'flow') {
+    const f = flows[state.currentFlow];
+    parts.push(`Viewing flow diagram: ${f.label}`);
+    parts.push(`This flow has ${f.nodes.length} steps and ${f.edges.length} transitions.`);
+  }
+  document.getElementById('prompt-output').textContent = parts.join('\n');
+}
+
+function copyPrompt() {
+  const text = document.getElementById('prompt-output').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+// ============================================================
+// UPDATE ALL
+// ============================================================
+function updateAll() {
+  if (state.currentTab === 'arch') {
+    renderArch();
+    renderComments();
+  } else if (state.currentTab === 'sec') {
+    renderSecurity();
+  } else if (state.currentTab === 'flow') {
+    renderFlowTabs();
+    renderFlow();
+  }
+  updatePrompt();
+}
+
+// ============================================================
+// KEYBOARD
+// ============================================================
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// ============================================================
+// INIT
+// ============================================================
+setupControls();
+renderFlowTabs();
+updateAll();
+</script>
+</body>
+</html>

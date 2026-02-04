@@ -4,6 +4,7 @@
  */
 
 import { escapeHtml } from '../utils/helpers.js';
+import { THEME_COLORS, FEEDBACK_TYPE_COLORS } from '../utils/constants.js';
 
 /**
  * 反饋管理器類別
@@ -31,8 +32,8 @@ export class FeedbackManager {
     modal.className = 'modal active';
     modal.innerHTML = `
       <div class="modal-content">
-        <h3 style="margin-bottom: 15px; color: #1e3c72;">💬 提供反饋</h3>
-        <p style="margin-bottom: 15px; color: #666;">請告訴我們您對這個回答的看法：</p>
+        <h3 style="margin-bottom: 15px; color: ${THEME_COLORS.primary};">💬 提供反饋</h3>
+        <p style="margin-bottom: 15px; color: ${THEME_COLORS.textMuted};">請告訴我們您對這個回答的看法：</p>
 
         <textarea
           id="feedback-text"
@@ -154,11 +155,7 @@ export class FeedbackManager {
       let feedbacksHtml = '';
       if (feedbacks.length > 0) {
         feedbacks.forEach((feedback, index) => {
-          const typeColor = {
-            'positive': '#4CAF50',
-            'negative': '#f44336',
-            'error': '#FF9800'
-          }[feedback.feedback_type] || '#666';
+          const typeColor = (FEEDBACK_TYPE_COLORS[feedback.feedback_type] || {}).color || THEME_COLORS.textMuted;
 
           const typeIcon = {
             'positive': '👍',
@@ -167,13 +164,13 @@ export class FeedbackManager {
           }[feedback.feedback_type] || '💬';
 
           feedbacksHtml += `
-            <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid ${typeColor};">
+            <div style="background: ${THEME_COLORS.bgAlt}; padding: 15px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid ${typeColor};">
               <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                <strong style="color: #1e3c72;">${typeIcon} ${feedback.feedback_type.toUpperCase()}</strong>
-                <span style="font-size: 12px; color: #666;">${new Date(feedback.timestamp).toLocaleString('zh-TW')}</span>
+                <strong style="color: ${THEME_COLORS.primary};">${typeIcon} ${feedback.feedback_type.toUpperCase()}</strong>
+                <span style="font-size: 12px; color: ${THEME_COLORS.textMuted};">${new Date(feedback.timestamp).toLocaleString('zh-TW')}</span>
               </div>
-              <p style="margin: 8px 0; color: #333;"><strong>問題：</strong>${escapeHtml(feedback.question)}</p>
-              ${feedback.feedback_text ? `<p style="margin: 8px 0; color: #666;"><strong>反饋：</strong>${escapeHtml(feedback.feedback_text)}</p>` : ''}
+              <p style="margin: 8px 0; color: ${THEME_COLORS.text};"><strong>問題：</strong>${escapeHtml(feedback.question)}</p>
+              ${feedback.feedback_text ? `<p style="margin: 8px 0; color: ${THEME_COLORS.textMuted};"><strong>反饋：</strong>${escapeHtml(feedback.feedback_text)}</p>` : ''}
             </div>
           `;
         });
@@ -186,21 +183,21 @@ export class FeedbackManager {
           <h3 class="modal-title">📊 用戶反饋統計</h3>
 
           <div style="display: flex; gap: 15px; margin: 20px 0;">
-            <div style="flex: 1; background: #e8f5e9; padding: 15px; border-radius: 8px; text-align: center;">
-              <div style="font-size: 24px; font-weight: bold; color: #4CAF50;">${stats.positive}</div>
-              <div style="font-size: 12px; color: #666;">正面反饋</div>
+            <div style="flex: 1; background: ${FEEDBACK_TYPE_COLORS.positive.bg}; padding: 15px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: ${FEEDBACK_TYPE_COLORS.positive.color};">${stats.positive}</div>
+              <div style="font-size: 12px; color: ${THEME_COLORS.textMuted};">正面反饋</div>
             </div>
-            <div style="flex: 1; background: #ffebee; padding: 15px; border-radius: 8px; text-align: center;">
-              <div style="font-size: 24px; font-weight: bold; color: #f44336;">${stats.negative}</div>
-              <div style="font-size: 12px; color: #666;">負面反饋</div>
+            <div style="flex: 1; background: ${FEEDBACK_TYPE_COLORS.negative.bg}; padding: 15px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: ${FEEDBACK_TYPE_COLORS.negative.color};">${stats.negative}</div>
+              <div style="font-size: 12px; color: ${THEME_COLORS.textMuted};">負面反饋</div>
             </div>
-            <div style="flex: 1; background: #fff3e0; padding: 15px; border-radius: 8px; text-align: center;">
-              <div style="font-size: 24px; font-weight: bold; color: #FF9800;">${stats.error}</div>
-              <div style="font-size: 12px; color: #666;">錯誤報告</div>
+            <div style="flex: 1; background: ${FEEDBACK_TYPE_COLORS.error.bg}; padding: 15px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: ${FEEDBACK_TYPE_COLORS.error.color};">${stats.error}</div>
+              <div style="font-size: 12px; color: ${THEME_COLORS.textMuted};">錯誤報告</div>
             </div>
           </div>
 
-          <h4 style="margin: 20px 0 10px 0; color: #1e3c72;">最近反饋：</h4>
+          <h4 style="margin: 20px 0 10px 0; color: ${THEME_COLORS.primary};">最近反饋：</h4>
           ${feedbacksHtml}
 
           <div style="text-align: right; margin-top: 20px;">

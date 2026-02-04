@@ -4,6 +4,7 @@
  */
 
 import { escapeHtml } from '../utils/helpers.js';
+import { THEME_COLORS } from '../utils/constants.js';
 
 /**
  * 訊息管理器類別
@@ -137,35 +138,35 @@ export class MessageManager {
     if (sources && sources.length > 0) {
       sources.forEach((source, index) => {
         sourcesHtml += `
-          <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #2196F3;">
+          <div style="background: ${THEME_COLORS.bgLight}; padding: 15px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid ${THEME_COLORS.info};">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <strong style="color: #1e3c72;">來源 ${source.index || index + 1}</strong>
-              <span style="background: #e3f2fd; padding: 4px 12px; border-radius: 12px; font-size: 12px; color: #1976d2;">
+              <strong style="color: ${THEME_COLORS.primary};">來源 ${source.index || index + 1}</strong>
+              <span style="background: #e3f2fd; padding: 4px 12px; border-radius: 12px; font-size: 12px; color: ${THEME_COLORS.infoDark};">
                 相似度: ${(source.score * 100).toFixed(1)}%
               </span>
             </div>
-            <p style="margin: 8px 0; color: #333; line-height: 1.6;">${escapeHtml(source.content)}</p>
-            <p style="margin: 4px 0; font-size: 12px; color: #666;">
-              📄 路徑: <code style="background: #fff; padding: 2px 6px; border-radius: 4px;">${escapeHtml(source.path)}</code>
+            <p style="margin: 8px 0; color: ${THEME_COLORS.text}; line-height: 1.6;">${escapeHtml(source.content)}</p>
+            <p style="margin: 4px 0; font-size: 12px; color: ${THEME_COLORS.textMuted};">
+              📄 路徑: <code style="background: ${THEME_COLORS.white}; padding: 2px 6px; border-radius: 4px;">${escapeHtml(source.path)}</code>
             </p>
           </div>
         `;
       });
     } else {
-      sourcesHtml = '<p style="color: #666; text-align: center; padding: 20px;">無來源資訊</p>';
+      sourcesHtml = `<p style="color: ${THEME_COLORS.textMuted}; text-align: center; padding: 20px;">無來源資訊</p>`;
     }
 
     modal.innerHTML = `
       <div class="modal-content" style="max-width: 800px; max-height: 80vh; overflow-y: auto;">
         <h3 class="modal-title">📚 文本引用來源</h3>
         <div style="margin: 20px 0;">
-          <h4 style="color: #1e3c72; margin-bottom: 10px;">問題：</h4>
-          <p style="background: #f5f5f5; padding: 12px; border-radius: 6px; margin-bottom: 20px;">${escapeHtml(question)}</p>
+          <h4 style="color: ${THEME_COLORS.primary}; margin-bottom: 10px;">問題：</h4>
+          <p style="background: ${THEME_COLORS.bgLight}; padding: 12px; border-radius: 6px; margin-bottom: 20px;">${escapeHtml(question)}</p>
 
-          <h4 style="color: #1e3c72; margin-bottom: 15px;">檢索來源（共 ${sources.length} 筆）：</h4>
+          <h4 style="color: ${THEME_COLORS.primary}; margin-bottom: 15px;">檢索來源（共 ${sources.length} 筆）：</h4>
           ${sourcesHtml}
 
-          <p style="margin-top: 15px; font-size: 12px; color: #666; border-top: 1px solid #e0e0e0; padding-top: 15px;">
+          <p style="margin-top: 15px; font-size: 12px; color: ${THEME_COLORS.textMuted}; border-top: 1px solid ${THEME_COLORS.border}; padding-top: 15px;">
             💡 提示：相似度分數越高，表示來源內容與問題越相關。
           </p>
         </div>

@@ -7,6 +7,15 @@ from branca.element import Element
 import os
 import math
 import json
+from config import (
+    MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM, MAP_DEFAULT_TILES,
+    MIL_SYMBOL_SIZE, MIL_SYMBOL_RETRY_MAX, MIL_SYMBOL_RETRY_INTERVAL,
+    DIAMOND_MIN_SIZE, ICON_SIZE, ICON_ANCHOR,
+    FACTION_COLORS, ATTACK_LINE_WEIGHT_DEFAULT,
+    ARROW_ICON_SIZE, ARROW_ICON_ANCHOR,
+    MISSILE_FLIGHT_TIME, WAVE_INTERVAL,
+    MISSILE_TRAIL_WEIGHT, ATTACK_LINE_WEIGHT_WTA
+)
 
 
 class MapState:
@@ -92,9 +101,9 @@ class MapState:
         """
         # 創建基礎地圖（台灣海峽中心）
         m = folium.Map(
-            location=[23.5, 120.5],
-            zoom_start=7,
-            tiles='OpenStreetMap'
+            location=MAP_DEFAULT_CENTER,
+            zoom_start=MAP_DEFAULT_ZOOM,
+            tiles=MAP_DEFAULT_TILES
         )
 
         # 注入本地 milsymbol 軍事符號庫
@@ -112,38 +121,38 @@ class MapState:
         milsymbol_tag = f"<script>\n{ms_code}\n</script>\n" if ms_code else '<script src="/static/js/milsymbol.js"></script>\n'
 
         # 定義全域 JavaScript 函式：繪製軍事符號和調整攻擊線
-        common_js = r"""
+        common_js = f"""
         <script>
         // 繪製 MIL-STD-2525 軍事符號
         // 參數：sidc=符號識別碼, elementId=HTML元素ID
-        window.drawMilSymbol = function(sidc, elementId) {
+        window.drawMilSymbol = function(sidc, elementId) {{
             var retryCount = 0;
-            var timer = setInterval(function() {
-        if (typeof ms !== 'undefined') {
-            var sym = new ms.Symbol(sidc, {
-                size: 35,
+            var timer = setInterval(function() {{
+        if (typeof ms !== 'undefined') {{
+            var sym = new ms.Symbol(sidc, {{
+                size: {MIL_SYMBOL_SIZE},
                 infoFields: false
-            });
+            }});
             var el = document.getElementById(elementId);
-            if (el) {
-                el.innerHTML = '<div style="width:35px;height:35px;display:flex;align-items:center;justify-content:center;">'
-                             + '<img src="' + sym.toDataURL() + '" style="width:35px;height:35px;display:block;" />'
+            if (el) {{
+                el.innerHTML = '<div style="width:{MIL_SYMBOL_SIZE}px;height:{MIL_SYMBOL_SIZE}px;display:flex;align-items:center;justify-content:center;">'
+                             + '<img src="' + sym.toDataURL() + '" style="width:{MIL_SYMBOL_SIZE}px;height:{MIL_SYMBOL_SIZE}px;display:block;" />'
                              + '</div>';
                 clearInterval(timer);
-            }
-        }
+            }}
+        }}
         retryCount++;
-        if (retryCount > 50) {
+        if (retryCount > {MIL_SYMBOL_RETRY_MAX}) {{
             console.error("milsymbol 載入失敗：請確認 milsymbol.js 是否可用");
             clearInterval(timer);
-        }
-            }, 100);
-        };
+        }}
+            }}, {MIL_SYMBOL_RETRY_INTERVAL});
+        }};
 
         // 調整攻擊線終點，使箭頭精準指向敵方菱形符號的頂點
         // 用途：避免箭頭與符號重疊，提高視覺清晰度
-        window.__adjustAttackLine = function(map, polyline, arrowMarker, startLatLng, endLatLng, diamondSizePx) {
-            try {
+        window.__adjustAttackLine = function(map, polyline, arrowMarker, startLatLng, endLatLng, diamondSizePx) {{
+            try {{
         if (!map || !polyline || !arrowMarker) return;
         var pa = map.latLngToLayerPoint(startLatLng);
         var pt = map.latLngToLayerPoint(endLatLng);
@@ -151,27 +160,27 @@ class MapState:
         var dx = pa.x - pt.x;
         var dy = pa.y - pt.y;
 
-        var r = Math.max(6, (diamondSizePx || 35) / 2);
+        var r = Math.max({DIAMOND_MIN_SIZE}, (diamondSizePx || {MIL_SYMBOL_SIZE}) / 2);
 
         // 取「我方方向」的頂點（從我方射向敵方，最先碰到的菱形頂點）
         var vx = 0, vy = 0;
-        if (Math.abs(dx) >= Math.abs(dy)) {
+        if (Math.abs(dx) >= Math.abs(dy)) {{
             vx = (dx > 0) ? r : -r;
             vy = 0;
-        } else {
+        }} else {{
             vx = 0;
             vy = (dy > 0) ? r : -r;
-        }
+        }}
 
         var pv = L.point(pt.x + vx, pt.y + vy);
         var vLatLng = map.layerPointToLatLng(pv);
 
         polyline.setLatLngs([startLatLng, vLatLng]);
         arrowMarker.setLatLng(vLatLng);
-            } catch (e) {
+            }} catch (e) {{
         console.error('adjustAttackLine failed', e);
-            }
-        };
+            }}
+        }};
         </script>
         """
 
@@ -202,8 +211,8 @@ class MapState:
                 location=marker_data['location'],
                 icon=folium.DivIcon(
                     html=f'<div id="{marker_id}">●</div>',
-                    icon_size=(35, 35),
-                    icon_anchor=(17, 17)
+                    icon_size=ICON_SIZE,
+                    icon_anchor=ICON_ANCHOR
                 ),
                 popup=marker_data['popup']
             ).add_to(m)
@@ -278,13 +287,13 @@ class MapState:
                 # 根據陣營選擇顏色和 SIDC
                 if track_type == 'enemy':
                     sidc = "SHS-------X----"  # 敵方水面艦艇
-                    marker_color = '#FF5252'
+                    marker_color = FACTION_COLORS['enemy_track']
                 elif track_type == 'roc':
                     sidc = "SFS-------X----"  # 友方水面艦艇
-                    marker_color = '#1A237E'
+                    marker_color = FACTION_COLORS['roc_track']
                 else:
                     sidc = "SFS-------X----"
-                    marker_color = '#757575'
+                    marker_color = FACTION_COLORS['unknown_track']
 
                 # 生成唯一的 marker ID
                 marker_id = f"track_marker_{marker_id_counter}"
@@ -295,8 +304,8 @@ class MapState:
                     location=last_coord,
                     icon=folium.DivIcon(
                         html=f'<div id="{marker_id}" style="font-size:10px; color:#999;">●</div>',
-                        icon_size=(35, 35),
-                        icon_anchor=(17, 17)
+                        icon_size=ICON_SIZE,
+                        icon_anchor=ICON_ANCHOR
                     ),
                     tooltip=folium.Tooltip(
                         text=ship_name,
@@ -331,7 +340,7 @@ class MapState:
                 end = line_data['end']
                 color = line_data['color']
                 popup_text = line_data.get('popup', '')
-                weight = line_data.get('weight', 5)
+                weight = line_data.get('weight', ATTACK_LINE_WEIGHT_DEFAULT)
 
                 static_lines_js_data.append({
                     'startLat': start[0],
@@ -407,7 +416,7 @@ class MapState:
                             ) * 180 / Math.PI;
 
                             // 3. 創建箭頭（使用 SVG）
-                            var arrowSvg = '<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" ' +
+                            var arrowSvg = '<svg width="{ARROW_ICON_SIZE[0]}" height="{ARROW_ICON_SIZE[1]}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" ' +
                                           'style="transform: rotate(' + angle + 'deg); transform-origin: center center;">' +
                                           '<path d="M12 2 L20 22 L12 18 L4 22 Z" ' +
                                           'fill="' + lineData.color + '" stroke="white" stroke-width="1.5"/>' +
@@ -418,8 +427,8 @@ class MapState:
                                 icon: L.divIcon({{
                                     html: arrowSvg,
                                     className: 'static-attack-arrow',
-                                    iconSize: [24, 24],
-                                    iconAnchor: [12, 12]
+                                    iconSize: {ARROW_ICON_SIZE},
+                                    iconAnchor: {ARROW_ICON_ANCHOR}
                                 }}),
                                 zIndexOffset: 1000
                             }}).addTo(map);
@@ -509,6 +518,18 @@ class MapState:
         返回:
             str: 完整的 HTML + CSS + JavaScript 代碼
         """
+        # 構建動畫 JS 配置常數（注入 Python config 值到 JavaScript）
+        anim_config_js = (
+            f"\n    var MISSILE_FLIGHT_TIME = {MISSILE_FLIGHT_TIME};"
+            f"\n    var WAVE_INTERVAL = {WAVE_INTERVAL};"
+            f"\n    var _DEFAULT_WEAPON_COLOR = '{FACTION_COLORS['default_weapon']}';"
+            f"\n    var _MISSILE_TRAIL_WEIGHT = {MISSILE_TRAIL_WEIGHT};"
+            f"\n    var _COMPLETED_LINE_WEIGHT = {ATTACK_LINE_WEIGHT_WTA};"
+            f"\n    var _ARROW_ICON_SIZE = {json.dumps(ARROW_ICON_SIZE)};"
+            f"\n    var _ARROW_ICON_ANCHOR = {json.dumps(ARROW_ICON_ANCHOR)};"
+            f"\n    var _ARROW_W = {ARROW_ICON_SIZE[0]};"
+            f"\n    var _ARROW_H = {ARROW_ICON_SIZE[1]};\n"
+        )
 
         return """
 <style>
@@ -652,6 +673,7 @@ class MapState:
     var wtaResults = """ + wta_results_json + """;
     var weaponColors = """ + weapon_colors_json + """;
     var mapVarName = '""" + map_name + """';
+""" + anim_config_js + """
     var map = null;
 
     function getMap() {
@@ -666,9 +688,6 @@ class MapState:
     }
 
     console.log('📊 載入', wtaResults.length, '筆武器分派記錄');
-
-    var MISSILE_FLIGHT_TIME = 2500;
-    var WAVE_INTERVAL = 1000;
 
     var state = {
         isPlaying: false,
@@ -700,7 +719,7 @@ class MapState:
                 currentWave = r.attack_wave;
             }
 
-            var color = '#666666';
+            var color = _DEFAULT_WEAPON_COLOR;
             for (var key in weaponColors) {
                 if (r.weapon && r.weapon.indexOf(key) >= 0) {
                     color = weaponColors[key];
@@ -749,7 +768,7 @@ class MapState:
         if (!line.polyline) {
             line.polyline = L.polyline(
                 [[line.startLat, line.startLon], [lat, lon]],
-                {color: line.color, weight: 5, opacity: 1, className: 'missile-trail'}
+                {color: line.color, weight: _MISSILE_TRAIL_WEIGHT, opacity: 1, className: 'missile-trail'}
             ).addTo(currentMap);
         } else {
             line.polyline.setLatLngs([[line.startLat, line.startLon], [lat, lon]]);
@@ -761,7 +780,7 @@ class MapState:
         ) * 180 / Math.PI;
 
         if (!line.missileHead) {
-            var arrowSvg = '<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" ' +
+            var arrowSvg = '<svg width="' + _ARROW_W + '" height="' + _ARROW_H + '" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" ' +
                           'style="transform: rotate(' + angle + 'deg); transform-origin: center center;">' +
                           '<path d="M12 2 L20 22 L12 18 L4 22 Z" ' +
                           'fill="' + line.color + '" stroke="white" stroke-width="1.5"/>' +
@@ -771,15 +790,15 @@ class MapState:
                 icon: L.divIcon({
                     html: arrowSvg,
                     className: 'missile-arrow-icon',
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12]
+                    iconSize: _ARROW_ICON_SIZE,
+                    iconAnchor: _ARROW_ICON_ANCHOR
                 }),
                 zIndexOffset: 1000
             }).addTo(currentMap);
         } else {
             line.missileHead.setLatLng([lat, lon]);
 
-            var newArrowSvg = '<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" ' +
+            var newArrowSvg = '<svg width="' + _ARROW_W + '" height="' + _ARROW_H + '" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" ' +
                              'style="transform: rotate(' + angle + 'deg); transform-origin: center center;">' +
                              '<path d="M12 2 L20 22 L12 18 L4 22 Z" ' +
                              'fill="' + line.color + '" stroke="white" stroke-width="1.5"/>' +
@@ -788,8 +807,8 @@ class MapState:
             line.missileHead.setIcon(L.divIcon({
                 html: newArrowSvg,
                 className: 'missile-arrow-icon',
-                iconSize: [24, 24],
-                iconAnchor: [12, 12]
+                iconSize: _ARROW_ICON_SIZE,
+                iconAnchor: _ARROW_ICON_ANCHOR
             }));
         }
     }
@@ -804,7 +823,7 @@ class MapState:
         }
 
         if (line.polyline) {
-            line.polyline.setStyle({opacity: 0.4, weight: 4});
+            line.polyline.setStyle({opacity: 0.4, weight: _COMPLETED_LINE_WEIGHT});
             state.completedLines.push(line.polyline);
             line.polyline = null;
         }

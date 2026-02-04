@@ -3,6 +3,8 @@
  * 處理 SYSTEM PROMPT 的配置、編輯和管理
  */
 
+import { THEME_COLORS } from '../utils/constants.js';
+
 export class PromptManager {
   constructor(apiClient, uiManager) {
     this.apiClient = apiClient;
@@ -66,7 +68,7 @@ export class PromptManager {
 
         <div style="margin-bottom: 20px; padding: 15px; background: #f0f8ff; border-radius: 8px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
           <label style="font-weight: 600; font-size: 14px;">配置：</label>
-          <select id="pm-config-sel" onchange="window.promptManager.loadPromptConfigToEditor()" style="flex: 1; min-width: 200px; padding: 8px; border: 2px solid #1e3c72; border-radius: 6px; font-size: 14px;">
+          <select id="pm-config-sel" onchange="window.promptManager.loadPromptConfigToEditor()" style="flex: 1; min-width: 200px; padding: 8px; border: 2px solid ${THEME_COLORS.primary}; border-radius: 6px; font-size: 14px;">
           </select>
           <button onclick="window.promptManager.createNewConfig()" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">➕ 新增</button>
           <button onclick="window.promptManager.renameConfig()" style="padding: 8px 16px; background: #17a2b8; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">✏️ 重命名</button>

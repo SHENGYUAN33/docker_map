@@ -3,7 +3,7 @@
  * 處理 CMO 模擬狀態監聽和輪詢
  */
 
-import { POLLING_INTERVAL, SIMULATION_STATUS_INTERVAL } from '../utils/constants.js';
+import { POLLING_INTERVAL, SIMULATION_STATUS_INTERVAL, THEME_COLORS } from '../utils/constants.js';
 
 export class SimulationManager {
   constructor(apiClient, uiManager, messageManager) {
@@ -99,20 +99,20 @@ export class SimulationManager {
       <div class="modal-content" style="max-width: 600px;">
         <div style="text-align: center; margin-bottom: 20px;">
           <div style="font-size: 64px; margin-bottom: 10px;">🎯</div>
-          <h2 style="color: #4CAF50; margin-bottom: 10px;">模擬完成</h2>
-          <p style="color: #666; font-size: 14px;">${new Date().toLocaleString('zh-TW')}</p>
+          <h2 style="color: ${THEME_COLORS.success}; margin-bottom: 10px;">模擬完成</h2>
+          <p style="color: ${THEME_COLORS.textMuted}; font-size: 14px;">${new Date().toLocaleString('zh-TW')}</p>
         </div>
 
         <div style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-          <h3 style="color: #2e7d32; margin-bottom: 10px; font-size: 16px;">✅ 模擬狀態</h3>
+          <h3 style="color: ${THEME_COLORS.successDark}; margin-bottom: 10px; font-size: 16px;">✅ 模擬狀態</h3>
           <p style="color: #1b5e20; font-size: 15px; line-height: 1.6;">
             ${message || '武器分派演算已完成'}
           </p>
         </div>
 
-        <div style="background: #fff3e0; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #FF9800;">
-          <h3 style="color: #e65100; margin-bottom: 10px; font-size: 16px;">✅ 接下來可以...</h3>
-          <ul style="color: #666; font-size: 14px; line-height: 1.8; margin-left: 20px;">
+        <div style="background: #fff3e0; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid ${THEME_COLORS.warning};">
+          <h3 style="color: ${THEME_COLORS.warningDark}; margin-bottom: 10px; font-size: 16px;">✅ 接下來可以...</h3>
+          <ul style="color: ${THEME_COLORS.textMuted}; font-size: 14px; line-height: 1.8; margin-left: 20px;">
             <li>開始進行<strong>攻擊配對線繪製</strong></li>
             <li>查詢<strong>武器分派結果</strong></li>
             <li>查看<strong>地圖視覺化呈現</strong></li>

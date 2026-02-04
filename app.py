@@ -15,7 +15,7 @@
 from flask import Flask
 from flask_cors import CORS
 from routes import register_blueprints
-from config import ensure_directories
+from config import ensure_directories, FLASK_HOST, FLASK_PORT, FLASK_DEBUG
 import os
 
 # ==================== 創建 Flask 應用程式 ====================
@@ -91,4 +91,4 @@ if __name__ == '__main__':
     # host='0.0.0.0' : 允許外部訪問（不僅限於 localhost）
     # port=5000      : 監聽端口 5000
     # debug=True     : 開啟調試模式（自動重載、詳細錯誤信息）
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host=FLASK_HOST, port=FLASK_PORT, debug=FLASK_DEBUG)

@@ -8,7 +8,7 @@ import requests
 import os
 import ast
 
-from config import NODE_API_BASE, MAP_DIR
+from config import NODE_API_BASE, MAP_DIR, DEFAULT_LLM_MODEL, DEFAULT_PROMPT_CONFIG, ENEMY_KEYWORDS, ROC_KEYWORDS
 from services import get_system_prompt
 from services.llm_service import LLMService
 from services.map_service import MapService
@@ -57,8 +57,8 @@ def import_scenario():
         user_input = data.get('user_input', '')
 
         # 從前端獲取模型選擇和 Prompt 配置
-        llm_model = data.get('llm_model', 'llama3.2:3b')
-        prompt_config = data.get('prompt_config', '預設配置')
+        llm_model = data.get('llm_model', DEFAULT_LLM_MODEL)
+        prompt_config = data.get('prompt_config', DEFAULT_PROMPT_CONFIG)
 
         print(f"\n{'='*80}")
         print(f"🚀 [API 請求] /api/import_scenario")
@@ -96,13 +96,10 @@ def import_scenario():
         # 核心修正：智能清理和修正參數
         cleaned_params = {}
 
-        # 定義關鍵字列表
-        enemy_keywords = ['解放軍', '敵軍', '中國', '052D', '054A', '055', '大型驅逐艦', '護衛艦', '敵方', '共軍']
-        roc_keywords = ['國軍', '我方', '我軍', '成功艦', '基隆艦', '沱江艦', '塔江艦', '1101', 'PGG', '批居居', '成功級', 'ROC', 'Chien Kung']
-
+        # 使用集中配置的關鍵字列表
         # 檢查用戶指令中是否提到陣營
-        has_enemy_in_input = any(keyword in user_input for keyword in enemy_keywords)
-        has_roc_in_input = any(keyword in user_input for keyword in roc_keywords)
+        has_enemy_in_input = any(keyword in user_input for keyword in ENEMY_KEYWORDS)
+        has_roc_in_input = any(keyword in user_input for keyword in ROC_KEYWORDS)
 
         # 處理 enemy 參數
         if 'enemy' in params:
@@ -127,7 +124,7 @@ def import_scenario():
                         continue
 
                     # 關鍵邏輯：檢查船艦是否被 LLM 放錯陣營
-                    if ship in roc_keywords:
+                    if ship in ROC_KEYWORDS:
                         # 這艘船是我軍，LLM 放錯了！自動修正
                         moved_to_roc.append(ship)
                         print(f"🔧 修正：{ship} 是我軍，從 enemy 移到 roc")
@@ -168,7 +165,7 @@ def import_scenario():
                         continue
 
                     # 關鍵邏輯：檢查船艦是否被 LLM 放錯陣營
-                    if ship in enemy_keywords:
+                    if ship in ENEMY_KEYWORDS:
                         # 這艘船是敵軍，LLM 放錯了！自動修正
                         moved_to_enemy.append(ship)
                         print(f"🔧 修正：{ship} 是敵軍，從 roc 移到 enemy")
@@ -310,8 +307,8 @@ def start_scenario():
         data = request.json
         user_input = data.get('user_input', '')
 
-        llm_model = data.get('llm_model', 'llama3.2:3b')
-        prompt_config = data.get('prompt_config', '預設配置')
+        llm_model = data.get('llm_model', DEFAULT_LLM_MODEL)
+        prompt_config = data.get('prompt_config', DEFAULT_PROMPT_CONFIG)
         print(f"\n【功能四：啟動模擬】收到指令: {user_input}")
         print(f"【使用模型】: {llm_model}")
         print(f"【Prompt 配置】: {prompt_config}")

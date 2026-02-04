@@ -8,7 +8,7 @@ import os
 import json
 import base64
 
-from config import COP_DIR, MAP_DIR
+from config import COP_DIR, MAP_DIR, SELENIUM_WINDOW_WIDTH, SELENIUM_WINDOW_HEIGHT, COP_PAGE_LOAD_WAIT, COP_FILENAME_FORMAT
 from utils import get_map_state, cleanup_old_files
 
 # 創建 COP 管理藍圖
@@ -79,7 +79,7 @@ def save_cop():
         chrome_options.add_argument('--headless')
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
-        chrome_options.add_argument('--window-size=1920,1080')
+        chrome_options.add_argument(f'--window-size={SELENIUM_WINDOW_WIDTH},{SELENIUM_WINDOW_HEIGHT}')
         chrome_options.add_argument('--disable-gpu')
 
         print("【啟動 Selenium】...")
@@ -96,11 +96,11 @@ def save_cop():
             driver.get(map_url)
 
             # 等待地圖載入完成
-            time.sleep(3)  # 給地圖一些時間完成渲染
+            time.sleep(COP_PAGE_LOAD_WAIT)  # 給地圖一些時間完成渲染
 
             # 生成截圖文件名
             timestamp = datetime.now()
-            cop_filename = f"COP_{timestamp.strftime('%Y%m%d_%H%M%S')}.png"
+            cop_filename = f"{timestamp.strftime(COP_FILENAME_FORMAT)}.png"
             cop_path = os.path.join(COP_DIR, cop_filename)
 
             # 截圖 - 只截取地圖元素
@@ -144,14 +144,14 @@ def save_cop():
             'ip_address': request.remote_addr
         }
 
-        metadata_filename = f"COP_{timestamp.strftime('%Y%m%d_%H%M%S')}_metadata.json"
+        metadata_filename = f"{timestamp.strftime(COP_FILENAME_FORMAT)}_metadata.json"
         metadata_path = os.path.join(COP_DIR, metadata_filename)
 
         with open(metadata_path, 'w', encoding='utf-8') as f:
             json.dump(metadata, f, ensure_ascii=False, indent=2)
 
-        # 清理 30 天前的舊文件
-        cleanup_old_files(COP_DIR, days=30)
+        # 清理超過保留天數的舊文件
+        cleanup_old_files(COP_DIR)
 
         # 讀取截圖並轉為 Base64（供前端下載）
         with open(cop_path, 'rb') as f:

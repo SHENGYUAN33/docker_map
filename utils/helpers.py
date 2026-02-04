@@ -4,17 +4,13 @@
 """
 import os
 import time
-import threading
 from flask import request
 from models.map_state import MapState
-
-
-# ==================== 會話狀態管理 ====================
-# 前端每個分頁會提供一個 X-Client-ID（使用 sessionStorage 產生），
-# 後端依此維護獨立的 MapState，避免不同分頁/不同使用者互相污染。
-
-_STATE_LOCK = threading.Lock()
-_STATES = {}  # client_id -> {"state": MapState, "last_access": float}
+from config import (
+    MAX_CLIENT_ID_LENGTH, MAX_CONCURRENT_SESSIONS,
+    SESSION_CLEANUP_BATCH, FILE_RETENTION_DAYS,
+    _STATE_LOCK, _STATES
+)
 
 
 def _sanitize_client_id(raw: str) -> str:
@@ -31,8 +27,8 @@ def _sanitize_client_id(raw: str) -> str:
     if not raw:
         return "default"
     raw = str(raw)
-    if len(raw) > 80:
-        raw = raw[:80]
+    if len(raw) > MAX_CLIENT_ID_LENGTH:
+        raw = raw[:MAX_CLIENT_ID_LENGTH]
     safe = []
     for ch in raw:
         if ch.isalnum() or ch in ("-", "_", "."):
@@ -78,9 +74,9 @@ def get_map_state() -> MapState:
             rec["last_access"] = now
 
         # 簡單清理：如果狀態太多，刪除最久未使用的
-        if len(_STATES) > 200:
+        if len(_STATES) > MAX_CONCURRENT_SESSIONS:
             items = sorted(_STATES.items(), key=lambda kv: kv[1].get("last_access", 0))
-            for k, _ in items[:50]:
+            for k, _ in items[:SESSION_CLEANUP_BATCH]:
                 if k != cid:
                     _STATES.pop(k, None)
         return rec["state"]
@@ -88,15 +84,17 @@ def get_map_state() -> MapState:
 
 # ==================== 文件清理工具 ====================
 
-def cleanup_old_files(directory, days=30):
+def cleanup_old_files(directory, days=None):
     """
     清理指定天數前的舊文件
     用途：定期清理舊的地圖、反饋、截圖等文件，防止磁碟空間不足
 
     參數:
         directory: 要清理的目錄路徑
-        days: 保留天數（超過此天數的文件將被刪除），預設為 30 天
+        days: 保留天數（超過此天數的文件將被刪除），預設使用 config.FILE_RETENTION_DAYS
     """
+    if days is None:
+        days = FILE_RETENTION_DAYS
     try:
         current_time = time.time()
         cutoff_time = current_time - (days * 24 * 60 * 60)

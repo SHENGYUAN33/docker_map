@@ -82,3 +82,34 @@ export const NOTIFICATION_DURATION = 3000;
 
 // Client ID 存儲鍵
 export const CLIENT_ID_KEY = 'cmo_client_id';
+
+// ==================== 主題色彩（供 JS 動態生成 DOM 時使用） ====================
+export const THEME_COLORS = {
+  // 主色調
+  primary: '#1e3c72',
+  primaryLight: '#2a5298',
+  // 功能色
+  success: '#4CAF50',
+  successDark: '#2e7d32',
+  info: '#2196F3',
+  infoDark: '#1976D2',
+  warning: '#FF9800',
+  warningDark: '#e65100',
+  danger: '#f44336',
+  dangerDark: '#c62828',
+  // 中性色
+  text: '#333',
+  textMuted: '#666',
+  textLight: '#7f8c8d',
+  border: '#e0e0e0',
+  bgLight: '#f5f5f5',
+  bgAlt: '#f9f9f9',
+  white: '#ffffff',
+};
+
+// 反饋類型顏色映射
+export const FEEDBACK_TYPE_COLORS = {
+  positive: { color: '#4CAF50', bg: '#e8f5e9', label: '正面' },
+  negative: { color: '#f44336', bg: '#ffebee', label: '負面' },
+  error:    { color: '#FF9800', bg: '#fff3e0', label: '錯誤' },
+};

@@ -2,7 +2,10 @@
 地圖服務模組
 用途：提供地圖相關的業務邏輯，包括船艦標記、武器分派線條、航跡繪製和表格生成
 """
-from config import WEAPON_COLORS
+from config import (
+    WEAPON_COLORS, FACTION_COLORS, TRACK_LINE_WEIGHT,
+    ATTACK_LINE_WEIGHT_WTA, WTA_TABLE_HEADER_BG, WTA_TABLE_ALT_ROW_BG
+)
 from models.map_state import MapState
 
 
@@ -27,7 +30,7 @@ class MapService:
         for key, color in WEAPON_COLORS.items():
             if key in weapon_name:
                 return color
-        return "#666666"  # 默認灰色
+        return FACTION_COLORS['default_weapon']  # 未知武器預設顏色
 
     @staticmethod
     def add_ships_to_map(ship_data, map_state: MapState):
@@ -47,7 +50,7 @@ class MapService:
                 map_state.add_marker(
                     location=location,
                     popup=f"<b>解放軍: {ship_name}</b>",
-                    color='red',
+                    color=FACTION_COLORS['enemy_marker'],
                     icon='ship',
                     shape='diamond'  # 紅色菱形
                 )
@@ -60,7 +63,7 @@ class MapService:
                 map_state.add_marker(
                     location=location,
                     popup=f"<b>國軍: {ship_name}</b>",
-                    color='blue',
+                    color=FACTION_COLORS['roc_marker'],
                     icon='ship',
                     shape='circle'  # 藍色圓形
                 )
@@ -83,7 +86,7 @@ class MapService:
             map_state.add_marker(
                 location=result['roc_location'],
                 popup=f"<b>國軍: {result['roc_unit']}</b>",
-                color='blue',
+                color=FACTION_COLORS['roc_marker'],
                 icon='ship',
                 shape='circle'  # 藍色圓形
             )
@@ -92,7 +95,7 @@ class MapService:
             map_state.add_marker(
                 location=result['enemy_location'],
                 popup=f"<b>解放軍: {result['enemy_unit']}</b>",
-                color='red',
+                color=FACTION_COLORS['enemy_marker'],
                 icon='ship',
                 shape='diamond'  # 紅色菱形
             )
@@ -104,7 +107,7 @@ class MapService:
                 end_location=result['enemy_location'],
                 color=weapon_color,
                 popup=popup_text,
-                weight=4
+                weight=ATTACK_LINE_WEIGHT_WTA
             )
 
     @staticmethod
@@ -145,7 +148,7 @@ class MapService:
                 map_state.add_marker(
                     location=last_position,
                     popup=f"<b>解放軍: {ship_name}</b>",
-                    color='red',
+                    color=FACTION_COLORS['enemy_marker'],
                     icon='ship',
                     shape='diamond'  # 紅色菱形
                 )
@@ -158,8 +161,8 @@ class MapService:
                     'type': 'enemy',
                     'ship_name': ship_name,
                     'coordinates': track_coords,
-                    'color': '#FF5252',  # 紅色
-                    'weight': 3
+                    'color': FACTION_COLORS['enemy_track'],  # 紅色
+                    'weight': TRACK_LINE_WEIGHT
                 })
 
         # 處理我方軌跡（藍色）
@@ -176,7 +179,7 @@ class MapService:
                 map_state.add_marker(
                     location=last_position,
                     popup=f"<b>國軍: {ship_name}</b>",
-                    color='blue',
+                    color=FACTION_COLORS['roc_marker'],
                     icon='ship',
                     shape='circle'  # 藍色圓形
                 )
@@ -189,8 +192,8 @@ class MapService:
                     'type': 'roc',
                     'ship_name': ship_name,
                     'coordinates': track_coords,
-                    'color': '#1A237E',  # 藍色
-                    'weight': 3
+                    'color': FACTION_COLORS['roc_track'],  # 藍色
+                    'weight': TRACK_LINE_WEIGHT
                 })
 
     @staticmethod
@@ -210,7 +213,7 @@ class MapService:
 
         html = '<div style="margin: 15px 0; overflow-x: auto;">'
         html += '<table style="width: 100%; border-collapse: collapse; font-size: 13px;">'
-        html += '<thead><tr style="background: #1e3c72; color: white;">'
+        html += f'<thead><tr style="background: {WTA_TABLE_HEADER_BG}; color: white;">'
 
         # 表頭
         for col in columns:
@@ -221,7 +224,7 @@ class MapService:
 
         # 表格內容
         for i, result in enumerate(results):
-            bg_color = '#f9f9f9' if i % 2 == 0 else 'white'
+            bg_color = WTA_TABLE_ALT_ROW_BG if i % 2 == 0 else 'white'
             html += f'<tr style="background: {bg_color};">'
 
             for col in columns:

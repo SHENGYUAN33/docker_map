@@ -2,6 +2,10 @@
 Fallback 處理器模組
 用途：當 LLM 不可用或解析失敗時，提供基於規則的後備解析邏輯
 """
+from config import (
+    ENEMY_KEYWORDS, ROC_KEYWORDS, ENEMY_SHIP_NAMES, ROC_SHIP_NAMES,
+    SIMULATION_START_KEYWORDS, WTA_KEYWORDS, TRACK_KEYWORDS, QUESTION_MARKERS
+)
 
 
 class FallbackHandler:
@@ -25,30 +29,28 @@ class FallbackHandler:
         params = {}
 
         # 檢查是否提到解放軍/敵軍
-        enemy_keywords = ['解放軍', '敵軍', '中國', '052D', '054A', '055', '大型驅逐艦', '護衛艦']
-        has_enemy_keyword = any(keyword in user_input for keyword in enemy_keywords)
+        has_enemy_keyword = any(keyword in user_input for keyword in ENEMY_KEYWORDS)
 
         if has_enemy_keyword:
             if '所有' in user_input or '全部' in user_input or '態勢' in user_input:
                 params['enemy'] = []
             else:
                 ships = []
-                for ship in ['052D', '054A', '055', '大型驅逐艦', '護衛艦']:
+                for ship in ENEMY_SHIP_NAMES:
                     if ship in user_input:
                         ships.append(ship)
                 if ships:
                     params['enemy'] = ships
 
         # 檢查是否提到國軍
-        roc_keywords = ['國軍', '我方', '成功艦', '基隆艦', '沱江艦', '塔江艦', '1101', 'PGG']
-        has_roc_keyword = any(keyword in user_input for keyword in roc_keywords)
+        has_roc_keyword = any(keyword in user_input for keyword in ROC_KEYWORDS)
 
         if has_roc_keyword:
             if '所有' in user_input or '全部' in user_input or '態勢' in user_input:
                 params['roc'] = []
             else:
                 ships = []
-                for ship in ['成功艦', '基隆艦', '沱江艦', '塔江艦', '1101', 'PGG']:
+                for ship in ROC_SHIP_NAMES:
                     if ship in user_input:
                         ships.append(ship)
                 if ships:
@@ -70,8 +72,7 @@ class FallbackHandler:
         返回:
             dict: {"tool": "star_scenario", "parameters": {}} 或 None
         """
-        keywords = ['開始模擬', '開始進行兵推', '開始戰鬥', '執行CMO兵推', '啟動模擬', '開始兵推']
-        if any(keyword in user_input for keyword in keywords):
+        if any(keyword in user_input for keyword in SIMULATION_START_KEYWORDS):
             return {'tool': 'star_scenario', 'parameters': {}}
         return None
 
@@ -87,12 +88,11 @@ class FallbackHandler:
         返回:
             dict: {"tool": "get_wta", "parameters": {"enemy": [...]}} 或 None
         """
-        keywords = ['武器分派', '攻擊配對', 'WTA', '分派結果']
-        if any(keyword in user_input for keyword in keywords):
+        if any(keyword in user_input for keyword in WTA_KEYWORDS):
             params = {'enemy': []}
 
             # 檢查是否提到特定船艦
-            for ship in ['052D', '054A', '055', '大型驅逐艦', '護衛艦']:
+            for ship in ENEMY_SHIP_NAMES:
                 if ship in user_input:
                     if 'enemy' not in params or params['enemy'] == []:
                         params['enemy'] = []
@@ -114,7 +114,7 @@ class FallbackHandler:
             dict: {"tool": "get_answer", "parameters": {"question": "..."}} 或 None
         """
         # 如果有問號或疑問詞，視為問答
-        if '?' in user_input or '？' in user_input or any(word in user_input for word in ['什麼', '如何', '為何', '是否', '請問', '請說明']):
+        if any(marker in user_input for marker in QUESTION_MARKERS):
             return {'tool': 'get_answer', 'parameters': {'question': user_input}}
         return None
 
@@ -130,7 +130,6 @@ class FallbackHandler:
         返回:
             dict: {"tool": "get_track", "parameters": {}} 或 None
         """
-        keywords = ['顯示航跡', '顯示軌跡', '繪製航跡', '繪製軌跡', '航行軌跡', '航行路徑', '移動路徑', '船艦軌跡', '航跡', '軌跡']
-        if any(keyword in user_input for keyword in keywords):
+        if any(keyword in user_input for keyword in TRACK_KEYWORDS):
             return {'tool': 'get_track', 'parameters': {}}
         return None
