@@ -190,11 +190,13 @@ export class APIClient {
   // ==================== 地圖相關 API ====================
 
   /**
-   * 清除地圖
+   * 清除地圖（全部或指定圖層）
+   * @param {string|null} layer - 要清除的圖層名稱（'scenario', 'wta', 'tracks'），null 則清除全部
    * @returns {Promise<Object>} 響應數據
    */
-  async clearMap() {
-    return await this.post('/api/clear_map');
+  async clearMap(layer = null) {
+    const data = layer ? { layer } : {};
+    return await this.post('/api/clear_map', data);
   }
 
   /**

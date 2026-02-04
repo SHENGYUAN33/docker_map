@@ -14,6 +14,7 @@ from services.llm_service import LLMService
 from services.map_service import MapService
 from handlers.fallback_handler import FallbackHandler
 from utils import get_map_state
+from models.map_state import LAYER_WTA, LAYER_TRACKS
 
 # 創建數據查詢藍圖
 data_bp = Blueprint('data', __name__)
@@ -104,9 +105,9 @@ def get_wta():
                 'error': f'無法連接到 Node.js API: {str(e)}'
             })
 
-        # 步驟 3: 取得當前分頁/會話的 MapState，並加入武器分派線
+        # 步驟 3: 取得當前分頁/會話的 MapState，並加入武器分派線（WTA 圖層）
         map_state = get_map_state()
-        map_service.add_wta_to_map(api_data['wta_results'], map_state)
+        map_service.add_wta_to_map(api_data['wta_results'], map_state, layer=LAYER_WTA)
 
         # 步驟 3.5: 檢查動畫開關設定（安全版本）
         enable_animation = ENABLE_ANIMATION_DEFAULT  # 使用配置預設值
@@ -342,17 +343,13 @@ def get_track():
                 'error': f'讀取 track_data.json 失敗: {str(e)}'
             })
 
-        # 步驟 4: 清除地圖上現有的所有軌跡圖層
-        # 這裡需要特別處理：只清除軌跡，不清除其他元素
+        # 步驟 4: 清除航跡圖層（標記 + 航跡線段），不影響其他圖層
         map_state = get_map_state()
+        map_state.clear_layer(LAYER_TRACKS)
+        print("🧹 已清除舊的航跡圖層")
 
-        # 清除舊的航跡數據（如果存在）
-        if hasattr(map_state, 'tracks'):
-            map_state.tracks = []
-            print("🧹 已清除舊的航跡數據")
-
-        # 步驟 5: 將航跡數據添加到地圖
-        map_service.add_tracks_to_map(api_data, map_state)
+        # 步驟 5: 將航跡數據添加到地圖（航跡圖層）
+        map_service.add_tracks_to_map(api_data, map_state, layer=LAYER_TRACKS)
 
         # 步驟 6: 創建累積式地圖
         map_obj = map_state.create_map()

@@ -14,6 +14,7 @@ from services.llm_service import LLMService
 from services.map_service import MapService
 from handlers.fallback_handler import FallbackHandler
 from utils import get_map_state
+from models.map_state import LAYER_SCENARIO
 
 # 創建場景管理藍圖
 scenario_bp = Blueprint('scenario', __name__)
@@ -227,9 +228,9 @@ def import_scenario():
                 'error': f'無法連接到 Node.js API: {str(e)}'
             })
 
-        # 步驟 4: 取得當前分頁/會話的 MapState，並將船艦加入
+        # 步驟 4: 取得當前分頁/會話的 MapState，並將船艦加入（場景圖層）
         map_state = get_map_state()
-        map_service.add_ships_to_map(api_data, map_state)
+        map_service.add_ships_to_map(api_data, map_state, layer=LAYER_SCENARIO)
 
         # 步驟 5: 創建累積式地圖
         map_obj = map_state.create_map()
@@ -378,20 +379,35 @@ def clear_map():
     """
     清除地圖狀態路由
 
-    用途：清除當前分頁/會話的所有地圖元素（標記、線條、航跡、動畫數據）
+    用途：清除當前分頁/會話的地圖元素，支援清除全部或指定圖層
 
     流程：
     1. 獲取當前分頁/會話的 MapState
-    2. 調用 clear() 方法清除所有元素
+    2. 若指定 layer 參數，僅清除該圖層；否則清除全部
     3. 返回成功訊息
+
+    請求參數（可選）：
+        layer (str): 要清除的圖層名稱（'scenario', 'wta', 'tracks'）
+                     若未提供則清除全部圖層
 
     返回：
         success (bool): 是否成功
         message (str): 回覆訊息
     """
     map_state = get_map_state()
-    map_state.clear()  # 一次清除所有元素（包括動畫數據）
-    return jsonify({
-        'success': True,
-        'message': '地圖已清除'
-    })
+
+    data = request.get_json(silent=True) or {}
+    layer = data.get('layer', None)
+
+    if layer:
+        map_state.clear_layer(layer)
+        return jsonify({
+            'success': True,
+            'message': f'圖層 "{layer}" 已清除'
+        })
+    else:
+        map_state.clear()
+        return jsonify({
+            'success': True,
+            'message': '地圖已清除'
+        })

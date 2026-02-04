@@ -33,7 +33,7 @@ class MapService:
         return FACTION_COLORS['default_weapon']  # 未知武器預設顏色
 
     @staticmethod
-    def add_ships_to_map(ship_data, map_state: MapState):
+    def add_ships_to_map(ship_data, map_state: MapState, layer=None):
         """
         將船艦標記添加到地圖狀態
         用途：根據船艦數據在地圖上添加我方（藍色圓形）和敵方（紅色菱形）標記
@@ -41,6 +41,7 @@ class MapService:
         參數:
             ship_data: 船艦數據，格式為 {"enemy": [...], "roc": [...]}
             map_state: MapState 實例（會話級地圖狀態）
+            layer: 所屬圖層名稱
         """
         # 添加解放軍船艦（紅色菱形標記）
         if 'enemy' in ship_data:
@@ -52,7 +53,8 @@ class MapService:
                     popup=f"<b>解放軍: {ship_name}</b>",
                     color=FACTION_COLORS['enemy_marker'],
                     icon='ship',
-                    shape='diamond'  # 紅色菱形
+                    shape='diamond',  # 紅色菱形
+                    layer=layer
                 )
 
         # 添加國軍船艦（藍色圓形標記）
@@ -65,11 +67,12 @@ class MapService:
                     popup=f"<b>國軍: {ship_name}</b>",
                     color=FACTION_COLORS['roc_marker'],
                     icon='ship',
-                    shape='circle'  # 藍色圓形
+                    shape='circle',  # 藍色圓形
+                    layer=layer
                 )
 
     @staticmethod
-    def add_wta_to_map(wta_results, map_state: MapState):
+    def add_wta_to_map(wta_results, map_state: MapState, layer=None):
         """
         將武器分派的攻擊線添加到地圖狀態
         用途：根據武器分派結果在地圖上繪製我方到敵方的攻擊線（帶顏色區分飛彈類型）
@@ -77,6 +80,7 @@ class MapService:
         參數:
             wta_results: 武器分派結果列表，每個元素包含攻擊波次、武器類型、雙方位置等資訊
             map_state: MapState 實例（會話級地圖狀態）
+            layer: 所屬圖層名稱
         """
         for result in wta_results:
             # 獲取飛彈顏色
@@ -88,7 +92,8 @@ class MapService:
                 popup=f"<b>國軍: {result['roc_unit']}</b>",
                 color=FACTION_COLORS['roc_marker'],
                 icon='ship',
-                shape='circle'  # 藍色圓形
+                shape='circle',  # 藍色圓形
+                layer=layer
             )
 
             # 添加敵方單位標記（如果還沒有）- 紅色菱形
@@ -97,7 +102,8 @@ class MapService:
                 popup=f"<b>解放軍: {result['enemy_unit']}</b>",
                 color=FACTION_COLORS['enemy_marker'],
                 icon='ship',
-                shape='diamond'  # 紅色菱形
+                shape='diamond',  # 紅色菱形
+                layer=layer
             )
 
             # 添加攻擊線
@@ -107,11 +113,12 @@ class MapService:
                 end_location=result['enemy_location'],
                 color=weapon_color,
                 popup=popup_text,
-                weight=ATTACK_LINE_WEIGHT_WTA
+                weight=ATTACK_LINE_WEIGHT_WTA,
+                layer=layer
             )
 
     @staticmethod
-    def add_tracks_to_map(track_data, map_state: MapState):
+    def add_tracks_to_map(track_data, map_state: MapState, layer=None):
         """
         將船艦航跡添加到地圖狀態
         用途：根據航跡數據在地圖上繪製船艦的移動路徑
@@ -131,6 +138,7 @@ class MapService:
                     }
                 }
             map_state: MapState 實例（會話級地圖狀態）
+            layer: 所屬圖層名稱
         """
         ship_data = track_data.get('ship', {})
 
@@ -150,20 +158,18 @@ class MapService:
                     popup=f"<b>解放軍: {ship_name}</b>",
                     color=FACTION_COLORS['enemy_marker'],
                     icon='ship',
-                    shape='diamond'  # 紅色菱形
+                    shape='diamond',  # 紅色菱形
+                    layer=layer
                 )
 
                 # 將航跡線段信息存儲到 MapState
-                if not hasattr(map_state, 'tracks'):
-                    map_state.tracks = []
-
-                map_state.tracks.append({
+                map_state.add_track({
                     'type': 'enemy',
                     'ship_name': ship_name,
                     'coordinates': track_coords,
                     'color': FACTION_COLORS['enemy_track'],  # 紅色
                     'weight': TRACK_LINE_WEIGHT
-                })
+                }, layer=layer)
 
         # 處理我方軌跡（藍色）
         if 'roc' in ship_data:
@@ -181,20 +187,18 @@ class MapService:
                     popup=f"<b>國軍: {ship_name}</b>",
                     color=FACTION_COLORS['roc_marker'],
                     icon='ship',
-                    shape='circle'  # 藍色圓形
+                    shape='circle',  # 藍色圓形
+                    layer=layer
                 )
 
                 # 將航跡線段信息存儲到 MapState
-                if not hasattr(map_state, 'tracks'):
-                    map_state.tracks = []
-
-                map_state.tracks.append({
+                map_state.add_track({
                     'type': 'roc',
                     'ship_name': ship_name,
                     'coordinates': track_coords,
                     'color': FACTION_COLORS['roc_track'],  # 藍色
                     'weight': TRACK_LINE_WEIGHT
-                })
+                }, layer=layer)
 
     @staticmethod
     def generate_wta_table_html(wta_data):

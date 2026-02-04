@@ -559,9 +559,9 @@
   "simulation_status": {
     "is_running": false,
     "is_completed": true,
-    "started_at": "2026-01-30T07:39:46.645Z",
-    "completed_at": "2026-01-30T07:40:23.105Z",
-    "last_message": "mock callback from trigger"
+    "started_at": "2026-02-04T08:26:11.151Z",
+    "completed_at": "2026-02-04T08:26:35.810Z",
+    "last_message": "模擬已完成"
   },
   "wta_results": {
     "all": [

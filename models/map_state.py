@@ -1,6 +1,7 @@
 """
 地圖狀態管理模組
 用途：管理地圖的持久化狀態，包括船艦標記、攻擊線、航跡等
+支援多圖層管理，不同功能可獨立管理各自的圖層
 """
 import folium
 from branca.element import Element
@@ -16,6 +17,18 @@ from config import (
     MISSILE_FLIGHT_TIME, WAVE_INTERVAL,
     MISSILE_TRAIL_WEIGHT, ATTACK_LINE_WEIGHT_WTA
 )
+
+# ==================== 圖層名稱常數 ====================
+LAYER_SCENARIO = 'scenario'   # 場景圖層（船艦標記）
+LAYER_WTA = 'wta'             # 武器分派圖層（攻擊線 + WTA 標記）
+LAYER_TRACKS = 'tracks'       # 航跡圖層（航跡線段 + 航跡標記）
+
+# 圖層顯示名稱映射（用於 Leaflet LayerControl）
+LAYER_DISPLAY_NAMES = {
+    LAYER_SCENARIO: '場景船艦',
+    LAYER_WTA: '武器分派',
+    LAYER_TRACKS: '航跡',
+}
 
 
 class MapState:
@@ -34,7 +47,7 @@ class MapState:
         self.tracks = []  # 所有航跡線段（船艦移動軌跡）
         self.wta_animation_data = None  # 動畫控制器數據（持久化）
 
-    def add_marker(self, location, popup, color, icon='ship', shape='circle'):
+    def add_marker(self, location, popup, color, icon='ship', shape='circle', layer=None):
         """
         添加船艦標記到地圖
 
@@ -44,17 +57,19 @@ class MapState:
             color: 標記顏色
             icon: 圖標名稱（保留用於相容性）
             shape: 形狀類型 ('circle'=圓形代表友方, 'diamond'=菱形代表敵方)
+            layer: 所屬圖層名稱（例如 'scenario', 'wta', 'tracks'）
         """
         marker_data = {
             'location': location,
             'popup': popup,
             'color': color,
             'icon': icon,
-            'shape': shape
+            'shape': shape,
+            'layer': layer
         }
         self.markers.append(marker_data)
 
-    def add_line(self, start_location, end_location, color, popup, weight=8, dash_array=None):
+    def add_line(self, start_location, end_location, color, popup, weight=8, dash_array=None, layer=None):
         """
         添加攻擊線到地圖（用於顯示武器分派）
 
@@ -65,6 +80,7 @@ class MapState:
             popup: 彈出視窗文字（顯示攻擊波次、武器類型等）
             weight: 線條粗細
             dash_array: 虛線樣式
+            layer: 所屬圖層名稱
         """
         line_data = {
             'start': start_location,
@@ -72,9 +88,21 @@ class MapState:
             'color': color,
             'popup': popup,
             'weight': weight,
-            'dash_array': dash_array
+            'dash_array': dash_array,
+            'layer': layer
         }
         self.lines.append(line_data)
+
+    def add_track(self, track_data, layer=None):
+        """
+        添加航跡線段到地圖
+
+        參數:
+            track_data: 航跡數據字典（包含 type, ship_name, coordinates, color, weight）
+            layer: 所屬圖層名稱
+        """
+        track_data['layer'] = layer
+        self.tracks.append(track_data)
 
     def clear(self):
         """
@@ -85,6 +113,42 @@ class MapState:
         self.lines = []
         self.tracks = []
         self.wta_animation_data = None
+
+    def clear_layer(self, layer_name):
+        """
+        清除指定圖層的所有元素
+
+        參數:
+            layer_name: 圖層名稱（例如 'scenario', 'wta', 'tracks'）
+        """
+        self.markers = [m for m in self.markers if m.get('layer') != layer_name]
+        self.lines = [l for l in self.lines if l.get('layer') != layer_name]
+        self.tracks = [t for t in self.tracks if t.get('layer') != layer_name]
+
+        # 清除 WTA 圖層時，同時清除動畫數據
+        if layer_name == LAYER_WTA:
+            self.wta_animation_data = None
+
+    def get_layers(self):
+        """
+        取得目前有內容的圖層清單
+
+        返回:
+            list: 圖層名稱列表
+        """
+        layers = set()
+        for m in self.markers:
+            if m.get('layer'):
+                layers.add(m['layer'])
+        for l in self.lines:
+            if l.get('layer'):
+                layers.add(l['layer'])
+        for t in self.tracks:
+            if t.get('layer'):
+                layers.add(t['layer'])
+        if self.wta_animation_data:
+            layers.add(LAYER_WTA)
+        return list(layers)
 
     def create_map(self, wta_animation_data=None):
         """
@@ -105,6 +169,19 @@ class MapState:
             zoom_start=MAP_DEFAULT_ZOOM,
             tiles=MAP_DEFAULT_TILES
         )
+
+        # 建立圖層分組（用於 Leaflet LayerControl 切換顯示）
+        active_layers = self.get_layers()
+        layer_groups = {}
+        for layer_key in active_layers:
+            display_name = LAYER_DISPLAY_NAMES.get(layer_key, layer_key)
+            fg = folium.FeatureGroup(name=display_name, show=True)
+            fg.add_to(m)
+            layer_groups[layer_key] = fg
+
+        def get_target(layer):
+            """根據圖層名稱取得對應的 FeatureGroup，無匹配則回傳地圖本身"""
+            return layer_groups.get(layer, m)
 
         # 注入本地 milsymbol 軍事符號庫
         # 用途：讓地圖 HTML 檔案可以離線顯示軍事符號（使用 file:// 協議直接打開）
@@ -135,6 +212,7 @@ class MapState:
             }});
             var el = document.getElementById(elementId);
             if (el) {{
+                el.style.visibility = 'visible';
                 el.innerHTML = '<div style="width:{MIL_SYMBOL_SIZE}px;height:{MIL_SYMBOL_SIZE}px;display:flex;align-items:center;justify-content:center;">'
                              + '<img src="' + sym.toDataURL() + '" style="width:{MIL_SYMBOL_SIZE}px;height:{MIL_SYMBOL_SIZE}px;display:block;" />'
                              + '</div>';
@@ -147,6 +225,24 @@ class MapState:
             clearInterval(timer);
         }}
             }}, {MIL_SYMBOL_RETRY_INTERVAL});
+        }};
+
+        // 重新繪製所有帶有 data-sidc 屬性的軍事符號
+        // 用途：在 Leaflet 圖層切換後重新渲染被重置的 DivIcon
+        window.renderAllMilSymbols = function() {{
+            if (typeof ms === 'undefined') return;
+            document.querySelectorAll('[data-sidc]').forEach(function(el) {{
+                var sidc = el.getAttribute('data-sidc');
+                if (!sidc) return;
+                var sym = new ms.Symbol(sidc, {{
+                    size: {MIL_SYMBOL_SIZE},
+                    infoFields: false
+                }});
+                el.style.visibility = 'visible';
+                el.innerHTML = '<div style="width:{MIL_SYMBOL_SIZE}px;height:{MIL_SYMBOL_SIZE}px;display:flex;align-items:center;justify-content:center;">'
+                             + '<img src="' + sym.toDataURL() + '" style="width:{MIL_SYMBOL_SIZE}px;height:{MIL_SYMBOL_SIZE}px;display:block;" />'
+                             + '</div>';
+            }});
         }};
 
         // 調整攻擊線終點，使箭頭精準指向敵方菱形符號的頂點
@@ -184,8 +280,18 @@ class MapState:
         </script>
         """
 
-        # 將 JavaScript 代碼注入地圖 HTML
-        header_js = milsymbol_tag + common_js
+        # 覆寫 Leaflet 預設 DivIcon 樣式（移除白色背景與邊框）
+        divicon_css = """
+        <style>
+        .leaflet-div-icon {
+            background: transparent !important;
+            border: none !important;
+        }
+        </style>
+        """
+
+        # 將 JavaScript 與 CSS 注入地圖 HTML
+        header_js = milsymbol_tag + divicon_css + common_js
         m.get_root().header.add_child(Element(header_js))
 
         # 添加所有船艦標記（使用 MIL-STD-2525 符號）
@@ -210,12 +316,12 @@ class MapState:
             folium.Marker(
                 location=marker_data['location'],
                 icon=folium.DivIcon(
-                    html=f'<div id="{marker_id}">●</div>',
+                    html=f'<div id="{marker_id}" data-sidc="{sidc}" style="visibility:hidden;">●</div>',
                     icon_size=ICON_SIZE,
                     icon_anchor=ICON_ANCHOR
                 ),
                 popup=marker_data['popup']
-            ).add_to(m)
+            ).add_to(get_target(marker_data.get('layer')))
 
             # 立即執行渲染腳本
             script = f'<script>window.drawMilSymbol("{sidc}", "{marker_id}");</script>'
@@ -240,7 +346,7 @@ class MapState:
                     weight=track['weight'],  # 粗度
                     opacity=1,  # 透明度
                     popup=f"<b>{ship_name}</b><br>陣營: {'敵方' if track_type == 'enemy' else '我方'}<br>航跡點數: {len(coordinates)}"
-                ).add_to(m)
+                ).add_to(get_target(track.get('layer')))
 
                 # 在航跡線段的最後一個點（當前位置）添加標記
                 last_coord = coordinates[-1]
@@ -303,7 +409,7 @@ class MapState:
                 folium.Marker(
                     location=last_coord,
                     icon=folium.DivIcon(
-                        html=f'<div id="{marker_id}" style="font-size:10px; color:#999;">●</div>',
+                        html=f'<div id="{marker_id}" data-sidc="{sidc}" style="visibility:hidden;">●</div>',
                         icon_size=ICON_SIZE,
                         icon_anchor=ICON_ANCHOR
                     ),
@@ -324,11 +430,15 @@ class MapState:
                             white-space: nowrap;
                         """
                     )
-                ).add_to(m)
+                ).add_to(get_target(track.get('layer')))
 
                 # 渲染軍事符號
                 script = f'<script>window.drawMilSymbol("{sidc}", "{marker_id}");</script>'
                 m.get_root().html.add_child(Element(script))
+
+        # 取得 WTA 圖層的 JS 變數名稱（用於將攻擊線加入圖層群組）
+        wta_group = layer_groups.get(LAYER_WTA)
+        wta_layer_js_var = wta_group.get_name() if wta_group else None
 
         # 繪製靜態攻擊配對線（使用 JavaScript 繪製，帶箭頭）
         if not wta_animation_data or not wta_animation_data.get('wta_results'):
@@ -372,6 +482,7 @@ class MapState:
                     var staticLinesData = {lines_data_json};
                     var staticLines = [];
                     var staticArrows = [];
+                    var wtaLayerJsVar = '{wta_layer_js_var or ""}';
 
                     function getMap() {{
                         var mapElements = document.querySelectorAll('.folium-map');
@@ -388,6 +499,7 @@ class MapState:
                             setTimeout(drawStaticAttackLines, 100);
                             return;
                         }}
+                        var targetLayer = (wtaLayerJsVar && window[wtaLayerJsVar]) ? window[wtaLayerJsVar] : map;
 
                         console.log('🎯 開始繪製', staticLinesData.length, '條靜態攻擊線...');
 
@@ -401,7 +513,7 @@ class MapState:
                                     opacity: 0.8,
                                     className: 'static-attack-line'
                                 }}
-                            ).addTo(map);
+                            ).addTo(targetLayer);
 
                             if (lineData.popup) {{
                                 polyline.bindPopup(lineData.popup);
@@ -431,7 +543,7 @@ class MapState:
                                     iconAnchor: {ARROW_ICON_ANCHOR}
                                 }}),
                                 zIndexOffset: 1000
-                            }}).addTo(map);
+                            }}).addTo(targetLayer);
 
                             if (lineData.popup) {{
                                 arrowMarker.bindPopup(lineData.popup);
@@ -480,11 +592,43 @@ class MapState:
             animation_html = self._create_animation_controller_html(
                 wta_results_json,
                 weapon_colors_json,
-                map_name
+                map_name,
+                wta_layer_js_var=wta_layer_js_var
             )
 
             # 添加到地圖
             m.get_root().html.add_child(Element(animation_html))
+
+        # 添加圖層控制器（Leaflet L.control.layers）
+        if layer_groups:
+            folium.LayerControl(collapsed=True).add_to(m)
+
+            # 監聽圖層切換事件，重新渲染 milsymbol 軍事符號
+            # 原因：Leaflet DivIcon 在圖層重新加入地圖時會重置 innerHTML，
+            #       導致已渲染的軍事符號變回 fallback 文字（●）
+            redraw_script = """
+            <script>
+            (function() {
+                function setupLayerRedraw() {
+                    var mapElements = document.querySelectorAll('.folium-map');
+                    if (mapElements.length === 0) { setTimeout(setupLayerRedraw, 200); return; }
+                    var map = window[mapElements[0].id];
+                    if (!map) { setTimeout(setupLayerRedraw, 200); return; }
+                    map.on('overlayadd', function() {
+                        setTimeout(window.renderAllMilSymbols, 50);
+                    });
+                }
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        setTimeout(setupLayerRedraw, 300);
+                    });
+                } else {
+                    setTimeout(setupLayerRedraw, 300);
+                }
+            })();
+            </script>
+            """
+            m.get_root().html.add_child(Element(redraw_script))
 
         return m
 
@@ -505,7 +649,7 @@ class MapState:
         angle = math.atan2(lon2 - lon1, lat2 - lat1)
         return math.degrees(angle)
 
-    def _create_animation_controller_html(self, wta_results_json, weapon_colors_json, map_name):
+    def _create_animation_controller_html(self, wta_results_json, weapon_colors_json, map_name, wta_layer_js_var=None):
         """
         生成武器分派動畫控制器的 HTML 代碼
         用途：創建一個交互式動畫控制面板，可以播放、暫停、調速武器分派動畫
@@ -514,6 +658,7 @@ class MapState:
             wta_results_json: JSON 格式的武器分派結果
             weapon_colors_json: JSON 格式的飛彈顏色映射
             map_name: Folium 地圖的 JavaScript 變數名
+            wta_layer_js_var: WTA 圖層的 JS 變數名（用於將動畫元素加入圖層群組）
 
         返回:
             str: 完整的 HTML + CSS + JavaScript 代碼
@@ -673,8 +818,10 @@ class MapState:
     var wtaResults = """ + wta_results_json + """;
     var weaponColors = """ + weapon_colors_json + """;
     var mapVarName = '""" + map_name + """';
+    var wtaLayerVarName = '""" + (wta_layer_js_var or "") + """';
 """ + anim_config_js + """
     var map = null;
+    var wtaLayer = null;
 
     function getMap() {
         if (!map) {
@@ -683,8 +830,16 @@ class MapState:
                 console.error('❌ Map object not found:', mapVarName);
                 return null;
             }
+            // 取得 WTA 圖層群組（若存在）
+            if (wtaLayerVarName && window[wtaLayerVarName]) {
+                wtaLayer = window[wtaLayerVarName];
+            }
         }
         return map;
+    }
+
+    function getTargetLayer() {
+        return wtaLayer || map;
     }
 
     console.log('📊 載入', wtaResults.length, '筆武器分派記錄');
@@ -764,12 +919,13 @@ class MapState:
 
         var currentMap = getMap();
         if (!currentMap) return;
+        var target = getTargetLayer();
 
         if (!line.polyline) {
             line.polyline = L.polyline(
                 [[line.startLat, line.startLon], [lat, lon]],
                 {color: line.color, weight: _MISSILE_TRAIL_WEIGHT, opacity: 1, className: 'missile-trail'}
-            ).addTo(currentMap);
+            ).addTo(target);
         } else {
             line.polyline.setLatLngs([[line.startLat, line.startLon], [lat, lon]]);
         }
@@ -794,7 +950,7 @@ class MapState:
                     iconAnchor: _ARROW_ICON_ANCHOR
                 }),
                 zIndexOffset: 1000
-            }).addTo(currentMap);
+            }).addTo(target);
         } else {
             line.missileHead.setLatLng([lat, lon]);
 
@@ -816,9 +972,10 @@ class MapState:
     function complete(line) {
         var currentMap = getMap();
         if (!currentMap) return;
+        var target = getTargetLayer();
 
         if (line.missileHead) {
-            currentMap.removeLayer(line.missileHead);
+            target.removeLayer(line.missileHead);
             line.missileHead = null;
         }
 
@@ -894,17 +1051,18 @@ class MapState:
 
         var currentMap = getMap();
         if (!currentMap) return;
+        var target = getTargetLayer();
 
         state.lines.forEach(function(line) {
-            if (line.polyline) currentMap.removeLayer(line.polyline);
-            if (line.missileHead) currentMap.removeLayer(line.missileHead);
+            if (line.polyline) target.removeLayer(line.polyline);
+            if (line.missileHead) target.removeLayer(line.missileHead);
             line.polyline = null;
             line.missileHead = null;
             line.completed = false;
         });
 
         state.completedLines.forEach(function(p) {
-            currentMap.removeLayer(p);
+            target.removeLayer(p);
         });
         state.completedLines = [];
 
