@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Military Wargaming AI System - Architecture Overview</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container { max-width: 1400px; margin: 0 auto; }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #0f3460 0%, #16213e 50%, #1a1a2e 100%);
+      border: 1px solid #3282b8;
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 30px;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(50, 130, 184, 0.2);
+    }
+    .header h1 {
+      font-size: 2.5em;
+      background: linear-gradient(90deg, #3282b8, #00d4ff, #3282b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+    .header .version {
+      font-size: 1.2em;
+      color: #00d4ff;
+      font-weight: 600;
+    }
+    .header .subtitle {
+      color: #8892b0;
+      margin-top: 10px;
+    }
+
+    /* Section */
+    .section {
+      background: rgba(15, 52, 96, 0.4);
+      border: 1px solid rgba(50, 130, 184, 0.3);
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 25px;
+    }
+    .section-title {
+      font-size: 1.5em;
+      color: #00d4ff;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: #00d4ff;
+      border-radius: 2px;
+    }
+
+    /* Grid layouts */
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+
+    /* Cards */
+    .card {
+      background: rgba(22, 33, 62, 0.8);
+      border: 1px solid rgba(50, 130, 184, 0.4);
+      border-radius: 10px;
+      padding: 20px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 212, 255, 0.15);
+    }
+    .card-title {
+      color: #00d4ff;
+      font-weight: 600;
+      margin-bottom: 10px;
+      font-size: 1.1em;
+    }
+    .card-content { color: #b0b0b0; font-size: 0.95em; line-height: 1.6; }
+
+    /* Tech Stack */
+    .tech-badge {
+      display: inline-block;
+      background: rgba(0, 212, 255, 0.15);
+      border: 1px solid rgba(0, 212, 255, 0.4);
+      color: #00d4ff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      margin: 4px;
+    }
+
+    /* Layer colors */
+    .layer-frontend { border-left: 4px solid #00d4ff; }
+    .layer-backend { border-left: 4px solid #ed8936; }
+    .layer-llm { border-left: 4px solid #9f7aea; }
+    .layer-data { border-left: 4px solid #48bb78; }
+    .layer-external { border-left: 4px solid #f56565; }
+
+    /* SVG Diagrams */
+    .diagram-container {
+      background: rgba(10, 25, 47, 0.6);
+      border-radius: 12px;
+      padding: 20px;
+      overflow-x: auto;
+    }
+    svg text { font-family: 'Segoe UI', system-ui, sans-serif; }
+
+    /* Feature list */
+    .feature-list { list-style: none; }
+    .feature-list li {
+      padding: 8px 0;
+      padding-left: 25px;
+      position: relative;
+      border-bottom: 1px solid rgba(50, 130, 184, 0.2);
+    }
+    .feature-list li:last-child { border-bottom: none; }
+    .feature-list li::before {
+      content: '>';
+      position: absolute;
+      left: 0;
+      color: #00d4ff;
+      font-weight: bold;
+    }
+
+    /* Stats */
+    .stat-box {
+      text-align: center;
+      padding: 20px;
+    }
+    .stat-number {
+      font-size: 2.5em;
+      font-weight: 700;
+      color: #00d4ff;
+    }
+    .stat-label {
+      color: #8892b0;
+      font-size: 0.9em;
+      margin-top: 5px;
+    }
+
+    /* API Endpoints */
+    .endpoint {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(50, 130, 184, 0.2);
+    }
+    .endpoint:last-child { border-bottom: none; }
+    .method {
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.75em;
+      font-weight: 700;
+      min-width: 50px;
+      text-align: center;
+    }
+    .method-get { background: #48bb78; color: #1a1a2e; }
+    .method-post { background: #4299e1; color: white; }
+    .endpoint-path { font-family: monospace; color: #e0e0e0; }
+    .endpoint-desc { color: #8892b0; font-size: 0.85em; margin-left: auto; }
+
+    /* File tree */
+    .file-tree {
+      font-family: monospace;
+      font-size: 0.9em;
+      line-height: 1.8;
+    }
+    .file-tree .folder { color: #f6e05e; }
+    .file-tree .file { color: #90cdf4; }
+    .file-tree .desc { color: #8892b0; font-style: italic; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header h1 { font-size: 1.8em; }
+      .section { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1>Military Wargaming AI System</h1>
+      <div class="version">v6.0 Refactored Architecture</div>
+      <p class="subtitle">Taiwan Strait Military Tactical Simulation with LLM-powered Natural Language Interface</p>
+    </header>
+
+    <!-- Business Context -->
+    <section class="section">
+      <h2 class="section-title">Business Context</h2>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Mission Objectives</div>
+          <ul class="feature-list">
+            <li>Natural language command for military scenario creation</li>
+            <li>Real-time weapon target allocation (WTA) visualization</li>
+            <li>Ship trajectory tracking and playback</li>
+            <li>Multi-layer interactive map generation</li>
+            <li>Military knowledge Q&A via RAG system</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">Target Users</div>
+          <ul class="feature-list">
+            <li>Military strategists and analysts</li>
+            <li>Defense simulation operators</li>
+            <li>Training personnel</li>
+            <li>Command center decision makers</li>
+          </ul>
+        </div>
+      </div>
+      <div class="grid-4" style="margin-top: 20px;">
+        <div class="card stat-box">
+          <div class="stat-number">22+</div>
+          <div class="stat-label">API Endpoints</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-number">10</div>
+          <div class="stat-label">Frontend Modules</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-number">8</div>
+          <div class="stat-label">Route Blueprints</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-number">3</div>
+          <div class="stat-label">Map Layers</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Data Flow Diagram -->
+    <section class="section">
+      <h2 class="section-title">Complete Data Flow</h2>
+      <div class="diagram-container">
+        <svg viewBox="0 0 1200 700" style="width: 100%; height: auto;">
+          <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L9,3 z" fill="#00d4ff"/>
+            </marker>
+            <linearGradient id="grad-frontend" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:0.8"/>
+              <stop offset="100%" style="stop-color:#0077b6;stop-opacity:0.8"/>
+            </linearGradient>
+            <linearGradient id="grad-backend" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#ed8936;stop-opacity:0.8"/>
+              <stop offset="100%" style="stop-color:#c05621;stop-opacity:0.8"/>
+            </linearGradient>
+            <linearGradient id="grad-llm" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#9f7aea;stop-opacity:0.8"/>
+              <stop offset="100%" style="stop-color:#6b46c1;stop-opacity:0.8"/>
+            </linearGradient>
+            <linearGradient id="grad-data" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#48bb78;stop-opacity:0.8"/>
+              <stop offset="100%" style="stop-color:#276749;stop-opacity:0.8"/>
+            </linearGradient>
+            <linearGradient id="grad-external" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#f56565;stop-opacity:0.8"/>
+              <stop offset="100%" style="stop-color:#c53030;stop-opacity:0.8"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Frontend Layer -->
+          <rect x="50" y="30" width="180" height="120" rx="10" fill="url(#grad-frontend)" stroke="#00d4ff" stroke-width="2"/>
+          <text x="140" y="60" text-anchor="middle" fill="white" font-weight="bold" font-size="14">Frontend</text>
+          <text x="140" y="85" text-anchor="middle" fill="#e0e0e0" font-size="11">ES6 Modules</text>
+          <text x="140" y="102" text-anchor="middle" fill="#e0e0e0" font-size="10">api-client.js</text>
+          <text x="140" y="117" text-anchor="middle" fill="#e0e0e0" font-size="10">map-manager.js</text>
+          <text x="140" y="132" text-anchor="middle" fill="#e0e0e0" font-size="10">ui-manager.js</text>
+
+          <!-- Session ID -->
+          <rect x="270" y="50" width="120" height="80" rx="8" fill="rgba(0,212,255,0.2)" stroke="#00d4ff" stroke-width="1" stroke-dasharray="4"/>
+          <text x="330" y="80" text-anchor="middle" fill="#00d4ff" font-size="11">X-Client-ID</text>
+          <text x="330" y="100" text-anchor="middle" fill="#8892b0" font-size="10">Session Storage</text>
+          <text x="330" y="115" text-anchor="middle" fill="#8892b0" font-size="10">Auto-injected</text>
+
+          <!-- Arrow: Frontend to Routes -->
+          <path d="M230,90 L420,90" stroke="#00d4ff" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+          <text x="325" y="75" text-anchor="middle" fill="#8892b0" font-size="9">HTTP POST</text>
+
+          <!-- Routes Layer -->
+          <rect x="430" y="30" width="180" height="120" rx="10" fill="url(#grad-backend)" stroke="#ed8936" stroke-width="2"/>
+          <text x="520" y="55" text-anchor="middle" fill="white" font-weight="bold" font-size="14">Flask Routes</text>
+          <text x="520" y="78" text-anchor="middle" fill="#e0e0e0" font-size="10">scenario_routes.py</text>
+          <text x="520" y="93" text-anchor="middle" fill="#e0e0e0" font-size="10">data_routes.py</text>
+          <text x="520" y="108" text-anchor="middle" fill="#e0e0e0" font-size="10">answer_routes.py</text>
+          <text x="520" y="123" text-anchor="middle" fill="#e0e0e0" font-size="10">+ 5 more blueprints</text>
+
+          <!-- Services Layer -->
+          <rect x="650" y="30" width="180" height="120" rx="10" fill="url(#grad-backend)" stroke="#ed8936" stroke-width="2"/>
+          <text x="740" y="55" text-anchor="middle" fill="white" font-weight="bold" font-size="14">Services</text>
+          <text x="740" y="78" text-anchor="middle" fill="#e0e0e0" font-size="10">llm_service.py</text>
+          <text x="740" y="93" text-anchor="middle" fill="#e0e0e0" font-size="10">map_service.py</text>
+          <text x="740" y="108" text-anchor="middle" fill="#e0e0e0" font-size="10">config_service.py</text>
+
+          <!-- Arrow: Routes to Services -->
+          <path d="M610,90 L650,90" stroke="#ed8936" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+
+          <!-- LLM Layer -->
+          <rect x="870" y="30" width="180" height="120" rx="10" fill="url(#grad-llm)" stroke="#9f7aea" stroke-width="2"/>
+          <text x="960" y="55" text-anchor="middle" fill="white" font-weight="bold" font-size="14">Ollama LLM</text>
+          <text x="960" y="78" text-anchor="middle" fill="#e0e0e0" font-size="10">llama3.2:3b</text>
+          <text x="960" y="93" text-anchor="middle" fill="#e0e0e0" font-size="10">Function Calling</text>
+          <text x="960" y="108" text-anchor="middle" fill="#e0e0e0" font-size="10">Port 11434</text>
+          <text x="960" y="123" text-anchor="middle" fill="#e0e0e0" font-size="10">Parameter Extraction</text>
+
+          <!-- Arrow: Services to LLM -->
+          <path d="M830,70 L870,70" stroke="#9f7aea" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+
+          <!-- Arrow: LLM to Fallback -->
+          <path d="M960,150 L960,180" stroke="#9f7aea" stroke-width="2" marker-end="url(#arrow)" fill="none" stroke-dasharray="4"/>
+          <text x="1000" y="170" fill="#f56565" font-size="9">if fails</text>
+
+          <!-- Fallback Handler -->
+          <rect x="870" y="190" width="180" height="80" rx="10" fill="rgba(245,101,101,0.3)" stroke="#f56565" stroke-width="2"/>
+          <text x="960" y="220" text-anchor="middle" fill="white" font-weight="bold" font-size="12">Fallback Handler</text>
+          <text x="960" y="240" text-anchor="middle" fill="#e0e0e0" font-size="10">Rule-based Regex</text>
+          <text x="960" y="255" text-anchor="middle" fill="#e0e0e0" font-size="10">Keyword Matching</text>
+
+          <!-- Parser & Helpers -->
+          <rect x="650" y="190" width="180" height="80" rx="10" fill="url(#grad-backend)" stroke="#ed8936" stroke-width="2"/>
+          <text x="740" y="215" text-anchor="middle" fill="white" font-weight="bold" font-size="12">Utils</text>
+          <text x="740" y="235" text-anchor="middle" fill="#e0e0e0" font-size="10">parser.py</text>
+          <text x="740" y="250" text-anchor="middle" fill="#e0e0e0" font-size="10">helpers.py</text>
+
+          <!-- Arrow: LLM to Parser -->
+          <path d="M870,110 L830,110 L830,190 L830,230" stroke="#ed8936" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+
+          <!-- Node.js API -->
+          <rect x="870" y="320" width="180" height="100" rx="10" fill="url(#grad-external)" stroke="#f56565" stroke-width="2"/>
+          <text x="960" y="345" text-anchor="middle" fill="white" font-weight="bold" font-size="14">Node.js API</text>
+          <text x="960" y="368" text-anchor="middle" fill="#e0e0e0" font-size="10">Port 3000</text>
+          <text x="960" y="385" text-anchor="middle" fill="#e0e0e0" font-size="10">/api/v1/ships</text>
+          <text x="960" y="400" text-anchor="middle" fill="#e0e0e0" font-size="10">/api/v1/wta</text>
+          <text x="960" y="415" text-anchor="middle" fill="#e0e0e0" font-size="10">/api/v1/tracks</text>
+
+          <!-- Arrow: Services to Node.js -->
+          <path d="M740,150 L740,370 L870,370" stroke="#f56565" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+          <text x="780" y="380" fill="#8892b0" font-size="9">GET/POST</text>
+
+          <!-- Local Data -->
+          <rect x="650" y="320" width="180" height="100" rx="10" fill="url(#grad-data)" stroke="#48bb78" stroke-width="2"/>
+          <text x="740" y="345" text-anchor="middle" fill="white" font-weight="bold" font-size="14">Local Data</text>
+          <text x="740" y="368" text-anchor="middle" fill="#e0e0e0" font-size="10">db_v2.json</text>
+          <text x="740" y="385" text-anchor="middle" fill="#e0e0e0" font-size="10">track_data.json</text>
+          <text x="740" y="400" text-anchor="middle" fill="#e0e0e0" font-size="10">prompts_config.json</text>
+          <text x="740" y="415" text-anchor="middle" fill="#e0e0e0" font-size="10">config.json</text>
+
+          <!-- MapState -->
+          <rect x="430" y="320" width="180" height="100" rx="10" fill="url(#grad-backend)" stroke="#ed8936" stroke-width="2"/>
+          <text x="520" y="345" text-anchor="middle" fill="white" font-weight="bold" font-size="14">MapState</text>
+          <text x="520" y="368" text-anchor="middle" fill="#e0e0e0" font-size="10">Per-Session Storage</text>
+          <text x="520" y="385" text-anchor="middle" fill="#e0e0e0" font-size="10">markers[], lines[]</text>
+          <text x="520" y="400" text-anchor="middle" fill="#e0e0e0" font-size="10">tracks[], layers</text>
+          <text x="520" y="415" text-anchor="middle" fill="#e0e0e0" font-size="10">Thread-safe Lock</text>
+
+          <!-- Arrow: Data to MapState -->
+          <path d="M650,370 L610,370" stroke="#48bb78" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+
+          <!-- Folium Map Gen -->
+          <rect x="430" y="470" width="180" height="100" rx="10" fill="url(#grad-data)" stroke="#48bb78" stroke-width="2"/>
+          <text x="520" y="495" text-anchor="middle" fill="white" font-weight="bold" font-size="14">Folium + Leaflet</text>
+          <text x="520" y="518" text-anchor="middle" fill="#e0e0e0" font-size="10">HTML Map Generation</text>
+          <text x="520" y="535" text-anchor="middle" fill="#e0e0e0" font-size="10">MilSymbol Markers</text>
+          <text x="520" y="552" text-anchor="middle" fill="#e0e0e0" font-size="10">LayerControl</text>
+
+          <!-- Arrow: MapState to Folium -->
+          <path d="M520,420 L520,470" stroke="#ed8936" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+          <text x="550" y="450" fill="#8892b0" font-size="9">create_map()</text>
+
+          <!-- Maps Directory -->
+          <rect x="650" y="470" width="180" height="100" rx="10" fill="url(#grad-data)" stroke="#48bb78" stroke-width="2"/>
+          <text x="740" y="495" text-anchor="middle" fill="white" font-weight="bold" font-size="14">maps/ Directory</text>
+          <text x="740" y="518" text-anchor="middle" fill="#e0e0e0" font-size="10">map_[timestamp].html</text>
+          <text x="740" y="535" text-anchor="middle" fill="#e0e0e0" font-size="10">Auto-cleanup 30 days</text>
+          <text x="740" y="552" text-anchor="middle" fill="#e0e0e0" font-size="10">Session-isolated</text>
+
+          <!-- Arrow: Folium to Maps -->
+          <path d="M610,520 L650,520" stroke="#48bb78" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+          <text x="630" y="510" fill="#8892b0" font-size="9">save</text>
+
+          <!-- JSON Response -->
+          <rect x="210" y="470" width="180" height="100" rx="10" fill="url(#grad-frontend)" stroke="#00d4ff" stroke-width="2"/>
+          <text x="300" y="495" text-anchor="middle" fill="white" font-weight="bold" font-size="14">JSON Response</text>
+          <text x="300" y="518" text-anchor="middle" fill="#e0e0e0" font-size="10">map_url: string</text>
+          <text x="300" y="535" text-anchor="middle" fill="#e0e0e0" font-size="10">answer: string</text>
+          <text x="300" y="552" text-anchor="middle" fill="#e0e0e0" font-size="10">wta_data: object</text>
+
+          <!-- Arrow: Maps to Response -->
+          <path d="M430,520 L390,520" stroke="#00d4ff" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+
+          <!-- Browser Render -->
+          <rect x="50" y="470" width="130" height="100" rx="10" fill="url(#grad-frontend)" stroke="#00d4ff" stroke-width="2"/>
+          <text x="115" y="500" text-anchor="middle" fill="white" font-weight="bold" font-size="13">Browser</text>
+          <text x="115" y="523" text-anchor="middle" fill="#e0e0e0" font-size="10">iframe Map</text>
+          <text x="115" y="540" text-anchor="middle" fill="#e0e0e0" font-size="10">WTA Table</text>
+          <text x="115" y="557" text-anchor="middle" fill="#e0e0e0" font-size="10">Chat Messages</text>
+
+          <!-- Arrow: Response to Browser -->
+          <path d="M210,520 L180,520" stroke="#00d4ff" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+
+          <!-- Return arrow to Frontend -->
+          <path d="M115,470 L115,180 L140,150" stroke="#00d4ff" stroke-width="2" marker-end="url(#arrow)" fill="none" stroke-dasharray="4"/>
+          <text x="70" y="300" fill="#8892b0" font-size="9" transform="rotate(-90, 70, 300)">Update UI</text>
+
+          <!-- 3 Layers annotation -->
+          <rect x="50" y="600" width="350" height="80" rx="8" fill="rgba(72,187,120,0.2)" stroke="#48bb78" stroke-width="1"/>
+          <text x="70" y="625" fill="#48bb78" font-weight="bold" font-size="12">Three Map Layers:</text>
+          <text x="70" y="645" fill="#e0e0e0" font-size="11">LAYER_SCENARIO - Ship markers (enemy/ROC)</text>
+          <text x="70" y="662" fill="#e0e0e0" font-size="11">LAYER_WTA - Attack lines + animation</text>
+          <text x="70" y="679" fill="#e0e0e0" font-size="11">LAYER_TRACKS - Trajectory lines</text>
+
+          <!-- Session isolation annotation -->
+          <rect x="430" y="600" width="350" height="80" rx="8" fill="rgba(0,212,255,0.2)" stroke="#00d4ff" stroke-width="1"/>
+          <text x="450" y="625" fill="#00d4ff" font-weight="bold" font-size="12">Session Isolation:</text>
+          <text x="450" y="645" fill="#e0e0e0" font-size="11">Each browser tab = unique client_id</text>
+          <text x="450" y="662" fill="#e0e0e0" font-size="11">Stored in sessionStorage (per-tab)</text>
+          <text x="450" y="679" fill="#e0e0e0" font-size="11">Max 200 concurrent sessions</text>
+
+          <!-- LLM fallback annotation -->
+          <rect x="820" y="600" width="330" height="80" rx="8" fill="rgba(159,122,234,0.2)" stroke="#9f7aea" stroke-width="1"/>
+          <text x="840" y="625" fill="#9f7aea" font-weight="bold" font-size="12">LLM Resilience:</text>
+          <text x="840" y="645" fill="#e0e0e0" font-size="11">Primary: Ollama Function Calling</text>
+          <text x="840" y="662" fill="#e0e0e0" font-size="11">Fallback: Rule-based regex matching</text>
+          <text x="840" y="679" fill="#e0e0e0" font-size="11">Graceful degradation on API failure</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- System Architecture Layers -->
+    <section class="section">
+      <h2 class="section-title">System Architecture Layers</h2>
+      <div class="grid-3">
+        <div class="card layer-frontend">
+          <div class="card-title">Frontend Layer</div>
+          <div class="card-content">
+            <div style="margin-bottom: 15px;">
+              <span class="tech-badge">Vanilla JS</span>
+              <span class="tech-badge">ES6 Modules</span>
+              <span class="tech-badge">Leaflet</span>
+            </div>
+            <ul class="feature-list">
+              <li>main.js - Application entry point</li>
+              <li>api-client.js - HTTP with auto X-Client-ID</li>
+              <li>map-manager.js - Folium iframe control</li>
+              <li>ui-manager.js - DOM, modals, tabs</li>
+              <li>message-manager.js - Chat UI</li>
+              <li>simulation-manager.js - WTA polling</li>
+              <li>+ 4 more modules</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card layer-backend">
+          <div class="card-title">Backend Layer</div>
+          <div class="card-content">
+            <div style="margin-bottom: 15px;">
+              <span class="tech-badge">Flask</span>
+              <span class="tech-badge">Python</span>
+              <span class="tech-badge">Folium</span>
+            </div>
+            <ul class="feature-list">
+              <li>8 Route Blueprints (22+ endpoints)</li>
+              <li>llm_service.py - Ollama integration</li>
+              <li>map_service.py - Map drawing logic</li>
+              <li>map_state.py - Session state model</li>
+              <li>fallback_handler.py - Regex fallback</li>
+              <li>parser.py - LLM output parsing</li>
+              <li>helpers.py - Session utilities</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card layer-llm">
+          <div class="card-title">LLM Layer</div>
+          <div class="card-content">
+            <div style="margin-bottom: 15px;">
+              <span class="tech-badge">Ollama</span>
+              <span class="tech-badge">llama3.2:3b</span>
+              <span class="tech-badge">Function Calling</span>
+            </div>
+            <ul class="feature-list">
+              <li>Intent understanding</li>
+              <li>Parameter extraction</li>
+              <li>import_scenario tool</li>
+              <li>get_wta tool</li>
+              <li>get_track tool</li>
+              <li>text_generation tool</li>
+              <li>Configurable prompts</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="grid-2" style="margin-top: 20px;">
+        <div class="card layer-data">
+          <div class="card-title">Data Layer</div>
+          <div class="card-content">
+            <div style="margin-bottom: 15px;">
+              <span class="tech-badge">JSON</span>
+              <span class="tech-badge">Local Files</span>
+              <span class="tech-badge">Per-Session</span>
+            </div>
+            <ul class="feature-list">
+              <li>db_v2.json - Ship database</li>
+              <li>track_data.json - Trajectory waypoints</li>
+              <li>config.json - Runtime switches</li>
+              <li>prompts_config.json - LLM prompts</li>
+              <li>maps/ - Generated HTML files</li>
+              <li>feedbacks/ - User feedback</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card layer-external">
+          <div class="card-title">External Services</div>
+          <div class="card-content">
+            <div style="margin-bottom: 15px;">
+              <span class="tech-badge">Node.js API</span>
+              <span class="tech-badge">Port 3000</span>
+              <span class="tech-badge">REST</span>
+            </div>
+            <ul class="feature-list">
+              <li>GET /api/v1/ships - Ship coordinates</li>
+              <li>POST /api/v1/wta - Weapon allocation</li>
+              <li>GET /api/v1/tracks - Trajectory data</li>
+              <li>Supports local/mock/real modes</li>
+              <li>Automatic mode switching via config</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- API Endpoints -->
+    <section class="section">
+      <h2 class="section-title">Key API Endpoints</h2>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Scenario Management</div>
+          <div class="card-content">
+            <div class="endpoint">
+              <span class="method method-post">POST</span>
+              <span class="endpoint-path">/api/import_scenario</span>
+              <span class="endpoint-desc">Draw ships</span>
+            </div>
+            <div class="endpoint">
+              <span class="method method-post">POST</span>
+              <span class="endpoint-path">/api/start_scenario</span>
+              <span class="endpoint-desc">Launch simulation</span>
+            </div>
+            <div class="endpoint">
+              <span class="method method-post">POST</span>
+              <span class="endpoint-path">/api/clear_map</span>
+              <span class="endpoint-desc">Clear all layers</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Data Queries</div>
+          <div class="card-content">
+            <div class="endpoint">
+              <span class="method method-post">POST</span>
+              <span class="endpoint-path">/api/get_wta</span>
+              <span class="endpoint-desc">Weapon allocation</span>
+            </div>
+            <div class="endpoint">
+              <span class="method method-post">POST</span>
+              <span class="endpoint-path">/api/get_track</span>
+              <span class="endpoint-desc">Draw trajectories</span>
+            </div>
+            <div class="endpoint">
+              <span class="method method-get">GET</span>
+              <span class="endpoint-path">/api/check_simulation_status/:id</span>
+              <span class="endpoint-desc">Poll status</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Military Q&A</div>
+          <div class="card-content">
+            <div class="endpoint">
+              <span class="method method-post">POST</span>
+              <span class="endpoint-path">/api/get_answer</span>
+              <span class="endpoint-desc">RAG-based Q&A</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Configuration</div>
+          <div class="card-content">
+            <div class="endpoint">
+              <span class="method method-get">GET</span>
+              <span class="endpoint-path">/api/prompts/list</span>
+              <span class="endpoint-desc">List configs</span>
+            </div>
+            <div class="endpoint">
+              <span class="method method-post">POST</span>
+              <span class="endpoint-path">/api/prompts/update/:name</span>
+              <span class="endpoint-desc">Update prompts</span>
+            </div>
+            <div class="endpoint">
+              <span class="method method-get">GET</span>
+              <span class="endpoint-path">/health</span>
+              <span class="endpoint-desc">Health check</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Processing Pipeline -->
+    <section class="section">
+      <h2 class="section-title">LLM Processing Pipeline</h2>
+      <div class="diagram-container">
+        <svg viewBox="0 0 1100 200" style="width: 100%; height: auto;">
+          <!-- Step 1: User Input -->
+          <rect x="20" y="60" width="120" height="80" rx="8" fill="rgba(0,212,255,0.3)" stroke="#00d4ff" stroke-width="2"/>
+          <text x="80" y="95" text-anchor="middle" fill="white" font-weight="bold" font-size="11">User Input</text>
+          <text x="80" y="115" text-anchor="middle" fill="#b0b0b0" font-size="9">Natural Language</text>
+
+          <!-- Arrow -->
+          <path d="M140,100 L170,100" stroke="#00d4ff" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+
+          <!-- Step 2: Function Calling -->
+          <rect x="180" y="60" width="120" height="80" rx="8" fill="rgba(159,122,234,0.3)" stroke="#9f7aea" stroke-width="2"/>
+          <text x="240" y="90" text-anchor="middle" fill="white" font-weight="bold" font-size="11">LLM Function</text>
+          <text x="240" y="105" text-anchor="middle" fill="white" font-weight="bold" font-size="11">Calling</text>
+          <text x="240" y="125" text-anchor="middle" fill="#b0b0b0" font-size="9">Ollama API</text>
+
+          <!-- Arrow -->
+          <path d="M300,100 L330,100" stroke="#9f7aea" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+
+          <!-- Step 3: Parameter Parsing -->
+          <rect x="340" y="60" width="120" height="80" rx="8" fill="rgba(237,137,54,0.3)" stroke="#ed8936" stroke-width="2"/>
+          <text x="400" y="90" text-anchor="middle" fill="white" font-weight="bold" font-size="11">Parameter</text>
+          <text x="400" y="105" text-anchor="middle" fill="white" font-weight="bold" font-size="11">Parsing</text>
+          <text x="400" y="125" text-anchor="middle" fill="#b0b0b0" font-size="9">parser.py</text>
+
+          <!-- Arrow -->
+          <path d="M460,100 L490,100" stroke="#ed8936" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+
+          <!-- Step 4: Smart Cleaning -->
+          <rect x="500" y="60" width="120" height="80" rx="8" fill="rgba(237,137,54,0.3)" stroke="#ed8936" stroke-width="2"/>
+          <text x="560" y="90" text-anchor="middle" fill="white" font-weight="bold" font-size="11">Smart</text>
+          <text x="560" y="105" text-anchor="middle" fill="white" font-weight="bold" font-size="11">Cleaning</text>
+          <text x="560" y="125" text-anchor="middle" fill="#b0b0b0" font-size="9">Validation</text>
+
+          <!-- Arrow -->
+          <path d="M620,100 L650,100" stroke="#ed8936" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+
+          <!-- Step 5: API Calls -->
+          <rect x="660" y="60" width="120" height="80" rx="8" fill="rgba(245,101,101,0.3)" stroke="#f56565" stroke-width="2"/>
+          <text x="720" y="90" text-anchor="middle" fill="white" font-weight="bold" font-size="11">External</text>
+          <text x="720" y="105" text-anchor="middle" fill="white" font-weight="bold" font-size="11">API Calls</text>
+          <text x="720" y="125" text-anchor="middle" fill="#b0b0b0" font-size="9">Node.js/Local</text>
+
+          <!-- Arrow -->
+          <path d="M780,100 L810,100" stroke="#f56565" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+
+          <!-- Step 6: Map Render -->
+          <rect x="820" y="60" width="120" height="80" rx="8" fill="rgba(72,187,120,0.3)" stroke="#48bb78" stroke-width="2"/>
+          <text x="880" y="90" text-anchor="middle" fill="white" font-weight="bold" font-size="11">Map</text>
+          <text x="880" y="105" text-anchor="middle" fill="white" font-weight="bold" font-size="11">Rendering</text>
+          <text x="880" y="125" text-anchor="middle" fill="#b0b0b0" font-size="9">Folium HTML</text>
+
+          <!-- Arrow -->
+          <path d="M940,100 L970,100" stroke="#48bb78" stroke-width="2" marker-end="url(#arrow)" fill="none"/>
+
+          <!-- Step 7: Response -->
+          <rect x="980" y="60" width="100" height="80" rx="8" fill="rgba(0,212,255,0.3)" stroke="#00d4ff" stroke-width="2"/>
+          <text x="1030" y="95" text-anchor="middle" fill="white" font-weight="bold" font-size="11">Response</text>
+          <text x="1030" y="115" text-anchor="middle" fill="#b0b0b0" font-size="9">JSON + URL</text>
+
+          <!-- Fallback path -->
+          <path d="M240,140 L240,170 L400,170 L400,140" stroke="#f56565" stroke-width="2" stroke-dasharray="4" fill="none"/>
+          <text x="320" y="185" text-anchor="middle" fill="#f56565" font-size="9">Fallback Handler (if LLM fails)</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- Technology Stack -->
+    <section class="section">
+      <h2 class="section-title">Technology Stack</h2>
+      <div class="grid-4">
+        <div class="card">
+          <div class="card-title">Backend</div>
+          <div class="card-content">
+            <span class="tech-badge">Flask</span>
+            <span class="tech-badge">Python 3.8+</span>
+            <span class="tech-badge">Folium</span>
+            <span class="tech-badge">Branca</span>
+            <span class="tech-badge">Requests</span>
+            <span class="tech-badge">Selenium</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Frontend</div>
+          <div class="card-content">
+            <span class="tech-badge">ES6 Modules</span>
+            <span class="tech-badge">Leaflet.js</span>
+            <span class="tech-badge">MilSymbol</span>
+            <span class="tech-badge">HTML5</span>
+            <span class="tech-badge">CSS3</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">AI/ML</div>
+          <div class="card-content">
+            <span class="tech-badge">Ollama</span>
+            <span class="tech-badge">llama3.2:3b</span>
+            <span class="tech-badge">Function Calling</span>
+            <span class="tech-badge">RAG</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">External</div>
+          <div class="card-content">
+            <span class="tech-badge">Node.js API</span>
+            <span class="tech-badge">REST</span>
+            <span class="tech-badge">OpenStreetMap</span>
+            <span class="tech-badge">JSON</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- File Structure -->
+    <section class="section">
+      <h2 class="section-title">Project Structure</h2>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Backend Structure</div>
+          <div class="file-tree">
+            <span class="folder">app.py</span> <span class="desc">- Flask entry point</span><br>
+            <span class="folder">config.py</span> <span class="desc">- 260+ configuration params</span><br>
+            <span class="folder">routes/</span><br>
+            &nbsp;&nbsp;<span class="file">scenario_routes.py</span><br>
+            &nbsp;&nbsp;<span class="file">data_routes.py</span><br>
+            &nbsp;&nbsp;<span class="file">answer_routes.py</span><br>
+            &nbsp;&nbsp;<span class="file">+ 5 more blueprints</span><br>
+            <span class="folder">services/</span><br>
+            &nbsp;&nbsp;<span class="file">llm_service.py</span><br>
+            &nbsp;&nbsp;<span class="file">map_service.py</span><br>
+            &nbsp;&nbsp;<span class="file">config_service.py</span><br>
+            <span class="folder">models/</span><br>
+            &nbsp;&nbsp;<span class="file">map_state.py</span> <span class="desc">- 1200+ lines</span><br>
+            <span class="folder">handlers/</span><br>
+            &nbsp;&nbsp;<span class="file">fallback_handler.py</span><br>
+            <span class="folder">utils/</span><br>
+            &nbsp;&nbsp;<span class="file">parser.py, helpers.py</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Frontend Structure</div>
+          <div class="file-tree">
+            <span class="folder">templates/</span><br>
+            &nbsp;&nbsp;<span class="file">index.html</span> <span class="desc">- 30KB main UI</span><br>
+            <span class="folder">static/js/</span><br>
+            &nbsp;&nbsp;<span class="file">main.js</span> <span class="desc">- Application entry</span><br>
+            &nbsp;&nbsp;<span class="file">milsymbol.js</span> <span class="desc">- MIL-STD-2525</span><br>
+            &nbsp;&nbsp;<span class="folder">modules/</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">api-client.js</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">map-manager.js</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">ui-manager.js</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">message-manager.js</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">simulation-manager.js</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">+ 5 more modules</span><br>
+            <span class="folder">static/css/</span> <span class="desc">- Styles</span><br>
+            <span class="folder">maps/</span> <span class="desc">- Generated HTML</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Deployment Info -->
+    <section class="section">
+      <h2 class="section-title">Deployment</h2>
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">Prerequisites</div>
+          <ul class="feature-list">
+            <li>Python 3.8+</li>
+            <li>Ollama with llama3.2:3b</li>
+            <li>Node.js backend (optional)</li>
+            <li>Modern browser (Chrome 61+)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">Port Configuration</div>
+          <ul class="feature-list">
+            <li>Flask: 5000</li>
+            <li>Ollama: 11434</li>
+            <li>Node.js API: 3000</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">API Modes</div>
+          <ul class="feature-list">
+            <li><strong>local</strong> - JSON files</li>
+            <li><strong>mock</strong> - Simulated responses</li>
+            <li><strong>real</strong> - Node.js/external API</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 30px; color: #8892b0; font-size: 0.9em;">
+      <p>Military Wargaming AI System v6.0 | Architecture Documentation</p>
+      <p style="margin-top: 10px;">Taiwan Strait Defense Simulation Platform</p>
+    </footer>
+  </div>
+</body>
+</html>
