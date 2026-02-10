@@ -7,7 +7,7 @@ from flask import Blueprint, request, jsonify
 from services import load_config, save_config
 from services.config_loader import get_all_providers, get_active_provider_name
 from utils import get_client_id, get_map_state
-from config import _STATES
+from config import _STATES, CONFIG_DEFAULTS
 
 # 創建系統管理藍圖
 admin_bp = Blueprint('admin', __name__)
@@ -83,10 +83,7 @@ def admin_settings():
         # 即使失敗也返回默認配置
         return jsonify({
             'success': True,
-            'settings': {
-                'show_source_btn': True,
-                'enable_animation': True
-            }
+            'settings': CONFIG_DEFAULTS
         })
 
 

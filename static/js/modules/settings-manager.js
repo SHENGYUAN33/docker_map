@@ -8,17 +8,29 @@ export class SettingsManager {
     this.apiClient = apiClient;
     this.uiManager = uiManager;
     this.systemSettings = {
-      show_source_btn: true,
+      show_source_btn: false,
       enable_feedback: true,
-      enable_animation: null
+      enable_animation: false
     };
   }
 
   /**
    * 加載系統設置
+   * 新 session 時先重置 config.json 為預設值，確保每個分頁從 false 開始
    */
   async loadSystemSettings() {
     try {
+      // 新 session（新分頁）時，先重置伺服器端設定為預設值
+      const isNewSession = !sessionStorage.getItem('settings_initialized');
+      if (isNewSession) {
+        await this.apiClient.updateSystemSettings({
+          show_source_btn: false,
+          enable_animation: false
+        });
+        sessionStorage.setItem('settings_initialized', 'true');
+        console.log('🔄 新 session，已重置設定為預設值');
+      }
+
       const result = await this.apiClient.getSystemSettings();
       if (result.success) {
         this.systemSettings = result.settings;
@@ -28,7 +40,6 @@ export class SettingsManager {
 
         // 設置動畫生成開關（嚴格按照 config.json 的值）
         if (document.getElementById('setting-enable-animation')) {
-          // 如果 config.json 有設定值，使用該值；否則默認為 false
           const animationEnabled = result.settings.enable_animation === true;
           document.getElementById('setting-enable-animation').checked = animationEnabled;
           console.log('🎬 動畫生成開關設定為:', animationEnabled, '(來自 config.json)');
@@ -38,8 +49,8 @@ export class SettingsManager {
     } catch (error) {
       console.error('❌ 載入設定錯誤:', error);
       // API 失敗時使用保底默認值（動畫關閉更安全）
-      this.systemSettings = { show_source_btn: true, enable_feedback: true, enable_animation: false };
-      document.getElementById('setting-show-source').checked = true;
+      this.systemSettings = { show_source_btn: false, enable_feedback: true, enable_animation: false };
+      document.getElementById('setting-show-source').checked = false;
       if (document.getElementById('setting-enable-animation')) {
         document.getElementById('setting-enable-animation').checked = false;
         console.log('⚠️ 使用默認值：動畫生成關閉');

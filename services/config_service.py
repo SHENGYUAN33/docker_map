@@ -5,7 +5,7 @@
 import json
 import os
 from datetime import datetime
-from config import PROMPTS_CONFIG_FILE, CONFIG_FILE
+from config import PROMPTS_CONFIG_FILE, CONFIG_FILE, CONFIG_DEFAULTS
 
 
 # ==================== SYSTEM PROMPT 配置管理 ====================
@@ -126,24 +126,17 @@ def load_config():
     try:
         if not os.path.exists(CONFIG_FILE):
             # 創建預設配置
-            default_config = {
-                "show_source_btn": True,
-                "enable_animation": True
-            }
             try:
-                save_config(default_config)
+                save_config(CONFIG_DEFAULTS)
             except:
                 pass  # 寫入失敗也不影響
-            return default_config
+            return dict(CONFIG_DEFAULTS)
 
         with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
     except Exception as e:
         print(f"⚠️ 載入 config.json 失敗: {e}，使用預設配置")
-        return {
-            "show_source_btn": True,
-            "enable_animation": True
-        }
+        return dict(CONFIG_DEFAULTS)
 
 
 def save_config(config):
