@@ -5,6 +5,17 @@
 
 import { LLM_MODELS } from './constants.js';
 
+// 動態模型 metadata（由 populateLLMSelector 從後端 API 載入）
+let _dynamicModelMap = null;
+
+/**
+ * 設定動態模型 metadata map
+ * @param {Object|null} map - 從 API 載入的模型 metadata
+ */
+export function setDynamicModelMap(map) {
+  _dynamicModelMap = map;
+}
+
 /**
  * HTML 轉義函數
  * 將特殊字元轉換為 HTML 實體，防止 XSS 攻擊
@@ -53,23 +64,125 @@ export function handleLLMChange(showNotification) {
 
   console.log(`🔄 切換 LLM 模型: ${selectedModel}`);
 
-  // 獲取模型資訊
-  const modelInfo = LLM_MODELS[selectedModel];
+  // 優先從動態 map 查找，fallback 到 constants.js 的 LLM_MODELS
+  const modelInfo = (_dynamicModelMap && _dynamicModelMap[selectedModel])
+                    || LLM_MODELS[selectedModel];
 
   if (modelInfo) {
-    // 顯示詳細通知
-    showNotification(
-      `✅ 已切換至: ${modelInfo.name} (${modelInfo.size}, ${modelInfo.speed})`,
-      'success'
-    );
+    const detail = modelInfo.size
+      ? `${modelInfo.name} (${modelInfo.size}, ${modelInfo.speed})`
+      : `${modelInfo.name} (${modelInfo.speed})`;
+    showNotification(`已切換至: ${detail}`, 'success');
   } else {
-    // 簡單通知
     const modelName = selector.options[selector.selectedIndex].text;
-    showNotification(`✅ 已切換至: ${modelName}`, 'success');
+    showNotification(`已切換至: ${modelName}`, 'success');
   }
 
   // 保存選擇到 sessionStorage
   sessionStorage.setItem('selected_llm_model', selectedModel);
+}
+
+/**
+ * 動態載入 LLM 模型清單到下拉選單
+ * 從後端 /api/llm/models 讀取 system_config.json 的模型設定
+ *
+ * @param {Object} apiClient - API 客戶端實例
+ * @returns {Object|null} 模型 metadata map，失敗時返回 null
+ */
+export async function populateLLMSelector(apiClient) {
+  const selector = document.getElementById('llm-model-selector');
+  if (!selector) return null;
+
+  try {
+    const result = await apiClient.getLLMModels();
+    if (!result.success) throw new Error('API 回傳失敗');
+
+    const { providers, active_provider } = result;
+
+    // 清空現有選項
+    selector.innerHTML = '';
+
+    // 暫存模型 metadata
+    const modelMap = {};
+
+    // 依 Provider 產生 optgroup
+    for (const [providerKey, providerConfig] of Object.entries(providers)) {
+      const models = providerConfig.models || [];
+      if (models.length === 0) continue;
+
+      const group = document.createElement('optgroup');
+      group.label = providerConfig.name;
+
+      for (const model of models) {
+        const option = document.createElement('option');
+        const fullId = `${providerKey}-${model.id}`;
+        option.value = fullId;
+
+        // 顯示名稱（含 size 如果有）
+        let displayName = model.name;
+        if (model.size) displayName += ` (${model.size})`;
+        option.textContent = displayName;
+
+        group.appendChild(option);
+
+        // 存入 metadata map
+        modelMap[fullId] = {
+          name: model.name,
+          provider: providerConfig.name,
+          size: model.size || '',
+          speed: model.speed || '',
+          quality: model.quality || ''
+        };
+      }
+
+      selector.appendChild(group);
+    }
+
+    // 設定預設選項：優先恢復 sessionStorage，否則用 active_provider 的 default_model
+    const saved = sessionStorage.getItem('selected_llm_model');
+    if (saved && saved in modelMap) {
+      selector.value = saved;
+      console.log(`✅ 已恢復上次選擇的模型: ${saved}`);
+    } else {
+      const activeConfig = providers[active_provider];
+      if (activeConfig) {
+        selector.value = `${active_provider}-${activeConfig.default_model}`;
+      }
+    }
+
+    console.log(`✅ 已從 system_config.json 載入 ${Object.keys(modelMap).length} 個模型`);
+    return modelMap;
+
+  } catch (error) {
+    console.error('載入 LLM 模型清單失敗，使用內建預設值:', error);
+    _populateFallbackOptions(selector);
+    return null;
+  }
+}
+
+/**
+ * Fallback：當 API 不可用時，使用內建預設選項
+ */
+function _populateFallbackOptions(selector) {
+  selector.innerHTML = '';
+  const group = document.createElement('optgroup');
+  group.label = 'Ollama 本地模型';
+
+  const defaults = [
+    { value: 'ollama-llama3.2:3b', text: 'Llama 3.2 3B (預設)' },
+    { value: 'ollama-mistral:7b', text: 'Mistral 7B' },
+    { value: 'ollama-llama3:8b', text: 'Llama 3 8B' },
+    { value: 'ollama-llama3.1:70b', text: 'Llama 3.1 70B' }
+  ];
+
+  for (const d of defaults) {
+    const opt = document.createElement('option');
+    opt.value = d.value;
+    opt.textContent = d.text;
+    group.appendChild(opt);
+  }
+  selector.appendChild(group);
+  selector.value = 'ollama-llama3.2:3b';
 }
 
 /**

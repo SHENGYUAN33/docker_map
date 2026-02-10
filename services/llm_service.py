@@ -1,29 +1,64 @@
 """
 LLM 服務模組
-用途：封裝所有與 Ollama LLM API 互動的功能，包括場景匯入、模擬啟動、武器分派查詢、航跡查詢和問答等
+用途：封裝所有與 LLM API 互動的功能，包括場景匯入、模擬啟動、武器分派查詢、航跡查詢和問答等
+透過 Provider 抽象層支援 Ollama / OpenAI / Anthropic 等多個 LLM 提供者
 """
-import requests
 import json
-from utils.parser import parse_function_arguments
-from config import OLLAMA_URL, DEFAULT_LLM_MODEL, LLM_API_TIMEOUT
+from config import DEFAULT_LLM_MODEL
+from services.llm_providers import get_provider
 
 
 class LLMService:
     """
     LLM 服務類別
-    用途：提供統一的 LLM 調用介面，封裝與 Ollama API 的所有互動邏輯
+    用途：提供統一的 LLM 調用介面，透過 Provider 抽象層與不同的 LLM API 互動
     """
 
-    def __init__(self, ollama_url=None):
+    def __init__(self):
+        """初始化 LLM 服務"""
+        pass
+
+    def _get_provider(self, provider_name=None):
+        """取得 LLM Provider 實例（可指定 Provider，未指定時使用 active_provider）"""
+        return get_provider(provider_name)
+
+    def _call_with_provider(self, function_label, model, system_prompt, user_prompt, tools, provider_name=None):
         """
-        初始化 LLM 服務
+        統一的 Provider 調用入口
 
         參數:
-            ollama_url: Ollama API 的端點 URL（預設使用 config.OLLAMA_URL）
-        """
-        self.ollama_url = ollama_url or OLLAMA_URL
+            function_label: 功能標籤（用於日誌，例如 "import_scenario"）
+            model: 模型名稱
+            system_prompt: system prompt
+            user_prompt: 使用者輸入
+            tools: 工具定義列表
+            provider_name: Provider 名稱（可選，未指定時使用 active_provider）
 
-    def call_import_scenario(self, user_prompt, model=None, custom_prompt=None):
+        返回:
+            dict: {"tool": str, "parameters": dict} 或 None
+        """
+        try:
+            provider = self._get_provider(provider_name)
+            result = provider.call_function(
+                model=model,
+                system_prompt=system_prompt,
+                user_prompt=user_prompt,
+                tools=tools
+            )
+
+            if result:
+                return {
+                    "tool": result["function_name"],
+                    "parameters": result.get("arguments", {})
+                }
+
+            return None
+
+        except Exception as e:
+            print(f"❌ [{function_label}] Provider 調用錯誤: {type(e).__name__}: {e}")
+            return None
+
+    def call_import_scenario(self, user_prompt, model=None, custom_prompt=None, provider_name=None):
         """
         場景匯入參數提取（Function Calling）
         用途：從用戶指令中提取要在地圖上標示的船艦資訊
@@ -58,96 +93,35 @@ class LLMService:
 - 如果不確定編號歸屬，根據用戶指令中的陣營關鍵字判斷
 """
 
-        # 使用 Function Calling
-        payload = {
-            "model": model,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            "tools": [
-                {
-                    "type": "function",
-                    "function": {
-                        "name": "import_scenario",
-                        "description": "提取軍事船艦的陣營和名稱，用於在地圖上標示船艦位置",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "enemy": {
-                                    "type": "array",
-                                    "items": {"type": "string"},
-                                    "description": "解放軍/敵軍船艦列表。如果用戶要求「所有敵軍」則傳空陣列[]。如果指令未提到敵軍則不要包含此欄位。"
-                                },
-                                "roc": {
-                                    "type": "array",
-                                    "items": {"type": "string"},
-                                    "description": "國軍/我軍船艦列表。如果用戶要求「所有我軍」則傳空陣列[]。如果指令未提到我軍則不要包含此欄位。"
-                                }
+        tools = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "import_scenario",
+                    "description": "提取軍事船艦的陣營和名稱，用於在地圖上標示船艦位置",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "enemy": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                                "description": "解放軍/敵軍船艦列表。如果用戶要求「所有敵軍」則傳空陣列[]。如果指令未提到敵軍則不要包含此欄位。"
                             },
-                            "required": []
-                        }
+                            "roc": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                                "description": "國軍/我軍船艦列表。如果用戶要求「所有我軍」則傳空陣列[]。如果指令未提到我軍則不要包含此欄位。"
+                            }
+                        },
+                        "required": []
                     }
                 }
-            ],
-            "stream": False
-        }
+            }
+        ]
 
-        try:
-            print(f"🤖 [import_scenario] 正在調用 Ollama Function Calling...")
-            print(f"   模型: {model}")
-            print(f"   API: {self.ollama_url}")
+        return self._call_with_provider("import_scenario", model, system_prompt, user_prompt, tools, provider_name=provider_name)
 
-            response = requests.post(self.ollama_url, json=payload, timeout=LLM_API_TIMEOUT)
-
-            if response.status_code != 200:
-                print(f"❌ Ollama API 錯誤 (狀態碼: {response.status_code})")
-                print(f"   響應內容: {response.text}")
-                return None
-
-            response_data = response.json()
-            print(f"📦 原始響應: {json.dumps(response_data, ensure_ascii=False, indent=2)}")
-
-            # 解析 Function Calling 響應
-            message = response_data.get('message', {})
-
-            # 檢查是否有 tool_calls
-            if 'tool_calls' in message and len(message['tool_calls']) > 0:
-                tool_call = message['tool_calls'][0]
-                function_name = tool_call['function']['name']
-                arguments = parse_function_arguments(tool_call['function']['arguments'])
-
-                print(f"✅ Function Calling 成功")
-                print(f"   函數: {function_name}")
-                print(f"   參數: {arguments}")
-
-                return {
-                    "tool": function_name,
-                    "parameters": arguments
-                }
-            else:
-                # Fallback: 嘗試從 content 解析
-                content = message.get('content', '')
-                if content:
-                    try:
-                        parsed = json.loads(content)
-                        print(f"⚠️  未使用 Function Calling，從 content 解析: {parsed}")
-                        return parsed
-                    except:
-                        pass
-
-                print(f"❌ 無法解析 LLM 響應")
-                return None
-
-        except requests.exceptions.Timeout:
-            print(f"⏳ LLM 響應超時（可能模型較大或負載高）")
-            print(f"   ➤ 將使用 Fallback 規則解析")
-            return None
-        except Exception as e:
-            print(f"❌ LLM 調用錯誤: {type(e).__name__}: {e}")
-            return None
-
-    def call_star_scenario(self, user_prompt, model=None, custom_prompt=None):
+    def call_star_scenario(self, user_prompt, model=None, custom_prompt=None, provider_name=None):
         """
         識別是否為啟動模擬指令（Function Calling）
         用途：判斷用戶是否要求啟動軍事兵棋推演模擬
@@ -182,74 +156,30 @@ class LLMService:
 如果用戶指令包含上述任何關鍵字，應該調用 start_scenario 函數。
 """
 
-        # 使用 Function Calling
-        payload = {
-            "model": model,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            "tools": [
-                {
-                    "type": "function",
-                    "function": {
-                        "name": "star_scenario",
-                        "description": "啟動軍事兵棋推演模擬，執行CMO武器分派演算",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {},
-                            "required": []
-                        }
+        tools = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "star_scenario",
+                    "description": "啟動軍事兵棋推演模擬，執行CMO武器分派演算",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {},
+                        "required": []
                     }
                 }
-            ],
-            "stream": False
-        }
+            }
+        ]
 
-        try:
-            print(f"🤖 [start_scenario] 正在調用 Ollama Function Calling...")
-            print(f"   模型: {model}")
-            print(f"   API: {self.ollama_url}")
+        result = self._call_with_provider("star_scenario", model, system_prompt, user_prompt, tools, provider_name=provider_name)
 
-            response = requests.post(self.ollama_url, json=payload, timeout=LLM_API_TIMEOUT)
+        # star_scenario 特殊處理：無法識別時返回 unknown 而非 None
+        if not result:
+            return {"tool": "unknown", "parameters": {}}
 
-            if response.status_code != 200:
-                print(f"❌ Ollama API 錯誤 (狀態碼: {response.status_code})")
-                return None
+        return result
 
-            response_data = response.json()
-            message = response_data.get('message', {})
-
-            # 解析 Function Calling 響應
-            if 'tool_calls' in message and len(message['tool_calls']) > 0:
-                tool_call = message['tool_calls'][0]
-                function_name = tool_call['function']['name']
-
-                print(f"✅ Function Calling 成功: {function_name}")
-
-                return {
-                    "tool": function_name,
-                    "parameters": {}
-                }
-            else:
-                # Fallback: 嘗試從 content 解析
-                content = message.get('content', '')
-                if content:
-                    try:
-                        parsed = json.loads(content)
-                        print(f"⚠️  未使用 Function Calling，從 content 解析: {parsed}")
-                        return parsed
-                    except:
-                        pass
-
-                print(f"❌ 無法識別為啟動模擬指令")
-                return {"tool": "unknown", "parameters": {}}
-
-        except Exception as e:
-            print(f"❌ LLM 調用錯誤: {type(e).__name__}: {e}")
-            return None
-
-    def call_get_wta(self, user_prompt, model=None, custom_prompt=None):
+    def call_get_wta(self, user_prompt, model=None, custom_prompt=None, provider_name=None):
         """
         提取武器分派查詢參數（Function Calling）
         用途：從用戶指令中提取要查詢武器分派結果的敵方船艦
@@ -278,83 +208,30 @@ class LLMService:
 4. 嚴禁使用 "all" 字串
 """
 
-        # 使用 Function Calling
-        payload = {
-            "model": model,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            "tools": [
-                {
-                    "type": "function",
-                    "function": {
-                        "name": "get_wta",
-                        "description": "查詢並繪製武器分派結果（攻擊配對線）",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "enemy": {
-                                    "type": "array",
-                                    "items": {"type": "string"},
-                                    "description": "要查詢的敵方船艦列表。如果查詢所有敵軍則傳空陣列[]。"
-                                }
-                            },
-                            "required": ["enemy"]
-                        }
+        tools = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_wta",
+                    "description": "查詢並繪製武器分派結果（攻擊配對線）",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "enemy": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                                "description": "要查詢的敵方船艦列表。如果查詢所有敵軍則傳空陣列[]。"
+                            }
+                        },
+                        "required": ["enemy"]
                     }
                 }
-            ],
-            "stream": False
-        }
+            }
+        ]
 
-        try:
-            print(f"🤖 [get_wta] 正在調用 Ollama Function Calling...")
-            print(f"   模型: {model}")
-            print(f"   API: {self.ollama_url}")
+        return self._call_with_provider("get_wta", model, system_prompt, user_prompt, tools, provider_name=provider_name)
 
-            response = requests.post(self.ollama_url, json=payload, timeout=LLM_API_TIMEOUT)
-
-            if response.status_code != 200:
-                print(f"❌ Ollama API 錯誤 (狀態碼: {response.status_code})")
-                return None
-
-            response_data = response.json()
-            message = response_data.get('message', {})
-
-            # 解析 Function Calling 響應
-            if 'tool_calls' in message and len(message['tool_calls']) > 0:
-                tool_call = message['tool_calls'][0]
-                function_name = tool_call['function']['name']
-                arguments = parse_function_arguments(tool_call['function']['arguments'])
-
-                print(f"✅ Function Calling 成功")
-                print(f"   函數: {function_name}")
-                print(f"   參數: {arguments}")
-
-                return {
-                    "tool": function_name,
-                    "parameters": arguments
-                }
-            else:
-                # Fallback: 嘗試從 content 解析
-                content = message.get('content', '')
-                if content:
-                    try:
-                        parsed = json.loads(content)
-                        print(f"⚠️  未使用 Function Calling，從 content 解析: {parsed}")
-                        return parsed
-                    except:
-                        pass
-
-                print(f"❌ 無法解析 LLM 響應")
-                return None
-
-        except Exception as e:
-            print(f"❌ LLM 調用錯誤: {type(e).__name__}: {e}")
-            return None
-
-    def call_get_track(self, user_prompt, model=None, custom_prompt=None):
+    def call_get_track(self, user_prompt, model=None, custom_prompt=None, provider_name=None):
         """
         航跡繪製指令識別（Function Calling）
         用途：判斷用戶是否要求顯示船艦航跡/軌跡
@@ -389,85 +266,24 @@ class LLMService:
 如果用戶指令包含上述任何關鍵字，應該調用 get_track 函數。
 """
 
-        # 使用 Function Calling
-        payload = {
-            "model": model,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            "tools": [
-                {
-                    "type": "function",
-                    "function": {
-                        "name": "get_track",
-                        "description": "獲取並繪製所有船艦的航行軌跡",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {},
-                            "required": []
-                        }
+        tools = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_track",
+                    "description": "獲取並繪製所有船艦的航行軌跡",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {},
+                        "required": []
                     }
                 }
-            ],
-            "stream": False
-        }
+            }
+        ]
 
-        try:
-            print(f"🤖 [get_track] 正在調用 Ollama Function Calling...")
-            print(f"   模型: {model}")
-            print(f"   API: {self.ollama_url}")
+        return self._call_with_provider("get_track", model, system_prompt, user_prompt, tools, provider_name=provider_name)
 
-            response = requests.post(self.ollama_url, json=payload, timeout=LLM_API_TIMEOUT)
-
-            if response.status_code != 200:
-                print(f"❌ Ollama API 錯誤 (狀態碼: {response.status_code})")
-                print(f"   響應內容: {response.text}")
-                return None
-
-            response_data = response.json()
-            print(f"📦 原始響應: {json.dumps(response_data, ensure_ascii=False, indent=2)}")
-
-            # 解析 Function Calling 響應
-            message = response_data.get('message', {})
-
-            # 檢查是否有 tool_calls
-            if 'tool_calls' in message and len(message['tool_calls']) > 0:
-                tool_call = message['tool_calls'][0]
-                function_name = tool_call['function']['name']
-                arguments = parse_function_arguments(tool_call['function']['arguments'])
-
-                print(f"✅ Function Calling 成功")
-                print(f"   函數: {function_name}")
-                print(f"   參數: {arguments}")
-
-                return {
-                    "tool": function_name,
-                    "parameters": arguments
-                }
-            else:
-                # Fallback: 嘗試從 content 解析
-                content = message.get('content', '')
-                if content:
-                    try:
-                        parsed = json.loads(content)
-                        print(f"⚠️  未使用 Function Calling，從 content 解析: {parsed}")
-                        return parsed
-                    except:
-                        pass
-
-                print(f"❌ 無法解析 LLM 響應")
-                return None
-
-        except requests.exceptions.Timeout:
-            print(f"⏳ LLM 響應超時（可能模型較大或負載高）")
-            print(f"   ➤ 將使用 Fallback 規則解析")
-            return None
-        except Exception as e:
-            print(f"❌ LLM 調用錯誤: {type(e).__name__}: {e}")
-            return None
-
-    def call_get_answer(self, user_prompt, model=None, custom_prompt=None):
+    def call_get_answer(self, user_prompt, model=None, custom_prompt=None, provider_name=None):
         """
         提取 RAG 問題（Function Calling）
         用途：從用戶的軍事相關問題中提取完整問題，準備查詢知識庫
@@ -495,77 +311,24 @@ class LLMService:
 3. 保持原有的標點符號和格式
 """
 
-        # 使用 Function Calling
-        payload = {
-            "model": model,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            "tools": [
-                {
-                    "type": "function",
-                    "function": {
-                        "name": "get_answer",
-                        "description": "查詢軍事知識資料庫以回答軍事相關問題",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "question": {
-                                    "type": "string",
-                                    "description": "用戶的完整問題，原封不動"
-                                }
-                            },
-                            "required": ["question"]
-                        }
+        tools = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_answer",
+                    "description": "查詢軍事知識資料庫以回答軍事相關問題",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "question": {
+                                "type": "string",
+                                "description": "用戶的完整問題，原封不動"
+                            }
+                        },
+                        "required": ["question"]
                     }
                 }
-            ],
-            "stream": False
-        }
+            }
+        ]
 
-        try:
-            print(f"🤖 [get_answer] 正在調用 Ollama Function Calling...")
-            print(f"   模型: {model}")
-            print(f"   API: {self.ollama_url}")
-
-            response = requests.post(self.ollama_url, json=payload, timeout=LLM_API_TIMEOUT)
-
-            if response.status_code != 200:
-                print(f"❌ Ollama API 錯誤 (狀態碼: {response.status_code})")
-                return None
-
-            response_data = response.json()
-            message = response_data.get('message', {})
-
-            # 解析 Function Calling 響應
-            if 'tool_calls' in message and len(message['tool_calls']) > 0:
-                tool_call = message['tool_calls'][0]
-                function_name = tool_call['function']['name']
-                arguments = parse_function_arguments(tool_call['function']['arguments'])
-
-                print(f"✅ Function Calling 成功")
-                print(f"   函數: {function_name}")
-                print(f"   參數: {arguments}")
-
-                return {
-                    "tool": function_name,
-                    "parameters": arguments
-                }
-            else:
-                # Fallback: 嘗試從 content 解析
-                content = message.get('content', '')
-                if content:
-                    try:
-                        parsed = json.loads(content)
-                        print(f"⚠️  未使用 Function Calling，從 content 解析: {parsed}")
-                        return parsed
-                    except:
-                        pass
-
-                print(f"❌ 無法解析 LLM 響應")
-                return None
-
-        except Exception as e:
-            print(f"❌ LLM 調用錯誤: {type(e).__name__}: {e}")
-            return None
+        return self._call_with_provider("get_answer", model, system_prompt, user_prompt, tools, provider_name=provider_name)

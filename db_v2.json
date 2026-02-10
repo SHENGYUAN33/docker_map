@@ -559,8 +559,8 @@
   "simulation_status": {
     "is_running": false,
     "is_completed": true,
-    "started_at": "2026-02-04T08:26:11.151Z",
-    "completed_at": "2026-02-04T08:26:35.810Z",
+    "started_at": "2026-02-10T02:36:01.370Z",
+    "completed_at": "2026-02-10T02:37:12.383Z",
     "last_message": "模擬已完成"
   },
   "wta_results": {

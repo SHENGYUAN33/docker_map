@@ -8,10 +8,11 @@ import requests
 import os
 import ast
 
-from config import NODE_API_BASE, MAP_DIR, DEFAULT_LLM_MODEL, DEFAULT_PROMPT_CONFIG, ENEMY_KEYWORDS, ROC_KEYWORDS
+from config import MAP_DIR, DEFAULT_LLM_MODEL, DEFAULT_PROMPT_CONFIG, ENEMY_KEYWORDS, ROC_KEYWORDS
 from services import get_system_prompt
 from services.llm_service import LLMService
 from services.map_service import MapService
+from services.api_mode_service import APIModeService
 from handlers.fallback_handler import FallbackHandler
 from utils import get_map_state
 from models.map_state import LAYER_SCENARIO
@@ -57,8 +58,9 @@ def import_scenario():
         data = request.json
         user_input = data.get('user_input', '')
 
-        # 從前端獲取模型選擇和 Prompt 配置
+        # 從前端獲取模型選擇、Provider 和 Prompt 配置
         llm_model = data.get('llm_model', DEFAULT_LLM_MODEL)
+        llm_provider = data.get('llm_provider')
         prompt_config = data.get('prompt_config', DEFAULT_PROMPT_CONFIG)
 
         print(f"\n{'='*80}")
@@ -66,6 +68,7 @@ def import_scenario():
         print(f"{'='*80}")
         print(f"  用戶指令: {user_input}")
         print(f"  選擇模型: {llm_model}")
+        print(f"  Provider: {llm_provider or '(使用預設)'}")
         print(f"  配置名稱: {prompt_config}")
         print(f"{'='*80}\n")
 
@@ -78,7 +81,7 @@ def import_scenario():
             print(f"⚠️  警告: System Prompt 載入失敗，將使用預設 Prompt")
 
         # 步驟 2: 使用 LLM 提取參數
-        decision = llm_service.call_import_scenario(user_input, model=llm_model, custom_prompt=custom_prompt)
+        decision = llm_service.call_import_scenario(user_input, model=llm_model, custom_prompt=custom_prompt, provider_name=llm_provider)
 
         # Fallback: 如果 LLM 失敗，使用規則匹配
         if not decision or not decision.get('parameters'):
@@ -217,15 +220,15 @@ def import_scenario():
         params = convert_string_lists(params)
         print(f"【參數預處理後】: {params}")
 
-        # 步驟 3: 調用 Node.js API 獲取座標
+        # 步驟 3: 調用 API 獲取座標（根據 api_mode 自動切換來源）
         try:
-            res = requests.post(f"{NODE_API_BASE}/import_scenario", json=params, timeout=300)
+            res = APIModeService.call_api("import_scenario", params)
             api_data = res.json()
             print(f"【API 回傳數據】: {api_data}")
         except Exception as e:
             return jsonify({
                 'success': False,
-                'error': f'無法連接到 Node.js API: {str(e)}'
+                'error': f'無法連接到 API: {str(e)}'
             })
 
         # 步驟 4: 取得當前分頁/會話的 MapState，並將船艦加入（場景圖層）
@@ -309,16 +312,18 @@ def start_scenario():
         user_input = data.get('user_input', '')
 
         llm_model = data.get('llm_model', DEFAULT_LLM_MODEL)
+        llm_provider = data.get('llm_provider')
         prompt_config = data.get('prompt_config', DEFAULT_PROMPT_CONFIG)
         print(f"\n【功能四：啟動模擬】收到指令: {user_input}")
         print(f"【使用模型】: {llm_model}")
+        print(f"【Provider】: {llm_provider or '(使用預設)'}")
         print(f"【Prompt 配置】: {prompt_config}")
 
         # 獲取自定義 system prompt
         custom_prompt = get_system_prompt(prompt_config, 'star_scenario')
 
         # 步驟 1: 使用 LLM 識別指令
-        decision = llm_service.call_star_scenario(user_input, model=llm_model, custom_prompt=custom_prompt)
+        decision = llm_service.call_star_scenario(user_input, model=llm_model, custom_prompt=custom_prompt, provider_name=llm_provider)
 
         # Fallback
         if not decision or decision.get('tool') != 'star_scenario':
@@ -333,12 +338,11 @@ def start_scenario():
 
         print(f"【LLM 識別】: 啟動模擬")
 
-        # 步驟 2: 調用中科院 API（無需 request data，無回傳資料）
+        # 步驟 2: 調用 API 啟動模擬（根據 api_mode 自動切換來源）
         try:
             print(f"📡 正在通知中科院啟動武器分派演算...")
-            res = requests.post(f"{NODE_API_BASE}/star_scenario", json={}, timeout=300)
+            res = APIModeService.call_api("star_scenario", {})
 
-            # 中科院 API 無回傳資料，只要狀態碼 200 即成功
             if res.status_code == 200:
                 print(f"✅ 中科院已接收啟動指令")
             else:
@@ -347,12 +351,12 @@ def start_scenario():
         except requests.exceptions.Timeout:
             return jsonify({
                 'success': False,
-                'error': '中科院 API 響應超時，請檢查網絡連接'
+                'error': 'API 響應超時，請檢查網絡連接'
             })
         except Exception as e:
             return jsonify({
                 'success': False,
-                'error': f'無法連接到中科院 API: {str(e)}'
+                'error': f'無法連接到 API: {str(e)}'
             })
 
         # 中科院無回傳資料，模擬將在背景執行

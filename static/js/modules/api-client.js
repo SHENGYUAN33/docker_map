@@ -101,10 +101,11 @@ export class APIClient {
    * @param {string} mode - 模式
    * @returns {Promise<Object>} 響應數據
    */
-  async importScenario(userInput, llmModel, promptConfig, mode) {
+  async importScenario(userInput, llmModel, promptConfig, mode, llmProvider) {
     return await this.post('/api/import_scenario', {
       user_input: userInput,
       llm_model: llmModel,
+      llm_provider: llmProvider,
       prompt_config: promptConfig,
       mode: mode
     });
@@ -118,10 +119,11 @@ export class APIClient {
    * @param {string} mode - 模式
    * @returns {Promise<Object>} 響應數據
    */
-  async startScenario(userInput, llmModel, promptConfig, mode) {
+  async startScenario(userInput, llmModel, promptConfig, mode, llmProvider) {
     return await this.post('/api/start_scenario', {
       user_input: userInput,
       llm_model: llmModel,
+      llm_provider: llmProvider,
       prompt_config: promptConfig,
       mode: mode
     });
@@ -135,10 +137,11 @@ export class APIClient {
    * @param {string} mode - 模式
    * @returns {Promise<Object>} 響應數據
    */
-  async getWTA(userInput, llmModel, promptConfig, mode) {
+  async getWTA(userInput, llmModel, promptConfig, mode, llmProvider) {
     return await this.post('/api/get_wta', {
       user_input: userInput,
       llm_model: llmModel,
+      llm_provider: llmProvider,
       prompt_config: promptConfig,
       mode: mode
     });
@@ -152,10 +155,11 @@ export class APIClient {
    * @param {string} mode - 模式
    * @returns {Promise<Object>} 響應數據
    */
-  async getTrack(userInput, llmModel, promptConfig, mode) {
+  async getTrack(userInput, llmModel, promptConfig, mode, llmProvider) {
     return await this.post('/api/get_track', {
       user_input: userInput,
       llm_model: llmModel,
+      llm_provider: llmProvider,
       prompt_config: promptConfig,
       mode: mode
     });
@@ -169,10 +173,11 @@ export class APIClient {
    * @param {string} mode - 模式
    * @returns {Promise<Object>} 響應數據
    */
-  async getAnswer(userInput, llmModel, promptConfig, mode) {
+  async getAnswer(userInput, llmModel, promptConfig, mode, llmProvider) {
     return await this.post('/api/get_answer', {
       user_input: userInput,
       llm_model: llmModel,
+      llm_provider: llmProvider,
       prompt_config: promptConfig,
       mode: mode
     });
@@ -244,6 +249,14 @@ export class APIClient {
    */
   async updateSystemSettings(settings) {
     return await this.post('/api/admin/settings', settings);
+  }
+
+  /**
+   * 獲取 LLM 模型清單（從 system_config.json 動態讀取）
+   * @returns {Promise<Object>} 包含 providers 和 active_provider 的響應數據
+   */
+  async getLLMModels() {
+    return await this.get('/api/llm/models');
   }
 
   // ==================== Prompt 配置相關 API ====================

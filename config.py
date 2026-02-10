@@ -10,11 +10,16 @@ from dotenv import load_dotenv
 # 載入 .env 環境變數（如果 .env 檔案存在）
 load_dotenv()
 
+# ==================== 環境模式 ====================
+# development（預設）| production
+ENV = os.getenv('ENV', 'development')
+
 # ==================== 伺服器配置 ====================
 # Flask 開發伺服器綁定位址和端口
 FLASK_HOST = os.getenv('FLASK_HOST', '0.0.0.0')
 FLASK_PORT = int(os.getenv('FLASK_PORT', '5000'))
-FLASK_DEBUG = os.getenv('FLASK_DEBUG', 'True').lower() in ('true', '1', 'yes')
+_debug_default = 'True' if ENV == 'development' else 'False'
+FLASK_DEBUG = os.getenv('FLASK_DEBUG', _debug_default).lower() in ('true', '1', 'yes')
 
 # ==================== API 配置 ====================
 # Ollama LLM API 端點 URL
@@ -62,6 +67,12 @@ PROMPTS_CONFIG_FILE = "prompts_config.json"
 
 # 系統配置檔案路徑（儲存系統設定，如顯示選項等）
 CONFIG_FILE = "config.json"
+
+# config.json 預設值（每次啟動時重置用）
+CONFIG_DEFAULTS = {
+    "show_source_btn": False,
+    "enable_animation": False
+}
 
 # ==================== 會話管理配置 ====================
 # Client ID 最大長度（安全限制）

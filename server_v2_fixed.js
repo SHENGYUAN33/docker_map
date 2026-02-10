@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DB_PATH = path.join(__dirname, 'db_v2.json');
+const TRACK_PATH = path.join(__dirname, 'track_data.json');
 
 /* ==================== 資料庫操作函數 ==================== */
 
@@ -550,61 +551,28 @@ const server = http.createServer((req, res) => {
             console.log('📡 [get_track] 接收航跡繪製請求');
             console.log('='.repeat(80));
             
-            // 🔧 預留中科院 API 調用接口
-            // 在實際部署時，這裡應該調用中科院的 get_track API
-            // const response = await axios.get('http://中科院API地址/get_track');
-            // const trackData = response.data;
-            
-            // 🎭 暫時返回模擬數據（用於測試）
-            const mockTrackData = {
-                "ship": {
-                    "enemy": {
-                        "052": [
-                            [23.9429914, 125.8593584],
-                            [23.8324937, 125.5517412],
-                            [23.7922894, 125.2660967],
-                            [23.7721825, 124.9365068],
-                            [23.7922894, 124.5849443]
-                        ],
-                        "055": [
-                            [21.8693924, 125.5464584],
-                            [22.1037004, 125.0850326],
-                            [22.3477814, 124.7664291],
-                            [22.6522821, 124.5906479]
-                        ]
-                    },
-                    "roc": {
-                        "618": [
-                            [25.1728714, 122.151683],
-                            [24.8243734, 122.3384506]
-                        ],
-                        "619": [
-                            [24.788974, 121.9699026],
-                            [24.5093878, 121.9918753]
-                        ]
-                    }
-                }
-            };
-            
-            console.log('  ✅ 航跡數據已準備完成');
-            console.log(`     解放軍船艦: ${Object.keys(mockTrackData.ship.enemy).length} 艘`);
-            console.log(`     國軍船艦: ${Object.keys(mockTrackData.ship.roc).length} 艘`);
-            
+            // 從 track_data.json 讀取航跡資料
+            const trackData = JSON.parse(fs.readFileSync(TRACK_PATH, 'utf8'));
+
+            console.log('  ✅ 航跡數據已從 track_data.json 載入');
+            console.log(`     解放軍船艦: ${Object.keys(trackData.ship.enemy || {}).length} 艘`);
+            console.log(`     國軍船艦: ${Object.keys(trackData.ship.roc || {}).length} 艘`);
+
             // 計算總座標點數
             let totalPoints = 0;
-            for (const ship of Object.values(mockTrackData.ship.enemy)) {
+            for (const ship of Object.values(trackData.ship.enemy || {})) {
                 totalPoints += ship.length;
             }
-            for (const ship of Object.values(mockTrackData.ship.roc)) {
+            for (const ship of Object.values(trackData.ship.roc || {})) {
                 totalPoints += ship.length;
             }
             console.log(`     總航跡點數: ${totalPoints} 個`);
             console.log('='.repeat(80));
             console.log('✅ [get_track] 成功');
             console.log('='.repeat(80) + '\n');
-            
+
             res.statusCode = 200;
-            res.end(JSON.stringify(mockTrackData, null, 2));
+            res.end(JSON.stringify(trackData, null, 2));
             
         } catch (e) {
             console.log('='.repeat(80));

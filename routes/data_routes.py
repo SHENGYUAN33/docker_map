@@ -8,10 +8,11 @@ import requests
 import os
 import json
 
-from config import NODE_API_BASE, MAP_DIR, _STATE_LOCK, _STATES, DEFAULT_LLM_MODEL, DEFAULT_PROMPT_CONFIG, WEAPON_COLORS, ENABLE_ANIMATION_DEFAULT
+from config import MAP_DIR, _STATE_LOCK, _STATES, DEFAULT_LLM_MODEL, DEFAULT_PROMPT_CONFIG, WEAPON_COLORS, ENABLE_ANIMATION_DEFAULT
 from services import get_system_prompt, load_config
 from services.llm_service import LLMService
 from services.map_service import MapService
+from services.api_mode_service import APIModeService
 from handlers.fallback_handler import FallbackHandler
 from utils import get_map_state
 from models.map_state import LAYER_WTA, LAYER_TRACKS
@@ -59,17 +60,19 @@ def get_wta():
         user_input = data.get('user_input', '')
 
         llm_model = data.get('llm_model', DEFAULT_LLM_MODEL)
+        llm_provider = data.get('llm_provider')
         prompt_config = data.get('prompt_config', DEFAULT_PROMPT_CONFIG)
 
         print(f"\n【功能五：武器分派】收到指令: {user_input}")
         print(f"【使用模型】: {llm_model}")
+        print(f"【Provider】: {llm_provider or '(使用預設)'}")
         print(f"【Prompt 配置】: {prompt_config}")
 
         # 獲取自定義 system prompt
         custom_prompt = get_system_prompt(prompt_config, 'get_wta')
 
         # 步驟 1: 使用 LLM 提取參數
-        decision = llm_service.call_get_wta(user_input, model=llm_model, custom_prompt=custom_prompt)
+        decision = llm_service.call_get_wta(user_input, model=llm_model, custom_prompt=custom_prompt, provider_name=llm_provider)
 
         # Fallback
         if not decision or not decision.get('parameters'):
@@ -85,9 +88,9 @@ def get_wta():
         params = decision['parameters']
         print(f"【提取參數】: {params}")
 
-        # 步驟 2: 調用 Node.js API
+        # 步驟 2: 調用 API（根據 api_mode 自動切換來源）
         try:
-            res = requests.post(f"{NODE_API_BASE}/get_wta", json=params, timeout=300)
+            res = APIModeService.call_api("get_wta", params)
 
             if res.status_code != 200:
                 api_data = res.json()
@@ -102,7 +105,7 @@ def get_wta():
         except Exception as e:
             return jsonify({
                 'success': False,
-                'error': f'無法連接到 Node.js API: {str(e)}'
+                'error': f'無法連接到 API: {str(e)}'
             })
 
         # 步驟 3: 取得當前分頁/會話的 MapState，並加入武器分派線（WTA 圖層）
@@ -269,8 +272,9 @@ def get_track():
         data = request.json
         user_input = data.get('user_input', '')
 
-        # 從前端獲取模型選擇和 Prompt 配置
+        # 從前端獲取模型選擇、Provider 和 Prompt 配置
         llm_model = data.get('llm_model', DEFAULT_LLM_MODEL)
+        llm_provider = data.get('llm_provider')
         prompt_config = data.get('prompt_config', DEFAULT_PROMPT_CONFIG)
 
         print(f"\n{'='*80}")
@@ -278,6 +282,7 @@ def get_track():
         print(f"{'='*80}")
         print(f"  用戶指令: {user_input}")
         print(f"  選擇模型: {llm_model}")
+        print(f"  Provider: {llm_provider or '(使用預設)'}")
         print(f"  配置名稱: {prompt_config}")
         print(f"{'='*80}\n")
 
@@ -290,7 +295,7 @@ def get_track():
             print(f"⚠️  警告: System Prompt 載入失敗，將使用預設 Prompt")
 
         # 步驟 2: 使用 LLM 識別指令
-        decision = llm_service.call_get_track(user_input, model=llm_model, custom_prompt=custom_prompt)
+        decision = llm_service.call_get_track(user_input, model=llm_model, custom_prompt=custom_prompt, provider_name=llm_provider)
 
         # Fallback: 如果 LLM 失敗，使用規則匹配
         if not decision or decision.get('tool') != 'get_track':
@@ -305,42 +310,25 @@ def get_track():
 
         print(f"【LLM 識別】: 航跡繪製")
 
-        # 步驟 3: 讀取航跡數據
-        # 暫時使用本地 track_data.json（避免與原船艦數據衝突）
-        # 未來可改為調用中科院 API: res = requests.get(f"{NODE_API_BASE}/get_track")
+        # 步驟 3: 讀取航跡數據（根據 api_mode 自動切換來源）
         try:
-            print(f"📡 正在從 track_data.json 讀取航跡數據...")
-
-            # 讀取本地 track_data.json
-            track_data_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'track_data.json')
-
-            if not os.path.exists(track_data_path):
-                return jsonify({
-                    'success': False,
-                    'error': 'track_data.json 文件不存在，請確保文件位於專案根目錄'
-                })
-
-            with open(track_data_path, 'r', encoding='utf-8') as f:
-                api_data = json.load(f)
+            print(f"📡 正在讀取航跡數據...")
+            res = APIModeService.call_api("get_track", method='GET')
+            api_data = res.json()
 
             enemy_count = len(api_data.get('ship', {}).get('enemy', {}))
             roc_count = len(api_data.get('ship', {}).get('roc', {}))
-            print(f"【本地數據載入成功】: {enemy_count} 艘敵方船艦, {roc_count} 艘我方船艦")
+            print(f"【數據載入成功】: {enemy_count} 艘敵方船艦, {roc_count} 艘我方船艦")
 
-        except FileNotFoundError:
+        except FileNotFoundError as e:
             return jsonify({
                 'success': False,
-                'error': 'track_data.json 文件不存在'
-            })
-        except json.JSONDecodeError as e:
-            return jsonify({
-                'success': False,
-                'error': f'track_data.json 格式錯誤: {str(e)}'
+                'error': f'航跡資料檔案不存在: {str(e)}'
             })
         except Exception as e:
             return jsonify({
                 'success': False,
-                'error': f'讀取 track_data.json 失敗: {str(e)}'
+                'error': f'讀取航跡數據失敗: {str(e)}'
             })
 
         # 步驟 4: 清除航跡圖層（標記 + 航跡線段），不影響其他圖層

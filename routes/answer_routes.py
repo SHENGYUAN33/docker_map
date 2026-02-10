@@ -6,7 +6,8 @@ from flask import Blueprint, request, jsonify
 import requests
 import json
 
-from config import NODE_API_BASE, RAG_DEFAULT_MODE, RAG_DEFAULT_MODEL, RAG_DEFAULT_PROMPT, RAG_MAX_SOURCES
+from config import RAG_DEFAULT_MODE, RAG_DEFAULT_MODEL, RAG_DEFAULT_PROMPT, RAG_MAX_SOURCES
+from services.api_mode_service import APIModeService
 
 # 創建 RAG 問答藍圖
 answer_bp = Blueprint('answer', __name__)
@@ -67,9 +68,9 @@ def get_answer():
 
         print(f"【調用中科院 RAG API】: {json.dumps(rag_request, ensure_ascii=False)}")
 
-        # 步驟 1: 調用中科院 RAG API
+        # 步驟 1: 調用 RAG API（根據 api_mode 自動切換來源）
         try:
-            res = requests.post(f"{NODE_API_BASE}/get_answer", json=rag_request, timeout=300)
+            res = APIModeService.call_api("get_answer", rag_request)
 
             if res.status_code != 200:
                 return jsonify({

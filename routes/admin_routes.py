@@ -5,6 +5,7 @@
 from flask import Blueprint, request, jsonify
 
 from services import load_config, save_config
+from services.config_loader import get_all_providers, get_active_provider_name
 from utils import get_client_id, get_map_state
 from config import _STATES
 
@@ -86,4 +87,32 @@ def admin_settings():
                 'show_source_btn': True,
                 'enable_animation': True
             }
+        })
+
+
+@admin_bp.route('/api/llm/models', methods=['GET'])
+def get_llm_models():
+    """
+    返回所有可用的 LLM Provider 和模型清單
+    供前端動態生成下拉選單
+
+    返回：
+        success (bool): 是否成功
+        active_provider (str): 當前啟用的 Provider 名稱
+        providers (dict): 所有 Provider 及其模型清單
+    """
+    try:
+        providers = get_all_providers()
+        active_provider = get_active_provider_name()
+
+        return jsonify({
+            'success': True,
+            'active_provider': active_provider,
+            'providers': providers
+        })
+    except Exception as e:
+        print(f"❌ get_llm_models 錯誤: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
         })

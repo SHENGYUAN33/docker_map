@@ -5,7 +5,7 @@
 
 // 導入所有模組
 import { API_BASE, MODE_NAMES, MODE_TIPS } from './utils/constants.js';
-import { getCurrentLLMInfo, handleLLMChange } from './utils/helpers.js';
+import { getCurrentLLMInfo, handleLLMChange, populateLLMSelector, setDynamicModelMap } from './utils/helpers.js';
 import { apiClient } from './modules/api-client.js';
 import { UIManager } from './modules/ui-manager.js';
 import { FileManager } from './modules/file-manager.js';
@@ -66,6 +66,12 @@ class Application {
     // 載入系統設置
     await this.settingsManager.loadSystemSettings();
 
+    // 動態載入 LLM 模型清單（從 system_config.json）
+    const modelMap = await populateLLMSelector(apiClient);
+    if (modelMap) {
+      setDynamicModelMap(modelMap);
+    }
+
     // 載入 Prompt 配置列表
     await this.promptManager.loadPromptConfigs();
 
@@ -113,16 +119,6 @@ class Application {
     window.addEventListener('clear-conversation', () => {
       this.messageManager.clearConversation();
     });
-
-    // LLM 模型變更事件（恢復上次選擇）
-    const savedModel = sessionStorage.getItem('selected_llm_model');
-    if (savedModel) {
-      const selector = document.getElementById('llm-model-selector');
-      if (selector) {
-        selector.value = savedModel;
-        console.log(`✅ 已恢復上次選擇的模型: ${savedModel}`);
-      }
-    }
   }
 
   /**
@@ -242,7 +238,8 @@ class Application {
         message,
         llmInfo.modelName,
         this.promptManager.getSelectedPromptConfig(),
-        this.state.currentMode
+        this.state.currentMode,
+        llmInfo.provider
       );
 
       this.uiManager.hideLoading();

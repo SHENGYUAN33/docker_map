@@ -15,7 +15,8 @@
 from flask import Flask
 from flask_cors import CORS
 from routes import register_blueprints
-from config import ensure_directories, FLASK_HOST, FLASK_PORT, FLASK_DEBUG
+from config import ensure_directories, FLASK_HOST, FLASK_PORT, FLASK_DEBUG, CONFIG_DEFAULTS
+from services import save_config
 import os
 
 # ==================== 創建 Flask 應用程式 ====================
@@ -38,6 +39,9 @@ CORS(app)
 # - cops/      : 儲存 COP 截圖
 print("🔧 正在初始化系統目錄...")
 ensure_directories()
+
+# 重置 config.json 為預設值（確保每次啟動回到初始狀態）
+save_config(CONFIG_DEFAULTS)
 
 # ==================== 註冊所有路由藍圖 ====================
 # 用途：將所有功能模組的路由註冊到 Flask app

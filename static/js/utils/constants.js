@@ -7,7 +7,8 @@
 export const API_BASE = 'http://localhost:5000';
 export const NODE_API_BASE = 'http://localhost:3000';
 
-// LLM 模型資訊數據庫
+// LLM 模型資訊數據庫（Fallback 用：當 /api/llm/models API 不可用時使用）
+// 正常情況下，模型清單由 system_config.json 動態載入
 export const LLM_MODELS = {
   'ollama-llama3.2:3b': {
     name: 'Llama 3.2 3B',
