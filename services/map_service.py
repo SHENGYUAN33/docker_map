@@ -45,9 +45,13 @@ class MapService:
         """
         # 添加解放軍船艦（紅色菱形標記）
         if 'enemy' in ship_data:
-            for ship in ship_data['enemy']:
-                ship_name = list(ship.keys())[0]
-                location = ship[ship_name]['location']
+            enemy_data = ship_data['enemy']
+            # 支援中科院格式 {"ship_id": [{"location": [...]}]} 及舊格式 [{"ship_id": {"location": [...]}}]
+            if isinstance(enemy_data, dict):
+                items = [(name, locs[0]['location']) for name, locs in enemy_data.items() if locs]
+            else:
+                items = [(list(s.keys())[0], s[list(s.keys())[0]]['location']) for s in enemy_data]
+            for ship_name, location in items:
                 map_state.add_marker(
                     location=location,
                     popup=f"<b>解放軍: {ship_name}</b>",
@@ -59,9 +63,13 @@ class MapService:
 
         # 添加國軍船艦（藍色圓形標記）
         if 'roc' in ship_data:
-            for ship in ship_data['roc']:
-                ship_name = list(ship.keys())[0]
-                location = ship[ship_name]['location']
+            roc_data = ship_data['roc']
+            # 支援中科院格式 {"ship_id": [{"location": [...]}]} 及舊格式 [{"ship_id": {"location": [...]}}]
+            if isinstance(roc_data, dict):
+                items = [(name, locs[0]['location']) for name, locs in roc_data.items() if locs]
+            else:
+                items = [(list(s.keys())[0], s[list(s.keys())[0]]['location']) for s in roc_data]
+            for ship_name, location in items:
                 map_state.add_marker(
                     location=location,
                     popup=f"<b>國軍: {ship_name}</b>",
