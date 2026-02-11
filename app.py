@@ -12,12 +12,22 @@
 日期：2026-01
 """
 
+import sys
+import os
+
+# 修正 Windows 終端 emoji 編碼問題（cp950 不支援 emoji）
+if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
+
 from flask import Flask
 from flask_cors import CORS
 from routes import register_blueprints
 from config import ensure_directories, FLASK_HOST, FLASK_PORT, FLASK_DEBUG, CONFIG_DEFAULTS
 from services import save_config
-import os
 
 # ==================== 創建 Flask 應用程式 ====================
 # 用途：初始化 Flask app 並配置靜態文件目錄

@@ -325,6 +325,14 @@ export class APIClient {
     const response = await fetch(`${this.nodeApiBase}/api/v1/get_simulation_status`);
     return await response.json();
   }
+
+  /**
+   * 獲取模擬狀態（Flask 後端，real mode 用）
+   * @returns {Promise<Object>} 響應數據（格式與 Node.js 版相同）
+   */
+  async getSimulationStatusFromFlask() {
+    return await this.get('/api/get_simulation_status');
+  }
 }
 
 // 導出單例

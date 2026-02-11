@@ -242,7 +242,7 @@ SIMULATION_START_KEYWORDS = [
 ]
 
 # WTA 查詢關鍵字
-WTA_KEYWORDS = ['武器分派', '攻擊配對', 'WTA', '分派結果']
+WTA_KEYWORDS = ['武器分派', '攻擊配對', 'WTA', '分派結果', '攻擊']
 
 # 航跡繪製關鍵字
 TRACK_KEYWORDS = [
@@ -258,6 +258,14 @@ QUESTION_MARKERS = ['?', '？', '什麼', '如何', '為何', '是否', '請問'
 # 格式：client_id -> {"state": MapState 實例, "last_access": 時間戳}
 _STATE_LOCK = threading.Lock()  # 執行緒安全鎖
 _STATES = {}
+
+# ==================== 全域模擬狀態（供 real mode 前端輪詢）====================
+# 用途：儲存中科院回調的模擬完成狀態，不依賴 Node.js / db_v2.json
+_SIMULATION_STATUS = {
+    'is_completed': False,
+    'last_message': '',
+    'completion_time': None
+}
 
 # ==================== 初始化函數 ====================
 def ensure_directories():

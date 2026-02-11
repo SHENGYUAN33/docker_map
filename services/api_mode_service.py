@@ -68,13 +68,27 @@ class APIModeService:
 
         print(f"   URL: {url}")
         print(f"   Timeout: {timeout}s")
+        if json_data:
+            print(f"   Request Body: {json.dumps(json_data, ensure_ascii=False)}")
+
+        headers = {'Content-Type': 'application/json'}
+
+        # Postman Mock Server 需要此 header 才會依 request body 匹配不同 example
+        # 僅 POST 且有 body 時才啟用，GET 無 body 會導致 Mock Server 匹配失敗
+        if 'mock.pstmn.io' in base_url and method.upper() == 'POST' and json_data:
+            headers['x-mock-match-request-body'] = 'true'
+
+        print(f"   Method: {method.upper()}")
 
         if method.upper() == 'POST':
-            response = requests.post(url, json=json_data, timeout=timeout)
+            response = requests.post(url, json=json_data, headers=headers, timeout=timeout)
         elif method.upper() == 'GET':
-            response = requests.get(url, params=json_data, timeout=timeout)
+            response = requests.get(url, params=json_data, headers=headers, timeout=timeout)
         else:
             raise ValueError(f"不支援的 HTTP 方法: {method}")
+
+        print(f"   Response Status: {response.status_code}")
+        print(f"   Response Body: {response.text[:1000]}")
 
         return response
 

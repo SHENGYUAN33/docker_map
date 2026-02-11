@@ -47,13 +47,24 @@ export class SimulationManager {
 
   /**
    * 啟動模擬狀態監聽（監聽 CMO 完成事件）
+   * @param {string} apiMode - API 模式（"local" | "real" | "mock"）
    */
-  async startSimulationStatusPolling() {
+  async startSimulationStatusPolling(apiMode = 'local') {
+    // 依 api_mode 選擇輪詢目標：real → Flask，其他 → Node.js
+    const fetchStatus = async () => {
+      if (apiMode === 'real') {
+        return await this.apiClient.getSimulationStatusFromFlask();
+      }
+      return await this.apiClient.getSimulationStatus();
+    };
+
+    console.log(`📡 模擬狀態輪詢模式: ${apiMode} (${apiMode === 'real' ? 'Flask' : 'Node.js'})`);
+
     // 先獲取當前狀態作為基準，避免頁面載入時誤判
     let lastCompletedStatus = false;
 
     try {
-      const result = await this.apiClient.getSimulationStatus();
+      const result = await fetchStatus();
       if (result.success && result.simulation_status) {
         lastCompletedStatus = result.simulation_status.is_completed;
         console.log('📊 初始化模擬狀態基準:', lastCompletedStatus);
@@ -65,7 +76,7 @@ export class SimulationManager {
     // 每 3 秒檢查一次模擬狀態
     setInterval(async () => {
       try {
-        const result = await this.apiClient.getSimulationStatus();
+        const result = await fetchStatus();
 
         if (result.success && result.simulation_status) {
           const currentStatus = result.simulation_status.is_completed;
@@ -132,7 +143,7 @@ export class SimulationManager {
 
     // 同時在聊天區域添加系統訊息
     this.messageManager.addSystemMessage(
-      `🎯 CMO 模擬完成！\n${message || '武器分派演算已完成'}\n\n您現在可以開始進行攻擊配對線繪製。`
+      `🎯 CMO 模擬完成！\n${message || '\n\n武器分派演算已完成'}\n\n您現在可以開始進行攻擊配對線繪製。`
     );
 
     // 播放通知音效（如果瀏覽器支持）

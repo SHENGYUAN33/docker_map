@@ -12,6 +12,7 @@ export class SettingsManager {
       enable_feedback: true,
       enable_animation: false
     };
+    this.apiMode = 'local';
   }
 
   /**
@@ -34,6 +35,7 @@ export class SettingsManager {
       const result = await this.apiClient.getSystemSettings();
       if (result.success) {
         this.systemSettings = result.settings;
+        this.apiMode = result.api_mode || 'local';
 
         // 設置顯示原始碼按鈕開關
         document.getElementById('setting-show-source').checked = result.settings.show_source_btn !== false;
@@ -102,5 +104,13 @@ export class SettingsManager {
    */
   getSystemSettings() {
     return this.systemSettings;
+  }
+
+  /**
+   * 獲取當前 API 模式
+   * @returns {string} "local" | "real" | "mock"
+   */
+  getApiMode() {
+    return this.apiMode || 'local';
   }
 }

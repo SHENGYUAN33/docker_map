@@ -5,7 +5,7 @@
 from flask import Blueprint, request, jsonify
 
 from services import load_config, save_config
-from services.config_loader import get_all_providers, get_active_provider_name
+from services.config_loader import get_all_providers, get_active_provider_name, get_api_mode
 from utils import get_client_id, get_map_state
 from config import _STATES, CONFIG_DEFAULTS
 
@@ -66,7 +66,8 @@ def admin_settings():
             config = load_config()
             return jsonify({
                 'success': True,
-                'settings': config
+                'settings': config,
+                'api_mode': get_api_mode()
             })
         elif request.method == 'POST':
             # 保存設定到 config.json

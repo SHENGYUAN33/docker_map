@@ -308,35 +308,32 @@ const server = http.createServer((req, res) => {
                 let queryMode = 'all';
                 let queryDetail = '';
 
-                // ✅ 關鍵修復：按 attack_wave 查詢（不是按 id）
+                // ✅ 按 id（row 識別碼）查詢，對齊中科院 API 規格
                 if (payload.hasOwnProperty('wta_table_row')) {
-                    queryMode = 'wave';
-                    const targetWaves = payload.wta_table_row;
-                    
-                    if (!Array.isArray(targetWaves)) {
+                    queryMode = 'row';
+                    const targetIds = payload.wta_table_row;
+
+                    if (!Array.isArray(targetIds)) {
                         console.log('  ❌ 錯誤: wta_table_row 必須是陣列');
                         console.log('='.repeat(80) + '\n');
-                        
+
                         res.statusCode = 400;
-                        res.end(JSON.stringify({ 
+                        res.end(JSON.stringify({
                             error: "wta_table_row 必須是陣列",
-                            example: '{"wta_table_row": [1, 3, 5]}'
+                            example: '{"wta_table_row": [3, 4, 10]}'
                         }));
                         return;
                     }
 
-                    // ✅ 按 attack_wave 過濾（不是按 id）
-                    // wta_table_row: [1] → 查詢 attack_wave="第1波" 的所有記錄
-                    // wta_table_row: [1, 3] → 查詢 attack_wave in ["第1波", "第3波"] 的所有記錄
-                    const waveNames = targetWaves.map(n => `第${n}波`);
-                    
-                    filteredResults = db.wta_results.all.filter(result => 
-                        waveNames.includes(result.attack_wave)
+                    // wta_table_row: [3] → 查詢 id===3 的記錄
+                    // wta_table_row: [3, 4, 10] → 查詢 id in [3, 4, 10] 的記錄
+                    filteredResults = db.wta_results.all.filter(result =>
+                        targetIds.includes(result.id)
                     );
 
-                    queryDetail = `波次 [${waveNames.join(', ')}]`;
-                    console.log('  🎯 查詢模式: 按波次 (attack_wave)');
-                    console.log('  📊 目標波次:', waveNames);
+                    queryDetail = `row id [${targetIds.join(', ')}]`;
+                    console.log('  🎯 查詢模式: 按 row id');
+                    console.log('  📊 目標 id:', targetIds);
                     console.log('  📋 資料庫總記錄數:', db.wta_results.all.length);
                     console.log('  ✅ 過濾後記錄數:', filteredResults.length);
                     console.log('  📝 過濾後的記錄:');

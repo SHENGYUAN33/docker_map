@@ -2,6 +2,8 @@
 Fallback 處理器模組
 用途：當 LLM 不可用或解析失敗時，提供基於規則的後備解析邏輯
 """
+import re
+
 from config import (
     ENEMY_KEYWORDS, ROC_KEYWORDS, ENEMY_SHIP_NAMES, ROC_SHIP_NAMES,
     SIMULATION_START_KEYWORDS, WTA_KEYWORDS, TRACK_KEYWORDS, QUESTION_MARKERS
@@ -82,20 +84,53 @@ class FallbackHandler:
         武器分派的 Fallback 規則
         用途：根據關鍵字判斷是否為查詢武器分派的指令
 
+        支援兩種查詢模式（對齊中科院 API）：
+        1. enemy: 按敵艦名稱查詢
+        2. wta_table_row: 按列編號（id）查詢
+
         參數:
             user_input: 用戶輸入的指令
 
         返回:
-            dict: {"tool": "get_wta", "parameters": {"enemy": [...]}} 或 None
+            dict: {"tool": "get_wta", "parameters": {...}} 或 None
         """
-        if any(keyword in user_input for keyword in WTA_KEYWORDS):
-            params = {'enemy': []}
+        # 中文數字 → 阿拉伯數字對照
+        cn_num_map = {'一': 1, '二': 2, '三': 3, '四': 4, '五': 5,
+                      '六': 6, '七': 7, '八': 8, '九': 9, '十': 10}
 
-            # 檢查是否提到特定船艦
+        if any(keyword in user_input for keyword in WTA_KEYWORDS):
+            # 優先檢查是否為按列編號查詢
+            # 支援格式：「第1筆」「第一筆」「第3,4,10筆」「編號3」
+            row_ids = []
+
+            # 模式1: 「第3,4,10筆」逗號分隔數字
+            comma_pattern = r'第\s*([\d,，\s]+)\s*[筆列條]'
+            comma_match = re.search(comma_pattern, user_input)
+            if comma_match:
+                nums_str = comma_match.group(1)
+                row_ids = [int(n.strip()) for n in re.split(r'[,，\s]+', nums_str) if n.strip().isdigit()]
+
+            # 模式2: 「第一筆」中文數字
+            if not row_ids:
+                cn_pattern = r'第\s*([一二三四五六七八九十]+)\s*[筆列條]'
+                cn_matches = re.findall(cn_pattern, user_input)
+                for cn in cn_matches:
+                    if cn in cn_num_map:
+                        row_ids.append(cn_num_map[cn])
+
+            # 模式3: 「第3筆」「第8筆」個別出現
+            if not row_ids:
+                single_pattern = r'第\s*(\d+)\s*[筆列條]|編號\s*(\d+)'
+                single_matches = re.findall(single_pattern, user_input)
+                row_ids = [int(m[0] or m[1]) for m in single_matches]
+
+            if row_ids:
+                return {'tool': 'get_wta', 'parameters': {'wta_table_row': row_ids}}
+
+            # 否則按敵艦名稱查詢
+            params = {'enemy': []}
             for ship in ENEMY_SHIP_NAMES:
                 if ship in user_input:
-                    if 'enemy' not in params or params['enemy'] == []:
-                        params['enemy'] = []
                     params['enemy'].append(ship)
 
             return {'tool': 'get_wta', 'parameters': params}

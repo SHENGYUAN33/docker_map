@@ -8,7 +8,7 @@ import requests
 import os
 import ast
 
-from config import MAP_DIR, DEFAULT_LLM_MODEL, DEFAULT_PROMPT_CONFIG, ENEMY_KEYWORDS, ROC_KEYWORDS
+from config import MAP_DIR, DEFAULT_LLM_MODEL, DEFAULT_PROMPT_CONFIG, ENEMY_KEYWORDS, ROC_KEYWORDS, _STATE_LOCK, _SIMULATION_STATUS
 from services import get_system_prompt
 from services.llm_service import LLMService
 from services.map_service import MapService
@@ -337,6 +337,12 @@ def start_scenario():
             })
 
         print(f"【LLM 識別】: 啟動模擬")
+
+        # 重置全域模擬狀態（確保前端能偵測 false→true 轉換）
+        with _STATE_LOCK:
+            _SIMULATION_STATUS['is_completed'] = False
+            _SIMULATION_STATUS['last_message'] = ''
+            _SIMULATION_STATUS['completion_time'] = None
 
         # 步驟 2: 調用 API 啟動模擬（根據 api_mode 自動切換來源）
         try:

@@ -75,8 +75,9 @@ class Application {
     // 載入 Prompt 配置列表
     await this.promptManager.loadPromptConfigs();
 
-    // 啟動模擬狀態監聽
-    this.simulationManager.startSimulationStatusPolling();
+    // 啟動模擬狀態監聽（依 api_mode 決定輪詢 Flask 或 Node.js）
+    const apiMode = this.settingsManager.getApiMode();
+    this.simulationManager.startSimulationStatusPolling(apiMode);
 
     // 初始化上圖台/下文本拖曳分隔線
     this.uiManager.initSplitLayout();
@@ -290,7 +291,8 @@ class Application {
         }
 
       } else {
-        this.messageManager.addSystemMessage(`❌ ${result.error || '執行失敗'}`, 'error');
+        const errorMsg = typeof result.error === 'string' ? result.error : JSON.stringify(result.error);
+        this.messageManager.addSystemMessage(`❌ ${errorMsg || '執行失敗'}`, 'error');
       }
 
     } catch (error) {

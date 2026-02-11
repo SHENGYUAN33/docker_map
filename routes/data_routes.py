@@ -8,7 +8,7 @@ import requests
 import os
 import json
 
-from config import MAP_DIR, _STATE_LOCK, _STATES, DEFAULT_LLM_MODEL, DEFAULT_PROMPT_CONFIG, WEAPON_COLORS, ENABLE_ANIMATION_DEFAULT
+from config import MAP_DIR, _STATE_LOCK, _STATES, _SIMULATION_STATUS, DEFAULT_LLM_MODEL, DEFAULT_PROMPT_CONFIG, WEAPON_COLORS, ENABLE_ANIMATION_DEFAULT
 from services import get_system_prompt, load_config
 from services.llm_service import LLMService
 from services.map_service import MapService
@@ -82,7 +82,7 @@ def get_wta():
         if not decision or not decision.get('parameters'):
             return jsonify({
                 'success': False,
-                'error': '無法解析指令。範例：「查看所有敵軍的武器分派結果」'
+                'error': '無法解析指令。範例：「查看所有敵軍的武器分派結果」或「查看第3筆武器分派」'
             })
 
         params = decision['parameters']
@@ -94,9 +94,11 @@ def get_wta():
 
             if res.status_code != 200:
                 api_data = res.json()
+                raw_error = api_data.get('error', '查詢失敗')
+                error_msg = raw_error if isinstance(raw_error, str) else json.dumps(raw_error, ensure_ascii=False)
                 return jsonify({
                     'success': False,
-                    'error': api_data.get('error', '查詢失敗'),
+                    'error': f'API 回傳錯誤 (HTTP {res.status_code}): {error_msg}',
                     'message': api_data.get('message', '請先執行兵推模擬')
                 })
 
@@ -159,7 +161,10 @@ def get_wta():
         # 步驟 6: 生成回覆訊息
         result_count = len(api_data['wta_results'])
 
-        if params.get('enemy') and params['enemy']:
+        if params.get('wta_table_row'):
+            row_ids = ', '.join(str(r) for r in params['wta_table_row'])
+            answer = f"✅ 已查詢到第 {row_ids} 筆武器分派記錄，共 {result_count} 筆。"
+        elif params.get('enemy') and params['enemy']:
             targets = ', '.join(params['enemy'])
             answer = f"✅ 已查詢到針對 {targets} 的武器分派記錄，共 {result_count} 筆。"
         else:
@@ -223,6 +228,11 @@ def wta_completed():
                 state_record['completion_time'] = datetime.now().isoformat()
                 print(f"✅ 已更新 session {client_id} 的模擬狀態")
 
+            # 更新全域模擬狀態（供 real mode 前端輪詢）
+            _SIMULATION_STATUS['is_completed'] = True
+            _SIMULATION_STATUS['last_message'] = message
+            _SIMULATION_STATUS['completion_time'] = datetime.now().isoformat()
+
         return jsonify({
             'success': True,
             'received': True,
@@ -237,6 +247,29 @@ def wta_completed():
             'success': False,
             'error': str(e)
         }), 500
+
+
+@data_bp.route('/api/get_simulation_status', methods=['GET'])
+def get_simulation_status():
+    """
+    模擬狀態查詢端點（Flask 版）
+
+    用途：供前端在 real mode 下輪詢模擬完成狀態，替代 Node.js 的 GET /api/v1/get_simulation_status
+    回傳格式與 Node.js 版完全一致，前端不需改格式處理
+
+    返回：
+        success (bool): 是否成功
+        simulation_status.is_completed (bool): 模擬是否完成
+        simulation_status.last_message (str): 完成訊息
+    """
+    with _STATE_LOCK:
+        return jsonify({
+            'success': True,
+            'simulation_status': {
+                'is_completed': _SIMULATION_STATUS['is_completed'],
+                'last_message': _SIMULATION_STATUS.get('last_message', '')
+            }
+        })
 
 
 @data_bp.route('/api/get_track', methods=['POST'])
@@ -313,8 +346,25 @@ def get_track():
         # 步驟 3: 讀取航跡數據（根據 api_mode 自動切換來源）
         try:
             print(f"📡 正在讀取航跡數據...")
-            res = APIModeService.call_api("get_track", method='GET')
+            res = APIModeService.call_api("get_track", method='POST')
+
+            print(f"📥 [get_track] API 回應狀態碼: {res.status_code}")
+            raw_text = res.text if hasattr(res, 'text') else str(res)
+            print(f"📥 [get_track] API 原始回應 (前 2000 字): {raw_text[:2000]}")
+
             api_data = res.json()
+            print(f"📥 [get_track] 解析後 api_data 的 keys: {list(api_data.keys()) if isinstance(api_data, dict) else type(api_data)}")
+
+            if isinstance(api_data, dict) and 'ship' in api_data:
+                ship_data = api_data['ship']
+                print(f"📥 [get_track] ship 的 keys: {list(ship_data.keys()) if isinstance(ship_data, dict) else type(ship_data)}")
+                if isinstance(ship_data, dict):
+                    enemy_ships = ship_data.get('enemy', {})
+                    roc_ships = ship_data.get('roc', {})
+                    print(f"📥 [get_track] enemy 船艦: {list(enemy_ships.keys()) if isinstance(enemy_ships, dict) else enemy_ships}")
+                    print(f"📥 [get_track] roc 船艦: {list(roc_ships.keys()) if isinstance(roc_ships, dict) else roc_ships}")
+            else:
+                print(f"⚠️ [get_track] api_data 中沒有 'ship' 欄位! 完整資料: {str(api_data)[:1000]}")
 
             enemy_count = len(api_data.get('ship', {}).get('enemy', {}))
             roc_count = len(api_data.get('ship', {}).get('roc', {}))
@@ -364,14 +414,26 @@ def get_track():
 
         answer = f"✅ 已成功繪製 {feedback} 的航行軌跡，共 {ship_count} 艘船艦。\n📍 船艦圖示顯示當前位置，彩色線段顯示歷史航跡。\n地圖已更新，請查看。"
 
-        return jsonify({
+        response_data = {
             'success': True,
             'answer': answer,
             'map_url': f'/maps/{map_filename}',
             'track_data': api_data,
             'ship_count': ship_count,
             'llm_model_used': llm_model
-        })
+        }
+
+        print(f"\n{'='*80}")
+        print(f"📤 [get_track] 最終回傳給前端的資料:")
+        print(f"   success: {response_data['success']}")
+        print(f"   answer: {response_data['answer']}")
+        print(f"   map_url: {response_data['map_url']}")
+        print(f"   ship_count: {response_data['ship_count']}")
+        print(f"   track_data 類型: {type(response_data['track_data'])}")
+        print(f"   track_data 內容 (前 1000 字): {str(response_data['track_data'])[:1000]}")
+        print(f"{'='*80}\n")
+
+        return jsonify(response_data)
 
     except Exception as e:
         print(f"錯誤: {str(e)}")
