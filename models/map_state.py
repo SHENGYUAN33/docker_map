@@ -287,6 +287,9 @@ class MapState:
             background: transparent !important;
             border: none !important;
         }
+        .leaflet-tooltip {
+            pointer-events: none !important;
+        }
         </style>
         """
 
@@ -416,6 +419,7 @@ class MapState:
                     tooltip=folium.Tooltip(
                         text=ship_name,
                         permanent=True,
+                        sticky=False,
                         direction=tooltip_direction,
                         offset=(offset_x, offset_y),
                         style=f"""
@@ -423,11 +427,12 @@ class MapState:
                             border: 2px solid {marker_color};
                             border-radius: 4px;
                             padding: 4px 8px;
-                            font-size: 11px;
+                            font-size: 9px;
                             font-weight: bold;
                             color: {marker_color};
                             box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
                             white-space: nowrap;
+                            pointer-events: none;
                         """
                     )
                 ).add_to(get_target(track.get('layer')))

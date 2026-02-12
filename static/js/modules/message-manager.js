@@ -92,6 +92,84 @@ export class MessageManager {
   }
 
   /**
+   * 建立串流訊息氣泡
+   * 回傳物件含 appendText() 和 finalize() 方法，供逐字渲染使用
+   * @returns {Object} { appendText(str), finalize(options), getText() }
+   */
+  createStreamingMessage() {
+    const container = document.getElementById('chat-container');
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'chat-message assistant';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'message-bubble';
+
+    // 串流游標（閃爍效果）
+    const cursor = document.createElement('span');
+    cursor.className = 'streaming-cursor';
+    cursor.textContent = '\u258C';
+
+    bubble.appendChild(cursor);
+    msgDiv.appendChild(bubble);
+    container.appendChild(msgDiv);
+    container.scrollTop = container.scrollHeight;
+
+    let fullText = '';
+    const self = this;
+
+    return {
+      appendText(text) {
+        fullText += text;
+        bubble.innerHTML = escapeHtml(fullText);
+        bubble.appendChild(cursor);
+        container.scrollTop = container.scrollHeight;
+      },
+
+      finalize(options = {}) {
+        // 移除游標
+        if (cursor.parentNode) cursor.remove();
+
+        // 重新渲染最終內容
+        let finalHtml = escapeHtml(fullText);
+
+        if (options.tableHtml) {
+          finalHtml += options.tableHtml;
+        }
+
+        if (options.showRagButtons) {
+          finalHtml += `
+            <div class="rag-buttons">
+              <button class="rag-btn rag-copy" onclick="window.copyAnswer(this)">📋 複製</button>
+              <button class="rag-btn rag-source" onclick="window.showSource(this)">📚 來源</button>
+              <button class="rag-btn rag-feedback" onclick="window.showFeedback(this)">💬 反饋</button>
+            </div>
+          `;
+        }
+
+        bubble.innerHTML = finalHtml;
+
+        // 儲存 dataset 屬性（供 RAG 按鈕使用）
+        if (options.showRagButtons) {
+          msgDiv.dataset.answerText = fullText;
+          msgDiv.dataset.question = options.question || '';
+          msgDiv.dataset.sources = JSON.stringify(options.sources || []);
+          msgDiv.dataset.ragId = options.ragId || '';
+          msgDiv.dataset.datetime = options.datetime || '';
+        }
+
+        container.scrollTop = container.scrollHeight;
+
+        // 記錄對話
+        self.conversation.push({ role: 'assistant', content: fullText });
+      },
+
+      getText() {
+        return fullText;
+      }
+    };
+  }
+
+  /**
    * 複製答案到剪貼簿
    * @param {HTMLElement} button - 複製按鈕元素
    */

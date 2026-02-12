@@ -95,6 +95,45 @@ class APIModeService:
         return response
 
     @staticmethod
+    def call_api_stream(endpoint_key, json_data=None):
+        """
+        串流 API 呼叫（僅 real 模式支援）
+
+        參數:
+            endpoint_key (str): 端點名稱
+            json_data (dict, optional): 請求資料
+
+        返回:
+            requests.Response (stream=True) 或 None（非 real 模式時回傳 None，由呼叫端降級為模擬串流）
+        """
+        api_mode = get_api_mode()
+
+        if api_mode != 'real':
+            print(f"📡 [API Mode: {api_mode}] 不支援串流，將使用模擬串流")
+            return None
+
+        api_config = get_real_api_config()
+        base_url = api_config.get('base_url', '')
+        timeout = api_config.get('timeout', 300)
+        endpoints = api_config.get('endpoints', {})
+        endpoint_path = endpoints.get(endpoint_key, f'/{endpoint_key}')
+        url = f"{base_url}{endpoint_path}"
+
+        print(f"📡 [API Mode: real / Stream] 呼叫端點: {endpoint_key}")
+        print(f"   URL: {url}")
+        print(f"   Timeout: {timeout}s")
+
+        headers = {'Content-Type': 'application/json'}
+
+        response = requests.post(
+            url, json=json_data, headers=headers,
+            timeout=timeout, stream=True
+        )
+
+        print(f"   Response Status: {response.status_code}")
+        return response
+
+    @staticmethod
     def _get_mock_response(endpoint_key, json_data=None):
         """
         返回預定義的 Mock 回應

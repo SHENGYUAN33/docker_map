@@ -222,6 +222,11 @@ class Application {
       // 根據模式選擇 API
       let apiMethod;
       if (this.state.currentMode === 'text_generation' || this.state.currentMode === 'military_qa') {
+        // 串流模式：啟用時使用 SSE 串流端點
+        if (this.settingsManager.isStreamEnabled()) {
+          await this._sendStreamingAnswer(message, llmInfo);
+          return;
+        }
         apiMethod = 'getAnswer';
       } else {
         const methodMap = {
@@ -302,6 +307,68 @@ class Application {
     } finally {
       sendBtn.disabled = false;
     }
+  }
+
+  /**
+   * 使用 SSE 串流發送 RAG 問答
+   * @param {string} message - 用戶訊息
+   * @param {Object} llmInfo - LLM 模型資訊
+   */
+  async _sendStreamingAnswer(message, llmInfo) {
+    const sendBtn = document.getElementById('send-button');
+
+    // 立即建立串流訊息氣泡
+    const streamMsg = this.messageManager.createStreamingMessage();
+
+    let metadata = null;
+    let hasError = false;
+
+    try {
+      await apiClient.getAnswerStream(
+        message,
+        llmInfo.modelName,
+        this.promptManager.getSelectedPromptConfig(),
+        this.state.currentMode,
+        llmInfo.provider,
+        {
+          onChunk: (content) => {
+            streamMsg.appendText(content);
+          },
+          onMetadata: (meta) => {
+            metadata = meta;
+          },
+          onError: (errorMsg) => {
+            hasError = true;
+            console.error('串流錯誤:', errorMsg);
+            if (!streamMsg.getText()) {
+              this.messageManager.addSystemMessage(`❌ ${errorMsg}`, 'error');
+            }
+          },
+          onDone: () => {
+            // finalize 在 await 完成後處理
+          }
+        }
+      );
+    } catch (error) {
+      hasError = true;
+      console.error('串流連線錯誤:', error);
+      if (!streamMsg.getText()) {
+        this.messageManager.addSystemMessage(`❌ 串流連線錯誤：${error.message}`, 'error');
+      }
+    }
+
+    // 完成串流訊息
+    if (streamMsg.getText()) {
+      streamMsg.finalize({
+        showRagButtons: true,
+        question: metadata?.question || message,
+        sources: metadata?.sources || [],
+        ragId: metadata?.rag_id || '',
+        datetime: metadata?.datetime || ''
+      });
+    }
+
+    sendBtn.disabled = false;
   }
 }
 

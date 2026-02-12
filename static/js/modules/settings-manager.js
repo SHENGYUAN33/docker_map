@@ -13,6 +13,7 @@ export class SettingsManager {
       enable_animation: false
     };
     this.apiMode = 'local';
+    this.streamEnabled = false;
   }
 
   /**
@@ -36,6 +37,8 @@ export class SettingsManager {
       if (result.success) {
         this.systemSettings = result.settings;
         this.apiMode = result.api_mode || 'local';
+        this.streamEnabled = result.stream_enabled === true;
+        console.log('🔄 串流模式:', this.streamEnabled ? '啟用' : '停用');
 
         // 設置顯示原始碼按鈕開關
         document.getElementById('setting-show-source').checked = result.settings.show_source_btn !== false;
@@ -112,5 +115,13 @@ export class SettingsManager {
    */
   getApiMode() {
     return this.apiMode || 'local';
+  }
+
+  /**
+   * 檢查是否啟用串流模式
+   * @returns {boolean}
+   */
+  isStreamEnabled() {
+    return this.streamEnabled;
   }
 }

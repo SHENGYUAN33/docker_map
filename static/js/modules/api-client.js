@@ -184,6 +184,102 @@ export class APIClient {
   }
 
   /**
+   * SSE 串流版本的 getAnswer
+   * 使用 fetch + ReadableStream 讀取 SSE 事件
+   *
+   * @param {string} userInput - 用戶輸入
+   * @param {string} llmModel - LLM 模型
+   * @param {string} promptConfig - Prompt 配置
+   * @param {string} mode - 模式
+   * @param {string} llmProvider - LLM Provider
+   * @param {Object} callbacks - 回呼函式
+   * @param {function} callbacks.onChunk - 收到文字片段時呼叫 (content)
+   * @param {function} callbacks.onMetadata - 收到元資料時呼叫 (metadata)
+   * @param {function} callbacks.onError - 發生錯誤時呼叫 (errorMsg)
+   * @param {function} callbacks.onDone - 串流結束時呼叫 ()
+   */
+  async getAnswerStream(userInput, llmModel, promptConfig, mode, llmProvider, { onChunk, onMetadata, onError, onDone }) {
+    const response = await fetch(`${this.apiBase}/api/get_answer_stream`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_input: userInput,
+        llm_model: llmModel,
+        llm_provider: llmProvider,
+        prompt_config: promptConfig,
+        mode: mode
+      })
+    });
+
+    if (!response.ok) {
+      onError(`HTTP 錯誤: ${response.status}`);
+      onDone();
+      return;
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // 處理完整的 SSE 事件（以雙換行分隔）
+        const events = buffer.split('\n\n');
+        buffer = events.pop(); // 保留未完成的事件
+
+        for (const eventBlock of events) {
+          if (!eventBlock.trim()) continue;
+
+          const lines = eventBlock.split('\n');
+          let eventType = '';
+          let eventData = '';
+
+          for (const line of lines) {
+            if (line.startsWith('event: ')) {
+              eventType = line.slice(7).trim();
+            } else if (line.startsWith('data: ')) {
+              eventData = line.slice(6);
+            }
+          }
+
+          if (!eventType || !eventData) continue;
+
+          try {
+            const parsed = JSON.parse(eventData);
+
+            switch (eventType) {
+              case 'chunk':
+                onChunk(parsed.content || '');
+                break;
+              case 'metadata':
+                onMetadata(parsed);
+                break;
+              case 'error':
+                onError(parsed.error || '未知串流錯誤');
+                break;
+              case 'done':
+                onDone();
+                return;
+            }
+          } catch (e) {
+            console.warn('SSE 解析錯誤:', e, eventData);
+          }
+        }
+      }
+      // 串流結束但沒有收到 done 事件
+      onDone();
+    } catch (err) {
+      onError(`串流讀取錯誤: ${err.message}`);
+      onDone();
+    }
+  }
+
+  /**
    * 檢查模擬狀態
    * @param {string} simulationId - 模擬 ID
    * @returns {Promise<Object>} 響應數據

@@ -592,6 +592,19 @@
       border-color: transparent !important;
     }
 
+    /* ==================== 串流游標 ==================== */
+    .streaming-cursor {
+      display: inline;
+      animation: blink 0.7s step-end infinite;
+      color: #1e3c72;
+      font-weight: bold;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
     /* ==================== 武器分派表格 ==================== */
     .wta-table-container {
       margin-top: 20px;

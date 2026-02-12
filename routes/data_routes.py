@@ -346,7 +346,7 @@ def get_track():
         # 步驟 3: 讀取航跡數據（根據 api_mode 自動切換來源）
         try:
             print(f"📡 正在讀取航跡數據...")
-            res = APIModeService.call_api("get_track", method='POST')
+            res = APIModeService.call_api("get_track", method='GET')
 
             print(f"📥 [get_track] API 回應狀態碼: {res.status_code}")
             raw_text = res.text if hasattr(res, 'text') else str(res)
