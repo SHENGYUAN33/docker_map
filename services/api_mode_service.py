@@ -74,8 +74,10 @@ class APIModeService:
         headers = {'Content-Type': 'application/json'}
 
         # Postman Mock Server 需要此 header 才會依 request body 匹配不同 example
+        # get_answer 不需要 body 匹配（每次的 system_prompt 和 user 輸入都不同，回應格式固定）
         # 僅 POST 且有 body 時才啟用，GET 無 body 會導致 Mock Server 匹配失敗
-        if 'mock.pstmn.io' in base_url and method.upper() == 'POST' and json_data:
+        BODY_MATCH_ENDPOINTS = {'import_scenario', 'star_scenario', 'get_wta', 'get_track'}
+        if 'mock.pstmn.io' in base_url and method.upper() == 'POST' and json_data and endpoint_key in BODY_MATCH_ENDPOINTS:
             headers['x-mock-match-request-body'] = 'true'
 
         print(f"   Method: {method.upper()}")

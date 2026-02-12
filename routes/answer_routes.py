@@ -6,8 +6,16 @@ from flask import Blueprint, request, jsonify
 import requests
 import json
 
-from config import RAG_DEFAULT_MODE, RAG_DEFAULT_MODEL, RAG_DEFAULT_PROMPT, RAG_MAX_SOURCES
+from config import RAG_DEFAULT_MODE, RAG_DEFAULT_MODEL, RAG_DEFAULT_PROMPT, RAG_MAX_SOURCES, DEFAULT_PROMPT_CONFIG
+from services.config_loader import get_rag_settings
+from services.config_service import load_prompts_config
 from services.api_mode_service import APIModeService
+
+# 前端 mode → prompts_config.json 的 key 映射
+MODE_TO_PROMPT_KEY = {
+    'text_generation': 'text_generation',
+    'military_qa': 'military_rag'
+}
 
 # 創建 RAG 問答藍圖
 answer_bp = Blueprint('answer', __name__)
@@ -49,16 +57,25 @@ def get_answer():
         user_input = data.get('user_input', '')
         mode = data.get('mode', RAG_DEFAULT_MODE)
 
-        # 從前端獲取 LLM 模型和 system prompt
-        selected_model = data.get('model', RAG_DEFAULT_MODEL)
-        system_prompt = data.get('system_prompt', RAG_DEFAULT_PROMPT)
+        # model → 從 UI 的 LLM 選單取得
+        rag_settings = get_rag_settings()
+        selected_model = data.get('llm_model', rag_settings.get('default_model', RAG_DEFAULT_MODEL))
+
+        # system prompt → 從 Prompt Manager 的 editable 部分取得
+        prompt_config_name = data.get('prompt_config', DEFAULT_PROMPT_CONFIG)
+        prompt_key = MODE_TO_PROMPT_KEY.get(mode, 'military_rag')
+        system_prompt = _get_rag_system_prompt(prompt_config_name, prompt_key)
 
         print(f"\n【RAG 問答】收到問題: {user_input}")
-        print(f"【使用模型】: {selected_model}")
+        print(f"【模式】: {mode}")
+        print(f"【使用模型】: {selected_model}（來源: UI LLM 選單）")
+        print(f"【Prompt 配置】: {prompt_config_name} → {prompt_key}")
+        print(f"【System Prompt】: {system_prompt}")
 
         # 構建中科院 API 格式的請求
+        stream_mode = rag_settings.get('stream', 0)
         rag_request = {
-            "stream": 0,  # 使用數字 0 (一次回傳完整文本) 而非 False
+            "stream": stream_mode,
             "model": selected_model,
             "messages": [
                 {"role": "system", "content": system_prompt},
@@ -138,3 +155,32 @@ def get_answer():
             'success': False,
             'error': str(e)
         })
+
+
+def _get_rag_system_prompt(config_name, prompt_key):
+    """
+    從 prompts_config.json 讀取 Prompt Manager 的 editable 部分，作為中科院 API 的 system prompt
+
+    參數:
+        config_name: 配置名稱（例如 "預設配置"）
+        prompt_key: prompts_config 中的功能 key（例如 "text_generation", "military_rag"）
+
+    返回:
+        str: editable 部分的 system prompt，若找不到則返回 rag_settings 的 default_prompt
+    """
+    try:
+        config = load_prompts_config()
+
+        if config_name not in config['prompts']:
+            config_name = config.get('default_config', '預設配置')
+
+        prompt_data = config['prompts'].get(config_name, {}).get(prompt_key, {})
+        editable = prompt_data.get('editable', '')
+
+        if editable:
+            return editable
+
+    except Exception as e:
+        print(f"⚠️ 讀取 prompts_config 失敗: {e}")
+
+    return RAG_DEFAULT_PROMPT
