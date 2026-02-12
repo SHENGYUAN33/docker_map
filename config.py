@@ -225,15 +225,48 @@ ENEMY_KEYWORDS = [
 
 # 我方陣營識別關鍵字（廣義，用於指令中的陣營判斷）
 ROC_KEYWORDS = [
-    '國軍', '我方', '我軍', '成功艦', '基隆艦', '沱江艦', '塔江艦',
-    '1101', 'PGG', '批居居', '成功級', 'ROC', 'Chien Kung'
+    # 陣營通稱
+    '國軍', '我方', '我軍', 'ROC',
+    # 中文艦名 / 別名
+    '成功艦', '基隆艦', '沱江艦', '塔江艦', '批居居', '成功級',
+    # 舷號
+    '1101', '1306', '1310', '1401', '1801', '193', '232', '524', '330',
+    '601', '603', '605', '912', '915', '932',
+    # 含前綴舷號
+    'AOE 532', 'CG 601', 'FABG 5', 'FACG 61', 'PFG 1202', 'PGG 618', 'PGG 619',
+    'PGG',
+    # 英文艦名
+    'Cheng Kung', 'Yung Feng', 'Yung Yang', 'Yung Jin', 'Yu Shan',
+    'Keelung', 'Shui Hai', 'Chung Ho', 'Yuen Feng', 'Wu Yi',
+    'Lung Chiang', 'Jing Chiang', 'Dang Chiang',
+    'Chien Yang', 'Han Yang', 'Chi Yang',
+    'Panshih', 'Anping', 'Hai Ou', 'Kuang Hua VI', 'Kang Ding',
+    'Tuo Chiang', 'Ta Chiang', 'Chien Kung',
+    'Pinguin A1',
 ]
 
 # 敵方船艦名稱（窄義，用於 fallback 船艦提取）
 ENEMY_SHIP_NAMES = ['052D', '054A', '055', '大型驅逐艦', '護衛艦']
 
 # 我方船艦名稱（窄義，用於 fallback 船艦提取）
-ROC_SHIP_NAMES = ['成功艦', '基隆艦', '沱江艦', '塔江艦', '1101', 'PGG']
+ROC_SHIP_NAMES = [
+    # 中文艦名
+    '成功艦', '基隆艦', '沱江艦', '塔江艦',
+    # 舷號
+    '1101', '1306', '1310', '1401', '1801', '193', '232', '524', '330',
+    '601', '603', '605', '912', '915', '932',
+    # 含前綴舷號
+    'AOE 532', 'CG 601', 'FABG 5', 'FACG 61', 'PFG 1202', 'PGG 618', 'PGG 619',
+    'PGG',
+    # 英文艦名
+    'Cheng Kung', 'Yung Feng', 'Yung Yang', 'Yung Jin', 'Yu Shan',
+    'Keelung', 'Shui Hai', 'Chung Ho', 'Yuen Feng', 'Wu Yi',
+    'Lung Chiang', 'Jing Chiang', 'Dang Chiang',
+    'Chien Yang', 'Han Yang', 'Chi Yang',
+    'Panshih', 'Anping', 'Hai Ou', 'Kuang Hua VI', 'Kang Ding',
+    'Tuo Chiang', 'Ta Chiang',
+    'Pinguin A1',
+]
 
 # 啟動模擬關鍵字
 SIMULATION_START_KEYWORDS = [

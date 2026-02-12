@@ -4,8 +4,44 @@ LLM 服務模組
 透過 Provider 抽象層支援 Ollama / OpenAI / Anthropic 等多個 LLM 提供者
 """
 import json
+import os
 from config import DEFAULT_LLM_MODEL
 from services.llm_providers import get_provider
+
+# 預設 Prompt 檔案路徑
+_DEFAULT_PROMPTS_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'default_prompts.json')
+_default_prompts_cache = None
+
+
+def _load_default_prompts():
+    """載入 default_prompts.json 並快取"""
+    global _default_prompts_cache
+    if _default_prompts_cache is None:
+        try:
+            with open(_DEFAULT_PROMPTS_FILE, 'r', encoding='utf-8') as f:
+                _default_prompts_cache = json.load(f)
+            print(f"✅ 已載入預設 Prompt 檔案: {_DEFAULT_PROMPTS_FILE}")
+        except Exception as e:
+            print(f"⚠️ 無法載入 default_prompts.json: {e}，將使用最小化內建 Prompt")
+            _default_prompts_cache = {}
+    return _default_prompts_cache
+
+
+def _get_default_prompt(function_name):
+    """
+    取得指定功能的預設 system prompt（從 default_prompts.json）
+
+    參數:
+        function_name: 功能名稱（如 "import_scenario"）
+
+    返回:
+        str: editable + fixed 組合的完整 prompt，若檔案不可用則返回 None
+    """
+    prompts = _load_default_prompts()
+    if function_name in prompts:
+        entry = prompts[function_name]
+        return entry.get('editable', '') + entry.get('fixed', '')
+    return None
 
 
 class LLMService:
@@ -72,26 +108,7 @@ class LLMService:
             dict: {"tool": "import_scenario", "parameters": {"enemy": [...], "roc": [...]}} 或 None
         """
         model = model or DEFAULT_LLM_MODEL
-        if custom_prompt:
-            system_prompt = custom_prompt
-        else:
-            # Fallback: 當配置文件不可用時使用內建 Prompt
-            system_prompt = """你是一個精確的軍事船艦座標參數提取器。
-
-【核心規則】
-1. 僅提取指令中明確提到的船艦
-2. 陣營判斷：
-   - 解放軍/敵軍/中國/共軍 → enemy
-   - 國軍/我方/我軍/中華民國 → roc
-3. "所有"或"全部"某陣營 → 使用空陣列 []
-4. 沒提到的陣營不要出現在參數中
-5. 保留原始船艦名稱，不要翻譯
-
-【陣營判斷指南】
-- 052D, 054A, 055, 056, 驅逐艦(未指定) → enemy
-- 成功艦, 基隆艦, 沱江艦, 塔江艦, PGG, 1101, 1103, 1105, 1106, 1203, 1205, 1206, 1301, 1303, 1305, 1306, 1401 → roc
-- 如果不確定編號歸屬，根據用戶指令中的陣營關鍵字判斷
-"""
+        system_prompt = custom_prompt or _get_default_prompt('import_scenario')
 
         tools = [
             {
@@ -135,26 +152,7 @@ class LLMService:
             dict: {"tool": "star_scenario", "parameters": {}} 或 {"tool": "unknown", "parameters": {}}
         """
         model = model or DEFAULT_LLM_MODEL
-        if custom_prompt:
-            system_prompt = custom_prompt
-        else:
-            system_prompt = """你是一個軍事模擬啟動識別器。
-
-【任務】
-判斷用戶是否要求啟動軍事兵棋推演模擬。
-
-【觸發關鍵字】
-- 開始模擬
-- 開始進行兵推
-- 開始戰鬥
-- 執行CMO兵推
-- 啟動模擬
-- 開始兵推
-- 啟動兵推
-- 進行模擬
-
-如果用戶指令包含上述任何關鍵字，應該調用 start_scenario 函數。
-"""
+        system_prompt = custom_prompt or _get_default_prompt('star_scenario')
 
         tools = [
             {
@@ -193,24 +191,7 @@ class LLMService:
             dict: {"tool": "get_wta", "parameters": {"enemy": [...]}} 或 None
         """
         model = model or DEFAULT_LLM_MODEL
-        if custom_prompt:
-            system_prompt = custom_prompt
-        else:
-            system_prompt = """你是一個武器分派參數提取器。
-
-【任務】
-從用戶指令中提取要查詢武器分派結果的參數。支援兩種查詢方式：
-1. 按敵艦名稱查詢 → 使用 enemy 參數
-2. 按武器分派表的列編號查詢 → 使用 wta_table_row 參數
-
-【規則】
-1. 如果用戶提到特定敵艦名稱（如 052D、054A、055）→ 使用 enemy 參數
-2. 如果用戶說「所有」、「全部」、「全部的」→ 使用 enemy 參數，傳空陣列 []
-3. 如果用戶提到「第N筆」、「第N列」、「第N條」、「編號N」→ 使用 wta_table_row 參數，提取數字
-4. 保留原始船艦名稱，不要翻譯
-5. 嚴禁使用 "all" 字串
-6. enemy 和 wta_table_row 只能擇一使用，不要同時使用
-"""
+        system_prompt = custom_prompt or _get_default_prompt('get_wta')
 
         tools = [
             {
@@ -253,26 +234,7 @@ class LLMService:
             dict: {"tool": "get_track", "parameters": {}} 或 None
         """
         model = model or DEFAULT_LLM_MODEL
-        if custom_prompt:
-            system_prompt = custom_prompt
-        else:
-            system_prompt = """你是一個軍事船艦航跡繪製識別器。
-
-【任務】
-判斷用戶是否要求顯示船艦航跡/軌跡。
-
-【觸發關鍵字】
-- 顯示航跡
-- 顯示軌跡
-- 繪製航跡
-- 繪製軌跡
-- 顯示航行軌跡
-- 顯示航行路徑
-- 顯示移動路徑
-- 顯示船艦軌跡
-
-如果用戶指令包含上述任何關鍵字，應該調用 get_track 函數。
-"""
+        system_prompt = custom_prompt or _get_default_prompt('get_track')
 
         tools = [
             {
@@ -305,19 +267,7 @@ class LLMService:
             dict: {"tool": "get_answer", "parameters": {"question": "..."}} 或 None
         """
         model = model or DEFAULT_LLM_MODEL
-        if custom_prompt:
-            system_prompt = custom_prompt
-        else:
-            system_prompt = """你是一個軍事問題提取器。
-
-【任務】
-將用戶的軍事相關問題原封不動地提取出來，準備查詢軍事知識資料庫。
-
-【規則】
-1. 完整保留用戶的問題，不要修改或翻譯
-2. 不要添加額外的解釋或內容
-3. 保持原有的標點符號和格式
-"""
+        system_prompt = custom_prompt or _get_default_prompt('get_answer')
 
         tools = [
             {
