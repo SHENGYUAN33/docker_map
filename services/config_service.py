@@ -102,6 +102,11 @@ def get_system_prompt(config_name, function_name):
     func_prompt = prompt_config[function_name]
     full_prompt = func_prompt['editable'] + func_prompt['fixed']
 
+    # 動態注入陣營判斷指南（僅 import_scenario 需要，資料來自 ship_registry.json）
+    if function_name == 'import_scenario':
+        from utils.ship_registry import generate_faction_guide
+        full_prompt += generate_faction_guide()
+
     print(f"  ✅ 成功獲取 System Prompt")
     print(f"  📏 可編輯部分長度: {len(func_prompt['editable'])} 字元")
     print(f"  📏 固定部分長度: {len(func_prompt['fixed'])} 字元")

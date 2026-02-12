@@ -1,0 +1,44 @@
+{
+  "_comment": "船艦註冊表 - 單一資料來源 (Single Source of Truth)",
+  "_usage": "新增/修改船艦只需編輯此檔案，系統啟動時自動生成關鍵字列表和 LLM 陣營判斷指南",
+  "roc": {
+    "faction_terms": ["國軍", "我方", "我軍", "ROC", "友軍", "中華民國"],
+    "additional_keywords": ["PGG", "批居居", "成功級"],
+    "ships": [
+      { "hull_number": "1101", "name": "Cheng Kung", "chinese_name": "成功艦" },
+      { "hull_number": "1306", "name": "Yung Feng", "chinese_name": null },
+      { "hull_number": "1306", "name": "Yung Yang", "chinese_name": null },
+      { "hull_number": "1310", "name": "Yung Jin", "chinese_name": null },
+      { "hull_number": "1401", "name": "Yu Shan", "chinese_name": null },
+      { "hull_number": "1801", "name": "Keelung", "chinese_name": "基隆艦" },
+      { "hull_number": "193", "name": "Shui Hai", "chinese_name": null },
+      { "hull_number": "232", "name": "Chung Ho", "chinese_name": null },
+      { "hull_number": "524", "name": "Yuen Feng", "chinese_name": null },
+      { "hull_number": "330", "name": "Wu Yi", "chinese_name": null },
+      { "hull_number": "601", "name": "Lung Chiang", "chinese_name": null },
+      { "hull_number": "603", "name": "Jing Chiang", "chinese_name": null },
+      { "hull_number": "605", "name": "Dang Chiang", "chinese_name": null },
+      { "hull_number": "912", "name": "Chien Yang", "chinese_name": null },
+      { "hull_number": "915", "name": "Han Yang", "chinese_name": null },
+      { "hull_number": "932", "name": "Chi Yang", "chinese_name": null },
+      { "hull_number": "AOE 532", "name": "Panshih", "chinese_name": null },
+      { "hull_number": "CG 601", "name": "Anping", "chinese_name": null },
+      { "hull_number": "FABG 5", "name": "Hai Ou", "chinese_name": null },
+      { "hull_number": "FACG 61", "name": "Kuang Hua VI", "chinese_name": null },
+      { "hull_number": "PFG 1202", "name": "Kang Ding", "chinese_name": null },
+      { "hull_number": "PGG 618", "name": "Tuo Chiang", "chinese_name": "沱江艦" },
+      { "hull_number": "PGG 619", "name": "Ta Chiang", "chinese_name": "塔江艦" },
+      { "hull_number": null, "name": "Pinguin A1", "chinese_name": null }
+    ]
+  },
+  "enemy": {
+    "faction_terms": ["解放軍", "敵軍", "中國", "共軍", "敵方"],
+    "additional_keywords": ["驅逐艦(未指定)", "護衛艦(未指定)"],
+    "ships": [
+      { "name": "052D", "aliases": ["大型驅逐艦"] },
+      { "name": "054A", "aliases": ["護衛艦"] },
+      { "name": "055", "aliases": [] },
+      { "name": "056", "aliases": [] }
+    ]
+  }
+}

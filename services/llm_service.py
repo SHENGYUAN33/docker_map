@@ -40,7 +40,12 @@ def _get_default_prompt(function_name):
     prompts = _load_default_prompts()
     if function_name in prompts:
         entry = prompts[function_name]
-        return entry.get('editable', '') + entry.get('fixed', '')
+        prompt = entry.get('editable', '') + entry.get('fixed', '')
+        # 動態注入陣營判斷指南（僅 import_scenario 需要，資料來自 ship_registry.json）
+        if function_name == 'import_scenario':
+            from utils.ship_registry import generate_faction_guide
+            prompt += generate_faction_guide()
+        return prompt
     return None
 
 

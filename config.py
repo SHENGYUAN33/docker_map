@@ -3,6 +3,7 @@
 用途：定義 API URL、目錄路徑、飛彈顏色映射、地圖參數等全域配置
 支持 .env 環境變數覆寫
 """
+import json
 import os
 import threading
 from dotenv import load_dotenv
@@ -216,57 +217,59 @@ WTA_TABLE_ALT_ROW_BG = '#f9f9f9'
 
 # ==================== 陣營關鍵字配置 ====================
 # 用途：用於 LLM fallback 解析和參數修正
+# 資料來源：ship_registry.json（單一資料來源，新增船艦只需編輯該檔案）
+# 注意：直接載入 JSON 而非透過 utils.ship_registry，避免與 utils/__init__.py 的循環匯入
 
-# 敵方陣營識別關鍵字（廣義，用於指令中的陣營判斷）
-ENEMY_KEYWORDS = [
-    '解放軍', '敵軍', '中國', '052D', '054A', '055',
-    '大型驅逐艦', '護衛艦', '敵方', '共軍'
-]
+def _load_ship_registry():
+    """從 ship_registry.json 載入船艦資料（config.py 內部用）"""
+    _registry_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ship_registry.json')
+    try:
+        with open(_registry_file, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"[config] WARNING: Cannot load ship_registry.json: {e}")
+        return {"roc": {"faction_terms": [], "additional_keywords": [], "ships": []},
+                "enemy": {"faction_terms": [], "additional_keywords": [], "ships": []}}
 
-# 我方陣營識別關鍵字（廣義，用於指令中的陣營判斷）
-ROC_KEYWORDS = [
-    # 陣營通稱
-    '國軍', '我方', '我軍', 'ROC',
-    # 中文艦名 / 別名
-    '成功艦', '基隆艦', '沱江艦', '塔江艦', '批居居', '成功級',
-    # 舷號
-    '1101', '1306', '1310', '1401', '1801', '193', '232', '524', '330',
-    '601', '603', '605', '912', '915', '932',
-    # 含前綴舷號
-    'AOE 532', 'CG 601', 'FABG 5', 'FACG 61', 'PFG 1202', 'PGG 618', 'PGG 619',
-    'PGG',
-    # 英文艦名
-    'Cheng Kung', 'Yung Feng', 'Yung Yang', 'Yung Jin', 'Yu Shan',
-    'Keelung', 'Shui Hai', 'Chung Ho', 'Yuen Feng', 'Wu Yi',
-    'Lung Chiang', 'Jing Chiang', 'Dang Chiang',
-    'Chien Yang', 'Han Yang', 'Chi Yang',
-    'Panshih', 'Anping', 'Hai Ou', 'Kuang Hua VI', 'Kang Ding',
-    'Tuo Chiang', 'Ta Chiang', 'Chien Kung',
-    'Pinguin A1',
-]
+def _dedupe_list(items):
+    """去重並保持順序"""
+    seen = set()
+    return [x for x in items if x and x not in seen and not seen.add(x)]
+
+_ship_registry = _load_ship_registry()
+
+# 敵方關鍵字
+_enemy = _ship_registry['enemy']
+ENEMY_KEYWORDS = _dedupe_list(
+    list(_enemy['faction_terms']) +
+    [s['name'] for s in _enemy['ships']] +
+    [a for s in _enemy['ships'] for a in s.get('aliases', [])] +
+    _enemy.get('additional_keywords', [])
+)
+
+# 我方關鍵字
+_roc = _ship_registry['roc']
+ROC_KEYWORDS = _dedupe_list(
+    list(_roc['faction_terms']) +
+    [s['chinese_name'] for s in _roc['ships'] if s.get('chinese_name')] +
+    _roc.get('additional_keywords', []) +
+    [s['hull_number'] for s in _roc['ships'] if s.get('hull_number')] +
+    [s['name'] for s in _roc['ships']]
+)
 
 # 敵方船艦名稱（窄義，用於 fallback 船艦提取）
-ENEMY_SHIP_NAMES = ['052D', '054A', '055', '大型驅逐艦', '護衛艦']
+ENEMY_SHIP_NAMES = _dedupe_list(
+    [s['name'] for s in _enemy['ships']] +
+    [a for s in _enemy['ships'] for a in s.get('aliases', [])]
+)
 
 # 我方船艦名稱（窄義，用於 fallback 船艦提取）
-ROC_SHIP_NAMES = [
-    # 中文艦名
-    '成功艦', '基隆艦', '沱江艦', '塔江艦',
-    # 舷號
-    '1101', '1306', '1310', '1401', '1801', '193', '232', '524', '330',
-    '601', '603', '605', '912', '915', '932',
-    # 含前綴舷號
-    'AOE 532', 'CG 601', 'FABG 5', 'FACG 61', 'PFG 1202', 'PGG 618', 'PGG 619',
-    'PGG',
-    # 英文艦名
-    'Cheng Kung', 'Yung Feng', 'Yung Yang', 'Yung Jin', 'Yu Shan',
-    'Keelung', 'Shui Hai', 'Chung Ho', 'Yuen Feng', 'Wu Yi',
-    'Lung Chiang', 'Jing Chiang', 'Dang Chiang',
-    'Chien Yang', 'Han Yang', 'Chi Yang',
-    'Panshih', 'Anping', 'Hai Ou', 'Kuang Hua VI', 'Kang Ding',
-    'Tuo Chiang', 'Ta Chiang',
-    'Pinguin A1',
-]
+ROC_SHIP_NAMES = _dedupe_list(
+    [s['chinese_name'] for s in _roc['ships'] if s.get('chinese_name')] +
+    _roc.get('additional_keywords', []) +
+    [s['hull_number'] for s in _roc['ships'] if s.get('hull_number')] +
+    [s['name'] for s in _roc['ships']]
+)
 
 # 啟動模擬關鍵字
 SIMULATION_START_KEYWORDS = [

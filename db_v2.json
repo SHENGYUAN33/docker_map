@@ -557,11 +557,11 @@
     }
   ],
   "simulation_status": {
-    "is_running": true,
-    "is_completed": false,
-    "started_at": "2026-02-12T07:11:33.266Z",
-    "completed_at": null,
-    "last_message": null
+    "is_running": false,
+    "is_completed": true,
+    "started_at": "2026-02-12T09:15:31.509Z",
+    "completed_at": "2026-02-12T09:16:42.041Z",
+    "last_message": "mock callback from trigger"
   },
   "wta_results": {
     "all": [
