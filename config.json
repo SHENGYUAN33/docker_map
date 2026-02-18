@@ -1,4 +1,5 @@
 {
   "show_source_btn": false,
-  "enable_animation": false
+  "enable_animation": false,
+  "enable_3d_globe": true
 }

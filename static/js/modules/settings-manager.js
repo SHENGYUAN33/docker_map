@@ -10,7 +10,8 @@ export class SettingsManager {
     this.systemSettings = {
       show_source_btn: false,
       enable_feedback: true,
-      enable_animation: false
+      enable_animation: false,
+      enable_3d_globe: false
     };
     this.apiMode = 'local';
     this.streamEnabled = false;
@@ -27,7 +28,8 @@ export class SettingsManager {
       if (isNewSession) {
         await this.apiClient.updateSystemSettings({
           show_source_btn: false,
-          enable_animation: false
+          enable_animation: false,
+          enable_3d_globe: false
         });
         sessionStorage.setItem('settings_initialized', 'true');
         console.log('🔄 新 session，已重置設定為預設值');
@@ -49,17 +51,33 @@ export class SettingsManager {
           document.getElementById('setting-enable-animation').checked = animationEnabled;
           console.log('🎬 動畫生成開關設定為:', animationEnabled, '(來自 config.json)');
         }
+
+        // 設置 3D 地球儀開關
+        if (document.getElementById('setting-enable-3d')) {
+          const globe3DEnabled = result.settings.enable_3d_globe === true;
+          document.getElementById('setting-enable-3d').checked = globe3DEnabled;
+          // 顯示/隱藏 3D 切換按鈕
+          const toggleBtn = document.getElementById('map-dimension-toggle');
+          if (toggleBtn) toggleBtn.style.display = globe3DEnabled ? 'block' : 'none';
+          console.log('🌐 3D 地球儀開關設定為:', globe3DEnabled);
+        }
+
         console.log('✅ 系統設定已載入:', result.settings);
       }
     } catch (error) {
       console.error('❌ 載入設定錯誤:', error);
       // API 失敗時使用保底默認值（動畫關閉更安全）
-      this.systemSettings = { show_source_btn: false, enable_feedback: true, enable_animation: false };
+      this.systemSettings = { show_source_btn: false, enable_feedback: true, enable_animation: false, enable_3d_globe: false };
       document.getElementById('setting-show-source').checked = false;
       if (document.getElementById('setting-enable-animation')) {
         document.getElementById('setting-enable-animation').checked = false;
         console.log('⚠️ 使用默認值：動畫生成關閉');
       }
+      if (document.getElementById('setting-enable-3d')) {
+        document.getElementById('setting-enable-3d').checked = false;
+      }
+      const toggleBtn = document.getElementById('map-dimension-toggle');
+      if (toggleBtn) toggleBtn.style.display = 'none';
     }
   }
 
@@ -84,15 +102,23 @@ export class SettingsManager {
     const showSourceBtn = document.getElementById('setting-show-source').checked;
     const enableAnimationEl = document.getElementById('setting-enable-animation');
     const enableAnimation = enableAnimationEl ? enableAnimationEl.checked : true;
+    const enable3DEl = document.getElementById('setting-enable-3d');
+    const enable3DGlobe = enable3DEl ? enable3DEl.checked : false;
 
     try {
       const result = await this.apiClient.updateSystemSettings({
         show_source_btn: showSourceBtn,
-        enable_animation: enableAnimation
+        enable_animation: enableAnimation,
+        enable_3d_globe: enable3DGlobe
       });
 
       if (result.success) {
         this.systemSettings = result.settings;
+
+        // 更新 3D 切換按鈕可見性
+        const toggleBtn = document.getElementById('map-dimension-toggle');
+        if (toggleBtn) toggleBtn.style.display = enable3DGlobe ? 'block' : 'none';
+
         this.uiManager.showNotification('設定已更新', 'success');
       }
     } catch (error) {

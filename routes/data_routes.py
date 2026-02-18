@@ -176,6 +176,7 @@ def get_wta():
             'success': True,
             'answer': answer,
             'map_url': f'/maps/{map_filename}',
+            'map_data': map_state.to_json(),
             'wta_table_html': table_html,
             'wta_data': api_data
         })
@@ -418,6 +419,7 @@ def get_track():
             'success': True,
             'answer': answer,
             'map_url': f'/maps/{map_filename}',
+            'map_data': map_state.to_json(),
             'track_data': api_data,
             'ship_count': ship_count,
             'llm_model_used': llm_model

@@ -1,6 +1,6 @@
 {
   "api_settings": {
-    "api_mode": "local",
+    "api_mode": "real",
     "real_api": {
       "base_url": "http://YOUR_API_HOST/api/v1",
       "timeout": 300,

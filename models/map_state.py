@@ -150,6 +150,22 @@ class MapState:
             layers.add(LAYER_WTA)
         return list(layers)
 
+    def to_json(self):
+        """
+        序列化地圖狀態為 JSON 可序列化字典
+        用途：供前端 3D Cesium 渲染器使用
+
+        返回:
+            dict: 包含 markers, lines, tracks, wta_animation_data, layers
+        """
+        return {
+            'markers': self.markers,
+            'lines': self.lines,
+            'tracks': self.tracks,
+            'wta_animation_data': self.wta_animation_data,
+            'layers': self.get_layers()
+        }
+
     def create_map(self, wta_animation_data=None):
         """
         創建包含所有歷史內容的 Folium 地圖（使用本地 MIL-STD-2525 軍事符號）

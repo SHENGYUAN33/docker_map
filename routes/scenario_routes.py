@@ -270,6 +270,7 @@ def import_scenario():
             'success': True,
             'answer': answer,
             'map_url': f'/maps/{map_filename}',
+            'map_data': map_state.to_json(),
             'ship_data': api_data,
             'parameters': params,
             'llm_model_used': llm_model

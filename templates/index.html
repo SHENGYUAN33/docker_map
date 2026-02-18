@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- html2canvas 庫 - 用於截圖功能 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Cesium.js 3D 地球儀（免費開源，無需 Token） -->
+  <link id="cesium-css" rel="stylesheet" href="https://cesium.com/downloads/cesiumjs/releases/1.124/Build/Cesium/Widgets/widgets.css">
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.124/Build/Cesium/Cesium.js"></script>
+  <!-- milsymbol 軍事符號庫（供 3D Cesium billboard 使用） -->
+  <script src="/static/js/milsymbol.js"></script>
   <title>軍事兵推 AI 系統 v6.0 - Hermes-2-Pro Agent</title>
 
   <style>
@@ -974,6 +979,22 @@
                 srcdoc="<!DOCTYPE html>&#10;<html><head>&#10;<meta charset='utf-8'/>&#10;<meta name='viewport' content='width=device-width,initial-scale=1'/>&#10;<link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/>&#10;<style>&#10;html,body{height:100%;margin:0}&#10;#m{height:100%}&#10;</style>&#10;</head>&#10;<body>&#10;<div id='m'></div>&#10;<script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>&#10;<script>&#10;(function(){&#10;  function fallback(msg){&#10;    document.body.innerHTML = '<div style=&quot;padding:16px;font-family:sans-serif;color:#1e3c72;&quot;>'+msg+'</div>';&#10;  }&#10;  if (typeof L === 'undefined') {&#10;    fallback('底圖載入失敗（可能是離線）。請直接執行功能產生 Folium 地圖。');&#10;    return;&#10;  }&#10;  try{&#10;    var map=L.map('m',{zoomControl:true}).setView([23.7,121.0],7);&#10;    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&amp;copy; OpenStreetMap'}).addTo(map);&#10;  }catch(e){&#10;    fallback('底圖初始化失敗。請直接執行功能產生 Folium 地圖。');&#10;  }&#10;})();&#10;</script>&#10;</body></html>"
                 style="width: 100%; height: 100%; border: none; display: block;">
               </iframe>
+              <!-- 3D Cesium 地球儀容器 -->
+              <div id="cesium-container" style="display:none; position:absolute; inset:0; width:100%; height:100%;"></div>
+              <!-- 3D 切換按鈕（僅在 enable_3d_globe 啟用時顯示） -->
+              <div id="map-dimension-toggle" style="position:absolute; top:10px; left:10px; z-index:1001; display:none;">
+                <button id="toggle-3d-btn" onclick="toggle3DMode()"
+                  style="padding:8px 16px; background:linear-gradient(135deg,#1e3c72,#2a5298); color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.3); font-size:13px;">
+                  🌐 切換 3D 地球儀
+                </button>
+              </div>
+              <!-- 3D 狀態列（SinicaView 風格） -->
+              <div id="cesium-status-bar" style="display:none; position:absolute; bottom:0; left:0; right:0; z-index:999; background:rgba(10,10,26,0.85); color:#aab; padding:6px 16px; font-family:'Consolas','Monaco',monospace; font-size:12px; border-top:1px solid rgba(100,100,180,0.3);">
+                <span>經度: <span id="status-lon">-</span></span>
+                <span style="margin-left:20px;">緯度: <span id="status-lat">-</span></span>
+                <span style="margin-left:20px;">高度: <span id="status-alt">-</span> m</span>
+                <span style="margin-left:20px;">FPS: <span id="status-fps">-</span></span>
+              </div>
             </div>
           </div>
 
@@ -1024,6 +1045,15 @@
         <label>動畫生成開關</label>
         <label class="toggle-switch">
           <input type="checkbox" id="setting-enable-animation" onchange="updateSettings()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <!-- 3D 地球儀開關 -->
+      <div class="setting-item">
+        <label>3D 地球儀模式</label>
+        <label class="toggle-switch">
+          <input type="checkbox" id="setting-enable-3d" onchange="updateSettings()">
           <span class="toggle-slider"></span>
         </label>
       </div>

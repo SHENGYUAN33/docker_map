@@ -72,7 +72,9 @@ CONFIG_FILE = "config.json"
 # config.json 預設值（每次啟動時重置用）
 CONFIG_DEFAULTS = {
     "show_source_btn": False,
-    "enable_animation": False
+    "enable_animation": False,
+    "enable_3d_globe": False,
+    "cesium_ion_token": ""
 }
 
 # ==================== 會話管理配置 ====================
@@ -160,6 +162,16 @@ WAVE_INTERVAL = 1000
 
 # 動畫預設開關
 ENABLE_ANIMATION_DEFAULT = True
+
+# ==================== 3D 地球儀配置（完全免費，無需 Token）====================
+# 飛彈 3D 弧線最高海拔（公尺）
+MISSILE_3D_MAX_ALTITUDE = 50000
+
+# 攻擊弧線採樣點數（越多越平滑，影響效能）
+ATTACK_ARC_SEGMENTS = 50
+
+# 3D 軍事符號 Billboard 大小（像素）
+MIL_SYMBOL_3D_SIZE = 48
 
 # ==================== 陣營顏色配置 ====================
 # 用途：定義不同陣營在地圖上的顯示顏色

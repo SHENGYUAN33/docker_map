@@ -16,6 +16,7 @@ import { FeedbackManager } from './modules/feedback-manager.js';
 import { COPManager } from './modules/cop-manager.js';
 import { SettingsManager } from './modules/settings-manager.js';
 import { SimulationManager } from './modules/simulation-manager.js';
+import { CesiumManager } from './modules/cesium-manager.js';
 
 /**
  * 應用程式狀態
@@ -49,6 +50,7 @@ class Application {
       this.uiManager,
       this.messageManager
     );
+    this.cesiumManager = new CesiumManager(this.settingsManager);
 
     // 暴露全域函數供 HTML 調用
     this.exposeGlobalFunctions();
@@ -168,6 +170,20 @@ class Application {
       button,
       this.settingsManager.getSystemSettings()
     );
+
+    // 3D 地球儀切換
+    window.toggle3DMode = () => this.toggle3DMode();
+  }
+
+  /**
+   * 切換 2D / 3D 地圖模式
+   */
+  async toggle3DMode() {
+    if (this.cesiumManager.is3DActive) {
+      this.cesiumManager.deactivate();
+    } else {
+      await this.cesiumManager.activate();
+    }
   }
 
   /**
@@ -275,6 +291,12 @@ class Application {
         // 功能一：顯示地圖
         if (result.map_url) {
           this.mapManager.showMap(result.map_url);
+
+          // 3D 模式：傳遞資料給 Cesium 渲染器
+          if (result.map_data) {
+            this.cesiumManager.renderMapData(result.map_data);
+          }
+
           if (this.state.currentMode === 'import_scenario' ||
               this.state.currentMode === 'get_wta' ||
               this.state.currentMode === 'get_track') {

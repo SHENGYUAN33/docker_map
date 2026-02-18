@@ -51,7 +51,15 @@ print("🔧 正在初始化系統目錄...")
 ensure_directories()
 
 # 重置 config.json 為預設值（確保每次啟動回到初始狀態）
-save_config(CONFIG_DEFAULTS)
+# 保留不應被重置的持久設定（如 cesium_ion_token）
+from services import load_config as _load_existing
+_existing = _load_existing()
+_reset_config = dict(CONFIG_DEFAULTS)
+_persistent_keys = ["cesium_ion_token"]
+for _key in _persistent_keys:
+    if _key in _existing and _existing[_key]:
+        _reset_config[_key] = _existing[_key]
+save_config(_reset_config)
 
 # ==================== 註冊所有路由藍圖 ====================
 # 用途：將所有功能模組的路由註冊到 Flask app
