@@ -1,7 +1,7 @@
 {
   "show_source_btn": false,
-  "enable_animation": true,
-  "enable_3d_globe": true,
+  "enable_animation": false,
+  "enable_3d_globe": false,
   "cesium_ion_token": "",
   "google_maps_api_key": "AIzaSyBCFhSG2jtlF2oZyvNnZc0PNyhRZwiahUo",
   "custom_layers": []

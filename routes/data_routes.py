@@ -88,9 +88,16 @@ def get_wta():
         params = decision['parameters']
         print(f"【提取參數】: {params}")
 
+        # 清理空陣列參數，避免送出多餘欄位導致 Mock Server 匹配失敗
+        api_params = {k: v for k, v in params.items() if v is not None and v != []}
+        if not api_params:
+            # 若全部清空，預設查詢所有敵艦
+            api_params = {'enemy': []}
+        print(f"【送出 API 參數】: {api_params}")
+
         # 步驟 2: 調用 API（根據 api_mode 自動切換來源）
         try:
-            res = APIModeService.call_api("get_wta", params)
+            res = APIModeService.call_api("get_wta", api_params)
 
             if res.status_code != 200:
                 api_data = res.json()

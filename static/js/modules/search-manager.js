@@ -75,15 +75,20 @@ export class SearchManager {
    * @param {Object} ship - 船艦物件 {name, location, type}
    */
   flyToShip(ship) {
+    if (!ship || !ship.location) {
+      console.warn('flyToShip: 無效的船艦資料', ship);
+      return;
+    }
     const [lat, lon] = ship.location;
+    console.log(`🔍 飛到船艦: ${ship.name} [${lat}, ${lon}]`);
 
-    if (this.cesiumManager && this.cesiumManager.is3DActive) {
-      // 3D 模式：Cesium camera flyTo
+    if (this.cesiumManager && this.cesiumManager.is3DActive && this.cesiumManager.viewer) {
+      // 3D 模式：Cesium camera flyTo（近距離俯瞰船艦）
       this.cesiumManager.viewer.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(lon, lat, 50000),
+        destination: Cesium.Cartesian3.fromDegrees(lon, lat, 80000),
         orientation: {
           heading: 0,
-          pitch: Cesium.Math.toRadians(-45),
+          pitch: Cesium.Math.toRadians(-90),
           roll: 0
         },
         duration: 2
@@ -96,7 +101,7 @@ export class SearchManager {
           type: 'flyTo',
           lat: lat,
           lon: lon,
-          zoom: 10
+          zoom: 12
         }, '*');
       }
     }

@@ -424,7 +424,7 @@ export class CesiumManager {
         height: MIL_SYMBOL_3D_SIZE,
         verticalOrigin: Cesium.VerticalOrigin.CENTER,
         horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-        eyeOffset: new Cesium.Cartesian3(0, 0, -50)
+        disableDepthTestDistance: Number.POSITIVE_INFINITY
       };
     } else {
       // 降級：彩色圓點
@@ -432,7 +432,8 @@ export class CesiumManager {
         pixelSize: 12,
         color: isEnemy ? Cesium.Color.RED : Cesium.Color.BLUE,
         outlineColor: Cesium.Color.WHITE,
-        outlineWidth: 2
+        outlineWidth: 2,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY
       };
     }
 
@@ -1265,6 +1266,8 @@ export class CesiumManager {
         weapon: r.weapon,
         trailEntity: null,
         headEntity: null,
+        _currentPositions: null,
+        _currentHeadPositions: null,
         completed: false
       };
     });
@@ -1366,7 +1369,12 @@ export class CesiumManager {
         this.layerSources.wta.entities.remove(line.trailEntity);
         line.trailEntity = null;
       }
+      if (line.headEntity) {
+        this.layerSources.wta.entities.remove(line.headEntity);
+        line.headEntity = null;
+      }
       line._currentPositions = null;
+      line._currentHeadPositions = null;
       line.completed = false;
     }
 
@@ -1419,14 +1427,21 @@ export class CesiumManager {
       if (currentTime < line.startTime) continue;
 
       if (currentTime >= line.endTime) {
-        // 完成：移除動態 polyline，繪製靜態完成弧線
+        // 完成：將尾跡和箭頭設為最終位置，entity 不動（無縫銜接，不閃爍）
         if (!line.completed) {
           line.completed = true;
-          if (line.trailEntity) {
-            ds.entities.remove(line.trailEntity);
-            line.trailEntity = null;
+          const fullPositions = [];
+          for (let i = 0; i <= ATTACK_ARC_SEGMENTS; i++) {
+            const t = i / ATTACK_ARC_SEGMENTS;
+            const lat = line.startLat + (line.endLat - line.startLat) * t;
+            const lon = line.startLon + (line.endLon - line.startLon) * t;
+            const alt = MISSILE_3D_MAX_ALTITUDE * 4 * t * (1 - t);
+            fullPositions.push(Cesium.Cartesian3.fromDegrees(lon, lat, alt));
           }
-          this._drawCompletedArc(line, ds);
+          // 尾跡覆蓋全程（確保連到目標），箭頭段疊在最後 15%
+          const splitIdx = Math.max(1, Math.floor(fullPositions.length * 0.85));
+          line._currentPositions = fullPositions;
+          line._currentHeadPositions = fullPositions.slice(splitIdx);
         }
         continue;
       }
@@ -1439,32 +1454,43 @@ export class CesiumManager {
 
   _animateMissile(line, progress, ds) {
     const t = progress;
-    const lat = line.startLat + (line.endLat - line.startLat) * t;
-    const lon = line.startLon + (line.endLon - line.startLon) * t;
-    const alt = MISSILE_3D_MAX_ALTITUDE * 4 * t * (1 - t);
-    const headPos = Cesium.Cartesian3.fromDegrees(lon, lat, alt);
 
-    // 計算尾跡位置（含飛彈頭位置）
+    // 計算完整尾跡到當前位置的所有採樣點
     const segments = Math.max(1, Math.floor(t * ATTACK_ARC_SEGMENTS));
-    const trailPositions = [];
+    const allPositions = [];
     for (let i = 0; i <= segments; i++) {
       const tt = i / ATTACK_ARC_SEGMENTS;
       const tlat = line.startLat + (line.endLat - line.startLat) * tt;
       const tlon = line.startLon + (line.endLon - line.startLon) * tt;
       const talt = MISSILE_3D_MAX_ALTITUDE * 4 * tt * (1 - tt);
-      trailPositions.push(Cesium.Cartesian3.fromDegrees(tlon, tlat, talt));
+      allPositions.push(Cesium.Cartesian3.fromDegrees(tlon, tlat, talt));
     }
-    trailPositions.push(headPos);
+    // 加入精確的飛彈頭位置
+    const headLat = line.startLat + (line.endLat - line.startLat) * t;
+    const headLon = line.startLon + (line.endLon - line.startLon) * t;
+    const headAlt = MISSILE_3D_MAX_ALTITUDE * 4 * t * (1 - t);
+    allPositions.push(Cesium.Cartesian3.fromDegrees(headLon, headLat, headAlt));
 
-    // 更新動態位置（CallbackProperty 每幀自動讀取）
-    line._currentPositions = trailPositions;
+    // 尾跡覆蓋全程（確保線條連到目標），箭頭段疊在最後 15% 上方
+    const splitIdx = Math.max(1, Math.floor(allPositions.length * 0.85));
+    line._currentPositions = allPositions;
+    line._currentHeadPositions = allPositions.slice(splitIdx);
 
     if (!line.trailEntity) {
-      // 首次建立：用 CallbackProperty 讓 Cesium 知道位置是動態的
+      // 尾跡：實色粗線（不漸縮，全程等寬）
       line.trailEntity = ds.entities.add({
         polyline: {
           positions: new Cesium.CallbackProperty(() => line._currentPositions, false),
-          width: 22,
+          width: 6,
+          material: Cesium.Color.fromCssColorString(line.color)
+        }
+      });
+
+      // 箭頭段：短段 PolylineArrow（箭頭佔比大，清晰可見）
+      line.headEntity = ds.entities.add({
+        polyline: {
+          positions: new Cesium.CallbackProperty(() => line._currentHeadPositions, false),
+          width: 24,
           material: new Cesium.PolylineArrowMaterialProperty(
             Cesium.Color.fromCssColorString(line.color)
           )
@@ -1477,6 +1503,10 @@ export class CesiumManager {
     if (line.trailEntity) {
       ds.entities.remove(line.trailEntity);
       line.trailEntity = null;
+    }
+    if (line.headEntity) {
+      ds.entities.remove(line.headEntity);
+      line.headEntity = null;
     }
 
     const positions = [];
@@ -1495,6 +1525,25 @@ export class CesiumManager {
         material: new Cesium.PolylineArrowMaterialProperty(
           Cesium.Color.fromCssColorString(line.color).withAlpha(0.7)
         )
+      }
+    });
+
+    // 終點箭頭（取弧線末段方向，畫一段短箭頭指向目標）
+    const tApproach = 0.92;
+    const approachLat = line.startLat + (line.endLat - line.startLat) * tApproach;
+    const approachLon = line.startLon + (line.endLon - line.startLon) * tApproach;
+    const approachAlt = MISSILE_3D_MAX_ALTITUDE * 4 * tApproach * (1 - tApproach);
+    line.headEntity = ds.entities.add({
+      polyline: {
+        positions: [
+          Cesium.Cartesian3.fromDegrees(approachLon, approachLat, approachAlt),
+          Cesium.Cartesian3.fromDegrees(line.endLon, line.endLat, 0)
+        ],
+        width: 22,
+        material: new Cesium.PolylineArrowMaterialProperty(
+          Cesium.Color.fromCssColorString(line.color)
+        ),
+        clampToGround: false
       }
     });
   }
