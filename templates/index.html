@@ -11,872 +11,25 @@
   <!-- milsymbol 軍事符號庫（供 3D Cesium billboard 使用） -->
   <script src="/static/js/milsymbol.js"></script>
   <title>軍事兵推 AI 系統 v6.0 - Hermes-2-Pro Agent</title>
-
-  <style>
-    /* ==================== 主題色彩變數 ==================== */
-    :root {
-      /* 主色調 */
-      --color-primary: #1e3c72;
-      --color-primary-light: #2a5298;
-      --color-primary-bg: rgba(30, 60, 114, 0.1);
-      --color-primary-border: rgba(30, 60, 114, 0.3);
-
-      /* 功能色 */
-      --color-success: #4CAF50;
-      --color-success-dark: #2e7d32;
-      --color-info: #2196F3;
-      --color-info-dark: #1976D2;
-      --color-warning: #FF9800;
-      --color-warning-dark: #e65100;
-      --color-danger: #f44336;
-      --color-danger-dark: #c62828;
-
-      /* 中性色 */
-      --color-text: #333;
-      --color-text-muted: #666;
-      --color-text-light: #7f8c8d;
-      --color-border: #e0e0e0;
-      --color-bg-light: #f5f5f5;
-      --color-bg-alt: #f9f9f9;
-
-      /* 側邊欄 */
-      --sidebar-width: 340px;
-    }
-
-    /* ==================== 全局樣式 ==================== */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif;
-      height: 100vh;
-      overflow: hidden;
-      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-    }
-
-    #app {
-      display: flex;
-      height: 100vh;
-    }
-
-    /* ==================== 系統管理按鈕 ==================== */
-    #admin-btn {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 9998;
-      padding: 10px 20px;
-      background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      transition: all 0.3s;
-    }
-
-    #admin-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.4);
-    }
-
-    /* ==================== 左側功能列 ==================== */
-    #sidebar {
-      width: 340px;
-      background: rgba(255, 255, 255, 0.98);
-      border-right: 1px solid rgba(0,0,0,0.1);
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-      box-shadow: 4px 0 20px rgba(0,0,0,0.15);
-    }
-
-    /* 側邊欄捲軸樣式 */
-    #sidebar::-webkit-scrollbar { width: 10px; }
-    #sidebar::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 5px; }
-    #sidebar::-webkit-scrollbar-thumb { background: rgba(30, 60, 114, 0.3); border-radius: 5px; }
-
-    /* 側邊欄標題 */
-    #sidebar-title {
-      font-size: 24px;
-      font-weight: 700;
-      margin-bottom: 10px;
-      color: #1e3c72;
-      text-align: center;
-    }
-
-    #sidebar-subtitle {
-      font-size: 12px;
-      color: #7f8c8d;
-      text-align: center;
-      margin-bottom: 20px;
-      padding: 8px;
-      background: rgba(30, 60, 114, 0.1);
-      border-radius: 8px;
-    }
-
-    /* ==================== LLM 模型選擇器 ==================== */
-    .llm-selector {
-      margin-bottom: 20px;
-      padding: 15px;
-      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-      border-radius: 10px;
-      border: 2px solid #4CAF50;
-    }
-
-    .llm-selector-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: #2e7d32;
-      margin-bottom: 8px;
-      display: block;
-    }
-
-    .llm-selector select {
-      width: 100%;
-      padding: 10px;
-      border: 2px solid #4CAF50;
-      border-radius: 5px;
-      font-size: 14px;
-      background: white;
-      cursor: pointer;
-    }
-
-    /* ==================== 全域按鈕區 ==================== */
-    .global-buttons {
-      margin-bottom: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .global-btn {
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    /* 各個按鈕的顏色主題 */
-    .global-btn.btn-back {
-      background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%);
-      color: #424242;
-    }
-    .global-btn.btn-save-chat {
-      background: linear-gradient(135deg, #e3f2fd 0%, #90caf9 100%);
-      color: #0d47a1;
-    }
-    .global-btn.btn-save-cop {
-      background: linear-gradient(135deg, #fff3e0 0%, #ffb74d 100%);
-      color: #e65100;
-    }
-    .global-btn.btn-clear-map {
-      background: linear-gradient(135deg, #ffebee 0%, #ef5350 100%);
-      color: #c62828;
-    }
-    .global-btn.btn-clear-text {
-      background: linear-gradient(135deg, #f3e5f5 0%, #ce93d8 100%);
-      color: #6a1b9a;
-    }
-
-    .global-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-
-    /* ==================== 功能區塊（折疊式） ==================== */
-    .function-section {
-      margin-bottom: 15px;
-      border: 2px solid #e0e0e0;
-      border-radius: 10px;
-      overflow: visible;
-      background: white;
-      transition: all 0.3s;
-    }
-
-    .function-section:hover {
-      border-color: #1e3c72;
-      box-shadow: 0 4px 12px rgba(30, 60, 114, 0.2);
-    }
-
-    /* 功能區塊標題 */
-    .function-header {
-      padding: 15px;
-      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-      color: white;
-      cursor: pointer;
-      user-select: none;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: 600;
-      font-size: 15px;
-    }
-
-    .function-header .icon {
-      font-size: 18px;
-      transition: transform 0.3s;
-    }
-
-    .function-header.active .icon {
-      transform: rotate(90deg);
-    }
-
-    /* 功能區塊內容 */
-    .function-content {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease-out;
-      padding: 0 15px;
-    }
-
-    .function-content.active {
-      max-height: 200px;
-      padding: 15px;
-      padding-right: 25px; /* 為捲軸留空間 */
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
-
-    /* 功能區塊內容捲軸樣式 */
-    .function-content::-webkit-scrollbar {
-      width: 10px;
-      display: block;
-    }
-
-    .function-content::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.05);
-      border-radius: 10px;
-    }
-
-    .function-content::-webkit-scrollbar-thumb {
-      background: rgba(30, 60, 114, 0.3);
-      border-radius: 4px;
-    }
-
-    .function-content::-webkit-scrollbar-thumb:hover {
-      background: rgba(30, 60, 114, 0.5);
-    }
-
-    /* ==================== 模式按鈕 ==================== */
-    .mode-button {
-      margin-bottom: 12px;
-      padding: 12px;
-      background: #f8f9fa;
-      border-radius: 8px;
-      border-left: 4px solid #1e3c72;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .mode-button:hover {
-      background: #e3f2fd;
-      transform: translateX(5px);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .mode-button.active {
-      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-      border-left: 4px solid #2196F3;
-    }
-
-    .mode-button-title {
-      font-weight: 600;
-      color: #1e3c72;
-      margin-bottom: 5px;
-      font-size: 14px;
-    }
-
-    .mode-button-desc {
-      font-size: 12px;
-      color: #666;
-    }
-
-    /* ==================== 右側主區域 ==================== */
-    #main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: 20px;
-      gap: 20px;
-      padding-top: 70px;
-    }
-
-    #display-panel {
-      flex: 1;
-      min-height: 400px;
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* ==================== Tab 切換按鈕 ==================== */
-    /* ==================== 舊 Tab 區（保留 class 名稱以免其他 JS 依賴，但在整合版 UI 隱藏） ==================== */
-    .tab-header {
-      display: none; /* ✅ 整合版 UI 不再顯示切換 */
-      background: #f5f5f5;
-      border-bottom: 2px solid #e0e0e0;
-    }
-
-    /* ==================== 新 UI：上圖台 / 下文本，含可拖曳分隔線 ==================== */
-    #split-container {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    #pane-map {
-      flex: 0 0 55%;
-      min-height: 180px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    #pane-text {
-      flex: 1 1 auto;
-      min-height: 220px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    #splitter {
-      height: 8px;
-      cursor: row-resize;
-      background: rgba(0,0,0,0.12);
-      border-top: 1px solid rgba(0,0,0,0.08);
-      border-bottom: 1px solid rgba(0,0,0,0.08);
-      position: relative;
-      user-select: none;
-      touch-action: none;
-    }
-
-    #splitter::after {
-      content: '';
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 64px;
-      height: 3px;
-      transform: translate(-50%, -50%);
-      border-radius: 2px;
-      background: rgba(30, 60, 114, 0.35);
-    }
-
-    /* 讓 map/text 內容在新佈局下永遠顯示（不再切換） */
-#map-content{
-  height: 100%;
-  display: block !important;
-}
-#text-content{
-  height: 100%;
-  display: flex !important;
-  flex-direction: column;
-  overflow: hidden;
-  padding: 0;
-}
-
-    .tab-button {
-      flex: 1;
-      padding: 15px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: 600;
-      color: #666;
-      transition: all 0.3s;
-      border-bottom: 3px solid transparent;
-    }
-
-    .tab-button.active {
-      color: #1e3c72;
-      background: white;
-      border-bottom: 3px solid #1e3c72;
-    }
-
-    .tab-content {
-      flex: 1;
-      display: none;
-      overflow: auto;
-    }
-
-    .tab-content.active {
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* ==================== 圖台模式 ==================== */
-#map-content{
-  position: relative;
-  padding: 0;
-  height: 100%;
-  overflow: hidden;
-}
-
-/* ✅ 讓 iframe 永遠填滿 map-content（避免只剩一條） */
-#folium-map{
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: none;
-}
-
-/* ✅ placeholder 改成覆蓋層，不佔版面高度（避免把 iframe 擠到下面） */
-#map-placeholder{
-  position: absolute;
-  left: 12px;
-  top: 12px;
-  max-width: calc(100% - 24px);
-  padding: 8px 12px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.92);
-  border: 1px solid rgba(0,0,0,0.08);
-  color: #1e3c72;
-  font-size: 13px;
-  font-weight: 600;
-  pointer-events: none;
-  z-index: 5;
-}
-
-/* ==================== 文本模式 ==================== */
-    #text-content{
-  /* ✅ 下半部：聊天可滾動 + 輸入列固定底部 */
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  padding: 0;
-}
-
-    #chat-container{
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 20px;
-  background: #f5f5f5;
-  border-radius: 8px;
-  margin: 15px 20px 10px 20px;
-}
-
-    /* ==================== 聊天訊息樣式 ==================== */
-    .chat-message {
-      margin-bottom: 15px;
-      display: flex;
-      gap: 10px;
-    }
-
-    .chat-message.user { justify-content: flex-end; }
-    .chat-message.assistant { justify-content: flex-start; }
-    .chat-message.system { justify-content: center; }
-
-    .message-bubble {
-      max-width: 70%;
-      padding: 12px 16px;
-      border-radius: 12px;
-      word-wrap: break-word;
-      position: relative;
-      white-space: pre-wrap;
-    }
-
-    .chat-message.user .message-bubble {
-      background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-      color: white;
-    }
-
-    .chat-message.assistant .message-bubble {
-      background: white;
-      border: 1px solid #e0e0e0;
-      color: #333;
-    }
-
-    .chat-message.system .message-bubble {
-      background: #fff3e0;
-      color: #e65100;
-      border: 1px solid #ffb74d;
-      font-size: 13px;
-      max-width: 85%;
-    }
-
-    /* ==================== RAG 功能按鈕 ==================== */
-    .rag-buttons {
-      margin-top: 12px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    /* RAG 基底按鈕樣式 */
-    .rag-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 14px;
-      border-radius: 999px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: .2px;
-      border: 1px solid transparent;
-      background: #fff;
-      transition: transform .15s ease, box-shadow .15s ease, background .15s ease, color .15s ease, border-color .15s ease;
-      user-select: none;
-    }
-
-    .rag-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(0,0,0,.12);
-    }
-
-    .rag-btn:active {
-      transform: translateY(0);
-      box-shadow: 0 3px 10px rgba(0,0,0,.10);
-    }
-
-    /* RAG 複製按鈕 */
-    .rag-copy {
-      border-color: rgba(30,60,114,.35);
-      color: #1e3c72;
-      background: rgba(30,60,114,.06);
-    }
-
-    .rag-copy:hover {
-      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-      color: #fff;
-      border-color: transparent;
-    }
-
-    /* RAG 來源按鈕 */
-    .rag-source {
-      border-color: rgba(76,175,80,.35);
-      color: #2e7d32;
-      background: rgba(76,175,80,.08);
-    }
-
-    .rag-source:hover {
-      background: linear-gradient(135deg, #2e7d32 0%, #4CAF50 100%);
-      color: #fff;
-      border-color: transparent;
-    }
-
-    /* RAG 反饋按鈕 */
-    .rag-feedback {
-      border-color: rgba(255,152,0,.35);
-      color: #e65100;
-      background: rgba(255,152,0,.10);
-    }
-
-    .rag-feedback:hover {
-      background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
-      color: #fff;
-      border-color: transparent;
-    }
-
-    /* 複製成功狀態 */
-    .rag-btn.is-copied {
-      background: linear-gradient(135deg, #2e7d32 0%, #4CAF50 100%) !important;
-      color: #fff !important;
-      border-color: transparent !important;
-    }
-
-    /* ==================== 串流游標 ==================== */
-    .streaming-cursor {
-      display: inline;
-      animation: blink 0.7s step-end infinite;
-      color: #1e3c72;
-      font-weight: bold;
-    }
-
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-
-    /* ==================== 武器分派表格 ==================== */
-    .wta-table-container {
-      margin-top: 20px;
-      overflow-x: auto;
-      padding: 15px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .wta-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-
-    .wta-table thead {
-      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-      color: white;
-    }
-
-    .wta-table th,
-    .wta-table td {
-      padding: 12px;
-      text-align: center;
-      border-bottom: 1px solid #e0e0e0;
-    }
-
-    .wta-table tbody tr:hover {
-      background: #f5f5f5;
-    }
-
-    .weapon-hf3 {
-      color: #D32F2F;
-      font-weight: 600;
-    }
-
-    .weapon-hf2 {
-      color: #FF9800;
-      font-weight: 600;
-    }
-
-    /* ==================== 輸入區域 ==================== */
-    #chat-input-area{
-  display: flex;
-  gap: 10px;
-  padding: 15px;
-  background: white;
-  border-top: 1px solid #e0e0e0;
-  position: sticky;
-  bottom: 0;
-  z-index: 20;
-}
-
-/* WTA 表格區：不影響輸入列固定 */
-#wta-table-container{
-  flex: 0 0 auto;
-  overflow: auto;
-  padding: 0 20px 10px 20px;
-}
-
-    #chat-input {
-      flex: 1;
-      padding: 12px;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      font-size: 14px;
-      resize: none;
-      font-family: inherit;
-    }
-
-    #send-button {
-      padding: 12px 24px;
-      background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    #send-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
-    }
-
-    #send-button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    /* ==================== Modal 共用樣式 ==================== */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 10000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal.active { display: flex; }
-
-    .modal-content {
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      width: 500px;
-      max-width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    }
-
-    .modal-title {
-      font-size: 20px;
-      font-weight: 600;
-      color: #1e3c72;
-      margin-bottom: 10px;
-    }
-
-    /* ==================== 系統管理面板 ==================== */
-    #admin-modal .setting-item {
-      padding: 15px;
-      background: #f5f5f5;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    /* Toggle 開關樣式 */
-    .toggle-switch {
-      position: relative;
-      width: 50px;
-      height: 26px;
-    }
-
-    .toggle-switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .toggle-slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      transition: .4s;
-      border-radius: 26px;
-    }
-
-    .toggle-slider:before {
-      position: absolute;
-      content: "";
-      height: 20px;
-      width: 20px;
-      left: 3px;
-      bottom: 3px;
-      background-color: white;
-      transition: .4s;
-      border-radius: 50%;
-    }
-
-    input:checked + .toggle-slider {
-      background-color: #4CAF50;
-    }
-
-    input:checked + .toggle-slider:before {
-      transform: translateX(24px);
-    }
-
-    /* ==================== 通知訊息 ==================== */
-    .notification {
-      position: fixed;
-      top: 80px;
-      right: 20px;
-      padding: 15px 20px;
-      border-radius: 8px;
-      color: white;
-      font-weight: 600;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      z-index: 10001;
-      animation: slideIn 0.3s ease-out;
-      max-width: 400px;
-    }
-
-    .notification.success { background: #4CAF50; }
-    .notification.error { background: #f44336; }
-    .notification.info { background: #2196F3; }
-    .notification.warning { background: #FF9800; }
-
-    @keyframes slideIn {
-      from { transform: translateX(400px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-
-    /* ==================== Loading 動畫 ==================== */
-    .loading-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .loading-overlay.active { display: flex; }
-
-    .loading-content {
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      text-align: center;
-    }
-
-    .spinner {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #2196F3;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 20px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .progress-bar {
-      width: 300px;
-      height: 20px;
-      background: #e0e0e0;
-      border-radius: 10px;
-      overflow: hidden;
-      margin: 15px auto;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
-      width: 0%;
-      transition: width 0.3s;
-    }
-  </style>
+  <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
-  <!-- ==================== 系統管理按鈕 ==================== -->
-  <button id="admin-btn" onclick="openAdminPanel()">⚙️ 系統管理</button>
+  <!-- ==================== 頂部工具列（系統管理 + 切換2D/3D + 圖層管理） ==================== -->
+  <div id="top-toolbar">
+    <div id="map-dimension-toggle" style="display:none;">
+      <button id="toggle-3d-btn" onclick="toggle3DMode()"
+        style="padding:8px 16px; background:linear-gradient(135deg,#1e3c72,#2a5298); color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.3); font-size:13px;">
+        🌐 切換 3D 地球儀
+      </button>
+    </div>
+    <button id="open-layer-btn" onclick="openLayerPanel()"
+      style="padding:8px 16px; background:linear-gradient(135deg,#1e3c72,#2a5298); color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.3); font-size:13px; transition:transform 0.15s,box-shadow 0.15s;"
+      onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.4)'"
+      onmouseout="this.style.transform='';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.3)'">
+      &#128506; 圖層管理
+    </button>
+    <button id="admin-btn" onclick="openAdminPanel()">⚙️ 系統管理</button>
+  </div>
 
   <div id="app">
     <!-- ==================== 左側功能列 ==================== -->
@@ -981,12 +134,17 @@
               </iframe>
               <!-- 3D Cesium 地球儀容器 -->
               <div id="cesium-container" style="display:none; position:absolute; inset:0; width:100%; height:100%;"></div>
-              <!-- 3D 切換按鈕（僅在 enable_3d_globe 啟用時顯示） -->
-              <div id="map-dimension-toggle" style="position:absolute; top:10px; left:10px; z-index:1001; display:none;">
-                <button id="toggle-3d-btn" onclick="toggle3DMode()"
-                  style="padding:8px 16px; background:linear-gradient(135deg,#1e3c72,#2a5298); color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.3); font-size:13px;">
-                  🌐 切換 3D 地球儀
-                </button>
+              <!-- 船艦搜尋框 -->
+              <div id="ship-search-container" style="position:absolute; top:10px; left:50%; transform:translateX(-50%); z-index:1001; display:none;">
+                <div style="position:relative;">
+                  <input type="text" id="ship-search-input" placeholder="搜尋船艦名稱..."
+                    autocomplete="off"
+                    style="width:260px; padding:8px 12px 8px 32px; border:2px solid rgba(30,60,114,0.3); border-radius:20px; font-size:13px; background:rgba(255,255,255,0.95); box-shadow:0 2px 8px rgba(0,0,0,0.15); outline:none; transition:border-color 0.2s;"
+                    onfocus="this.style.borderColor='#2a5298'"
+                    onblur="this.style.borderColor='rgba(30,60,114,0.3)'">
+                  <span style="position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:14px; color:#999; pointer-events:none;">&#128269;</span>
+                  <div id="ship-search-results" style="display:none; position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #e0e0e0; border-radius:8px; margin-top:4px; max-height:240px; overflow-y:auto; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:1002;"></div>
+                </div>
               </div>
               <!-- 3D 狀態列（SinicaView 風格） -->
               <div id="cesium-status-bar" style="display:none; position:absolute; bottom:0; left:0; right:0; z-index:999; background:rgba(10,10,26,0.85); color:#aab; padding:6px 16px; font-family:'Consolas','Monaco',monospace; font-size:12px; border-top:1px solid rgba(100,100,180,0.3);">
@@ -1080,6 +238,60 @@
       <!-- 關閉按鈕 -->
       <div style="text-align: right; margin-top: 20px;">
         <button class="global-btn btn-save-chat" onclick="closeAdminPanel()">確定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 圖層管理 Modal ==================== -->
+  <div id="layer-modal" class="modal">
+    <div class="modal-content" style="width:560px;max-height:80vh;overflow-y:auto;">
+      <h3 class="modal-title">&#128506; 圖層管理</h3>
+
+      <!-- 既有圖層清單 -->
+      <div id="layer-list" style="margin-bottom:20px;">
+        <p style="color:#999;text-align:center;padding:20px 0;">尚無自訂圖層</p>
+      </div>
+
+      <!-- 新增圖層表單 -->
+      <div style="border-top:1px solid #e0e0e0;padding-top:16px;">
+        <h4 style="margin:0 0 12px 0;font-size:14px;color:#1e3c72;">新增圖層</h4>
+
+        <div style="margin-bottom:10px;">
+          <label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">圖層名稱 *</label>
+          <input type="text" id="layer-add-name" placeholder="例：海軍航海圖"
+            style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;">
+        </div>
+
+        <div style="margin-bottom:10px;">
+          <label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">URL 模板 * (需含 {z}/{x}/{y})</label>
+          <input type="text" id="layer-add-url" placeholder="https://example.com/tiles/{z}/{x}/{y}.png"
+            style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;">
+        </div>
+
+        <div style="display:flex;gap:10px;margin-bottom:14px;">
+          <div style="flex:1;">
+            <label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">來源標註</label>
+            <input type="text" id="layer-add-attribution" placeholder="選填"
+              style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;">
+          </div>
+          <div style="width:100px;">
+            <label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">透明度</label>
+            <input type="number" id="layer-add-opacity" value="1.0" min="0" max="1" step="0.1"
+              style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;">
+          </div>
+        </div>
+
+        <button onclick="addCustomLayer()"
+          style="width:100%;padding:10px;background:linear-gradient(135deg,#4CAF50,#45a049);color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(76,175,80,0.3);transition:transform 0.15s;"
+          onmouseover="this.style.transform='translateY(-1px)'"
+          onmouseout="this.style.transform=''">
+          + 新增圖層
+        </button>
+      </div>
+
+      <!-- 關閉按鈕 -->
+      <div style="text-align:right;margin-top:20px;">
+        <button class="global-btn btn-save-chat" onclick="closeLayerPanel()">關閉</button>
       </div>
     </div>
   </div>

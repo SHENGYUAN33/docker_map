@@ -308,6 +308,52 @@ export class APIClient {
     return await this.post('/api/save_cop', {});
   }
 
+  // ==================== 圖資管理相關 API ====================
+
+  /**
+   * 取得自訂圖層清單
+   */
+  async getCustomLayers() {
+    return await this.get('/api/custom_layers');
+  }
+
+  /**
+   * 新增自訂圖層
+   * @param {Object} layerData - 圖層資料 {name, url_template, attribution, max_zoom, opacity}
+   */
+  async addCustomLayer(layerData) {
+    return await this.post('/api/custom_layers', layerData);
+  }
+
+  /**
+   * 更新自訂圖層
+   * @param {string} layerId - 圖層 ID
+   * @param {Object} data - 更新欄位
+   */
+  async updateCustomLayer(layerId, data) {
+    const response = await fetch(`${this.apiBase}/api/custom_layers/${layerId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return await response.json();
+  }
+
+  /**
+   * 刪除自訂圖層
+   * @param {string} layerId - 圖層 ID
+   */
+  async deleteCustomLayer(layerId) {
+    return await this.delete(`/api/custom_layers/${layerId}`);
+  }
+
+  /**
+   * 刷新 2D 地圖（重新生成 Folium HTML）
+   */
+  async refreshMap() {
+    return await this.post('/api/refresh_map', {});
+  }
+
   // ==================== 反饋相關 API ====================
 
   /**

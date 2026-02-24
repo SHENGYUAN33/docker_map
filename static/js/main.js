@@ -17,6 +17,8 @@ import { COPManager } from './modules/cop-manager.js';
 import { SettingsManager } from './modules/settings-manager.js';
 import { SimulationManager } from './modules/simulation-manager.js';
 import { CesiumManager } from './modules/cesium-manager.js';
+import { LayerManager } from './modules/layer-manager.js';
+import { SearchManager } from './modules/search-manager.js';
 
 /**
  * 應用程式狀態
@@ -51,6 +53,8 @@ class Application {
       this.messageManager
     );
     this.cesiumManager = new CesiumManager(this.settingsManager);
+    this.layerManager = new LayerManager(apiClient, this.mapManager, this.cesiumManager);
+    this.searchManager = new SearchManager(this.mapManager, this.cesiumManager);
 
     // 暴露全域函數供 HTML 調用
     this.exposeGlobalFunctions();
@@ -73,6 +77,12 @@ class Application {
     if (modelMap) {
       setDynamicModelMap(modelMap);
     }
+
+    // 載入自訂圖層
+    await this.layerManager.loadCustomLayers();
+
+    // 初始化搜尋 UI 事件
+    this.searchManager.initSearchUI();
 
     // 載入 Prompt 配置列表
     await this.promptManager.loadPromptConfigs();
@@ -173,6 +183,15 @@ class Application {
 
     // 3D 地球儀切換
     window.toggle3DMode = () => this.toggle3DMode();
+
+    // 圖資管理
+    window._layerManager = this.layerManager;
+    window.openLayerPanel = () => this.layerManager.openLayerPanel();
+    window.closeLayerPanel = () => this.layerManager.closeLayerPanel();
+    window.addCustomLayer = () => this.layerManager.addLayer();
+
+    // 船艦搜尋
+    window._searchManager = this.searchManager;
   }
 
   /**
@@ -295,6 +314,7 @@ class Application {
           // 3D 模式：傳遞資料給 Cesium 渲染器
           if (result.map_data) {
             this.cesiumManager.renderMapData(result.map_data);
+            this.searchManager.updateShipIndex(result.map_data);
           }
 
           if (this.state.currentMode === 'import_scenario' ||

@@ -74,7 +74,9 @@ CONFIG_DEFAULTS = {
     "show_source_btn": False,
     "enable_animation": False,
     "enable_3d_globe": False,
-    "cesium_ion_token": ""
+    "cesium_ion_token": "",
+    "google_maps_api_key": "AIzaSyBCFhSG2jtlF2oZyvNnZc0PNyhRZwiahUo",
+    "custom_layers": []
 }
 
 # ==================== 會話管理配置 ====================

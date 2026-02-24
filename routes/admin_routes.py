@@ -72,12 +72,14 @@ def admin_settings():
                 'stream_enabled': rag_settings.get('stream', 0) == 1
             })
         elif request.method == 'POST':
-            # 保存設定到 config.json
+            # 合併保存設定到 config.json（保留未傳入的既有欄位）
             data = request.json
-            save_config(data)
+            config = load_config()
+            config.update(data)
+            save_config(config)
             return jsonify({
                 'success': True,
-                'settings': data
+                'settings': config
             })
     except Exception as e:
         print(f"❌ admin_settings 錯誤: {e}")

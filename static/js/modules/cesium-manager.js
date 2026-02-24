@@ -30,6 +30,9 @@ export class CesiumManager {
       tracks: null
     };
 
+    // Google Photorealistic 3D Tiles
+    this.google3DTileset = null;
+
     // 動畫狀態
     this.animationState = {
       isPlaying: false,
@@ -163,13 +166,98 @@ export class CesiumManager {
     // 設定底部狀態列
     this._setupStatusBar();
 
+    // 載入 Google Photorealistic 3D Tiles（如果有 API Key）
+    await this._loadGoogle3DTiles(settings);
+
     // 建立圖層控制面板
     this._createLayerPanel();
 
     // 建立工具列
     this._createToolbar();
 
-    console.log('Cesium 3D 地球儀已初始化（免費模式，無需 Token）');
+    // 建立視角控制面板
+    this._createCameraControlPanel();
+
+    console.log('Cesium 3D 地球儀已初始化');
+  }
+
+  // ==================== Google Photorealistic 3D Tiles ====================
+
+  /**
+   * 載入 Google Photorealistic 3D Tiles
+   * 需要 Google Maps Platform API Key（啟用 Map Tiles API）
+   */
+  async _loadGoogle3DTiles(settings) {
+    const apiKey = settings.google_maps_api_key || '';
+    if (!apiKey) {
+      console.log('未設定 Google Maps API Key，跳過 3D Tiles 載入');
+      return;
+    }
+
+    try {
+      const tileset = await Cesium.Cesium3DTileset.fromUrl(
+        `https://tile.googleapis.com/v1/3dtiles/root.json?key=${apiKey}`
+      );
+      this.viewer.scene.primitives.add(tileset);
+      this.google3DTileset = tileset;
+
+      // 啟用 3D Tiles 時隱藏預設 globe 底圖，避免重疊閃爍
+      this.viewer.scene.globe.show = false;
+
+      console.log('Google Photorealistic 3D Tiles 已載入');
+    } catch (error) {
+      console.error('Google 3D Tiles 載入失敗:', error);
+      // 載入失敗時確保 globe 顯示
+      this.viewer.scene.globe.show = true;
+    }
+  }
+
+  /**
+   * 切換 Google 3D Tiles 顯示/隱藏
+   */
+  toggleGoogle3DTiles(visible) {
+    if (this.google3DTileset) {
+      this.google3DTileset.show = visible;
+      // 3D Tiles 顯示時隱藏 globe，反之亦然
+      this.viewer.scene.globe.show = !visible;
+    }
+  }
+
+  // ==================== 自訂圖層管理 ====================
+
+  /**
+   * 動態加入自訂 imagery layer
+   * @param {Object} layerConfig - {url_template, attribution, max_zoom, opacity}
+   * @returns {Object|null} Cesium ImageryLayer 或 null
+   */
+  addCustomImageryLayer(layerConfig) {
+    if (!this.viewer) return null;
+    try {
+      const provider = new Cesium.UrlTemplateImageryProvider({
+        url: layerConfig.url_template,
+        credit: new Cesium.Credit(layerConfig.attribution || ''),
+        maximumLevel: layerConfig.max_zoom || 18
+      });
+      const imageryLayer = this.viewer.imageryLayers.addImageryProvider(provider);
+      imageryLayer.alpha = layerConfig.opacity || 1.0;
+      return imageryLayer;
+    } catch (error) {
+      console.error('加入自訂 Cesium 圖層失敗:', error);
+      return null;
+    }
+  }
+
+  /**
+   * 移除自訂 imagery layer
+   * @param {Object} imageryLayer - Cesium ImageryLayer 實例
+   */
+  removeCustomImageryLayer(imageryLayer) {
+    if (!this.viewer || !imageryLayer) return;
+    try {
+      this.viewer.imageryLayers.remove(imageryLayer);
+    } catch (error) {
+      console.error('移除自訂 Cesium 圖層失敗:', error);
+    }
   }
 
   // ==================== 啟用 / 停用 3D ====================
@@ -221,12 +309,12 @@ export class CesiumManager {
    * @param {Object} mapData - 後端 map_data JSON
    */
   renderMapData(mapData) {
-    if (!this.viewer || !mapData) return;
+    if (!mapData) return;
 
-    // 儲存資料（供 2D/3D 切換時重新渲染）
+    // 儲存資料（供 2D/3D 切換時重新渲染）— 無論 viewer 是否存在都要儲存
     this.lastMapData = mapData;
 
-    if (!this.is3DActive) return;
+    if (!this.viewer || !this.is3DActive) return;
 
     // 清除所有圖層
     for (const ds of Object.values(this.layerSources)) {
@@ -240,8 +328,8 @@ export class CesiumManager {
       }
     }
 
-    // 渲染攻擊弧線
-    if (mapData.lines) {
+    // 渲染攻擊弧線（有動畫資料時跳過，由動畫按順序展示）
+    if (mapData.lines && !mapData.wta_animation_data) {
       for (const line of mapData.lines) {
         this._addAttackArcEntity(line);
       }
@@ -336,7 +424,7 @@ export class CesiumManager {
         height: MIL_SYMBOL_3D_SIZE,
         verticalOrigin: Cesium.VerticalOrigin.CENTER,
         horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-        disableDepthTestDistance: Number.POSITIVE_INFINITY
+        eyeOffset: new Cesium.Cartesian3(0, 0, -50)
       };
     } else {
       // 降級：彩色圓點
@@ -344,8 +432,7 @@ export class CesiumManager {
         pixelSize: 12,
         color: isEnemy ? Cesium.Color.RED : Cesium.Color.BLUE,
         outlineColor: Cesium.Color.WHITE,
-        outlineWidth: 2,
-        disableDepthTestDistance: Number.POSITIVE_INFINITY
+        outlineWidth: 2
       };
     }
 
@@ -378,11 +465,10 @@ export class CesiumManager {
     ds.entities.add({
       polyline: {
         positions: positions,
-        width: lineData.weight || 3,
-        material: new Cesium.PolylineGlowMaterialProperty({
-          glowPower: 0.25,
-          color: Cesium.Color.fromCssColorString(lineData.color || '#FF0000')
-        }),
+        width: 22,
+        material: new Cesium.PolylineArrowMaterialProperty(
+          Cesium.Color.fromCssColorString(lineData.color || '#FF0000')
+        ),
         clampToGround: false
       },
       description: (lineData.popup || '').replace(/\n/g, '<br>')
@@ -526,6 +612,14 @@ export class CesiumManager {
       </label>`;
     }
 
+    // Google 3D Tiles 開關（僅在已載入時顯示）
+    if (this.google3DTileset) {
+      html += `<hr style="border:none;border-top:1px solid rgba(100,100,180,0.3);margin:10px 0;">`;
+      html += `<label style="display:block;margin:6px 0;cursor:pointer;">
+        <input type="checkbox" checked data-google3d="true" style="margin-right:6px;accent-color:#4a9eff;"> Google 3D 實景
+      </label>`;
+    }
+
     panel.innerHTML = html;
 
     // 事件綁定
@@ -533,6 +627,9 @@ export class CesiumManager {
       const input = e.target;
       if (input.dataset.layer) {
         this.toggleLayer(input.dataset.layer, input.checked);
+      }
+      if (input.dataset.google3d) {
+        this.toggleGoogle3DTiles(input.checked);
       }
     });
 
@@ -559,7 +656,8 @@ export class CesiumManager {
       { icon: '✈️', label: '飛行導覽', action: () => this.generateBattlefieldFlyover() },
       { icon: '📏', label: '測量距離', action: () => this.startMeasureDistance() },
       { icon: '📐', label: '測量面積', action: () => this.startMeasureArea() },
-      { icon: '🗑️', label: '清除測量', action: () => this.clearMeasurements() }
+      { icon: '🗑️', label: '清除測量', action: () => this.clearMeasurements() },
+      { icon: '🎥', label: '視角控制', action: () => this._toggleCameraPanel() }
     ];
 
     for (const btn of buttons) {
@@ -575,6 +673,221 @@ export class CesiumManager {
 
     const container = document.getElementById('cesium-container');
     if (container) container.appendChild(toolbar);
+  }
+
+  // ==================== 視角控制面板 ====================
+
+  /**
+   * 切換視角控制面板顯示/隱藏
+   */
+  _toggleCameraPanel() {
+    const panel = document.getElementById('cesium-camera-panel');
+    if (panel) {
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+  }
+
+  /**
+   * 建立視角控制面板
+   */
+  _createCameraControlPanel() {
+    const panel = document.createElement('div');
+    panel.id = 'cesium-camera-panel';
+    panel.style.cssText = 'position:absolute;top:130px;right:52px;z-index:998;background:rgba(10,10,26,0.92);padding:14px 16px;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.5);color:#ccd;font-family:"Microsoft JhengHei",sans-serif;font-size:13px;min-width:220px;border:1px solid rgba(100,100,180,0.2);display:none;';
+
+    // 共用滑桿樣式
+    const sliderStyle = 'width:100%;margin:4px 0 10px 0;accent-color:#4a9eff;cursor:pointer;height:6px;';
+    const labelStyle = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;';
+    const valueStyle = 'color:#4a9eff;font-weight:700;min-width:50px;text-align:right;';
+
+    panel.innerHTML = `
+      <div style="font-weight:700;color:#7eb8ff;margin-bottom:12px;font-size:14px;">🎥 視角控制</div>
+
+      <div style="${labelStyle}">
+        <span>傾角 (Pitch)</span>
+        <span id="cam-pitch-val" style="${valueStyle}">-45°</span>
+      </div>
+      <input type="range" id="cam-pitch" min="-90" max="0" value="-45" step="1" style="${sliderStyle}">
+
+      <div style="${labelStyle}">
+        <span>方位角 (Heading)</span>
+        <span id="cam-heading-val" style="${valueStyle}">0°</span>
+      </div>
+      <input type="range" id="cam-heading" min="0" max="360" value="0" step="1" style="${sliderStyle}">
+
+      <div style="${labelStyle}">
+        <span>高度 (Altitude)</span>
+        <span id="cam-alt-val" style="${valueStyle}">800 km</span>
+      </div>
+      <input type="range" id="cam-alt" min="0" max="100" value="58" step="1" style="${sliderStyle}">
+
+      <div style="border-top:1px solid rgba(100,100,180,0.3);padding-top:10px;margin-top:4px;">
+        <div style="font-size:12px;color:#889;margin-bottom:8px;">預設視角</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;">
+          <button class="cam-preset-btn" data-pitch="-90" data-heading="0" title="正上方俯視" style="flex:1;padding:5px 8px;border:1px solid rgba(100,100,180,0.3);border-radius:6px;background:rgba(30,30,60,0.8);color:#aab;cursor:pointer;font-size:12px;white-space:nowrap;">俯視</button>
+          <button class="cam-preset-btn" data-pitch="-45" data-heading="0" title="45度斜視" style="flex:1;padding:5px 8px;border:1px solid rgba(100,100,180,0.3);border-radius:6px;background:rgba(30,30,60,0.8);color:#aab;cursor:pointer;font-size:12px;white-space:nowrap;">45°</button>
+          <button class="cam-preset-btn" data-pitch="-15" data-heading="0" title="低角度視角" style="flex:1;padding:5px 8px;border:1px solid rgba(100,100,180,0.3);border-radius:6px;background:rgba(30,30,60,0.8);color:#aab;cursor:pointer;font-size:12px;white-space:nowrap;">低角度</button>
+          <button id="cam-reset-btn" title="回到預設位置" style="flex:1;padding:5px 8px;border:1px solid rgba(100,100,180,0.3);border-radius:6px;background:rgba(30,30,60,0.8);color:#aab;cursor:pointer;font-size:12px;white-space:nowrap;">重置</button>
+        </div>
+      </div>
+    `;
+
+    const container = document.getElementById('cesium-container');
+    if (container) container.appendChild(panel);
+
+    // — 滑桿事件綁定 —
+    const pitchSlider = document.getElementById('cam-pitch');
+    const headingSlider = document.getElementById('cam-heading');
+    const altSlider = document.getElementById('cam-alt');
+
+    const onSliderInput = () => {
+      const pitch = parseFloat(pitchSlider.value);
+      const heading = parseFloat(headingSlider.value);
+      const alt = this._altSliderToMeters(parseFloat(altSlider.value));
+      this._setCameraOrientation(heading, pitch, alt);
+    };
+
+    pitchSlider.addEventListener('input', onSliderInput);
+    headingSlider.addEventListener('input', onSliderInput);
+    altSlider.addEventListener('input', onSliderInput);
+
+    // — 預設視角按鈕 —
+    panel.querySelectorAll('.cam-preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const pitch = parseFloat(btn.dataset.pitch);
+        const heading = parseFloat(btn.dataset.heading);
+        this._setCameraOrientation(heading, pitch, null);
+      });
+      btn.addEventListener('mouseenter', () => { btn.style.background = 'rgba(42,82,152,0.7)'; btn.style.color = '#fff'; });
+      btn.addEventListener('mouseleave', () => { btn.style.background = 'rgba(30,30,60,0.8)'; btn.style.color = '#aab'; });
+    });
+
+    // — 重置按鈕 —
+    document.getElementById('cam-reset-btn').addEventListener('click', () => {
+      this.viewer.camera.flyTo({
+        destination: Cesium.Cartesian3.fromDegrees(120.5, 23.5, 800000),
+        orientation: { heading: 0, pitch: Cesium.Math.toRadians(-45), roll: 0 }
+      });
+    });
+    const resetBtn = document.getElementById('cam-reset-btn');
+    resetBtn.addEventListener('mouseenter', () => { resetBtn.style.background = 'rgba(42,82,152,0.7)'; resetBtn.style.color = '#fff'; });
+    resetBtn.addEventListener('mouseleave', () => { resetBtn.style.background = 'rgba(30,30,60,0.8)'; resetBtn.style.color = '#aab'; });
+
+    // — 啟動雙向同步 —
+    this._syncCameraToSliders();
+  }
+
+  /**
+   * 高度滑桿值（0~100）轉換為公尺（對數刻度：1km ~ 2000km）
+   */
+  _altSliderToMeters(val) {
+    // 0 → 1km, 100 → 2000km (對數刻度)
+    const minLog = Math.log(1000);        // 1 km
+    const maxLog = Math.log(2000000);     // 2000 km
+    return Math.exp(minLog + (val / 100) * (maxLog - minLog));
+  }
+
+  /**
+   * 公尺轉換為高度滑桿值（0~100）
+   */
+  _metersToAltSlider(meters) {
+    const minLog = Math.log(1000);
+    const maxLog = Math.log(2000000);
+    const clamped = Math.max(1000, Math.min(2000000, meters));
+    return ((Math.log(clamped) - minLog) / (maxLog - minLog)) * 100;
+  }
+
+  /**
+   * 格式化高度顯示文字
+   */
+  _formatAltitude(meters) {
+    if (meters >= 1000) {
+      return (meters / 1000).toFixed(0) + ' km';
+    }
+    return meters.toFixed(0) + ' m';
+  }
+
+  /**
+   * 透過滑桿值設定鏡頭方向
+   * @param {number} headingDeg - 方位角（度）
+   * @param {number} pitchDeg - 傾角（度，負值）
+   * @param {number|null} altMeters - 高度（公尺），null 表示保持現有高度
+   */
+  _setCameraOrientation(headingDeg, pitchDeg, altMeters) {
+    if (!this.viewer) return;
+
+    const camera = this.viewer.camera;
+    const currentPos = camera.positionCartographic;
+
+    const alt = altMeters !== null ? altMeters : currentPos.height;
+
+    camera.setView({
+      destination: Cesium.Cartesian3.fromRadians(
+        currentPos.longitude,
+        currentPos.latitude,
+        alt
+      ),
+      orientation: {
+        heading: Cesium.Math.toRadians(headingDeg),
+        pitch: Cesium.Math.toRadians(pitchDeg),
+        roll: 0
+      }
+    });
+
+    // 更新顯示值
+    this._updateCameraDisplayValues(headingDeg, pitchDeg, alt);
+  }
+
+  /**
+   * 更新面板上的數值顯示
+   */
+  _updateCameraDisplayValues(headingDeg, pitchDeg, altMeters) {
+    const pitchVal = document.getElementById('cam-pitch-val');
+    const headingVal = document.getElementById('cam-heading-val');
+    const altVal = document.getElementById('cam-alt-val');
+
+    if (pitchVal) pitchVal.textContent = Math.round(pitchDeg) + '°';
+    if (headingVal) headingVal.textContent = Math.round(headingDeg) + '°';
+    if (altVal) altVal.textContent = this._formatAltitude(altMeters);
+  }
+
+  /**
+   * 雙向同步：滑鼠操作鏡頭時，滑桿數值跟著更新
+   */
+  _syncCameraToSliders() {
+    if (!this.viewer) return;
+
+    // 使用 postRender 事件監聽鏡頭變化
+    this.viewer.scene.postRender.addEventListener(() => {
+      const panel = document.getElementById('cesium-camera-panel');
+      if (!panel || panel.style.display === 'none') return;
+
+      const camera = this.viewer.camera;
+      const headingDeg = Cesium.Math.toDegrees(camera.heading);
+      const pitchDeg = Cesium.Math.toDegrees(camera.pitch);
+      const altMeters = camera.positionCartographic.height;
+
+      const pitchSlider = document.getElementById('cam-pitch');
+      const headingSlider = document.getElementById('cam-heading');
+      const altSlider = document.getElementById('cam-alt');
+
+      // 僅在滑桿未被拖動時才更新（避免衝突）
+      if (pitchSlider && document.activeElement !== pitchSlider) {
+        pitchSlider.value = Math.max(-90, Math.min(0, Math.round(pitchDeg)));
+      }
+      if (headingSlider && document.activeElement !== headingSlider) {
+        headingSlider.value = Math.round(((headingDeg % 360) + 360) % 360);
+      }
+      if (altSlider && document.activeElement !== altSlider) {
+        altSlider.value = this._metersToAltSlider(altMeters);
+      }
+
+      this._updateCameraDisplayValues(
+        ((headingDeg % 360) + 360) % 360,
+        Math.max(-90, Math.min(0, pitchDeg)),
+        altMeters
+      );
+    });
   }
 
   // ==================== 飛行俯瞰導覽 ====================
@@ -1053,10 +1366,7 @@ export class CesiumManager {
         this.layerSources.wta.entities.remove(line.trailEntity);
         line.trailEntity = null;
       }
-      if (line.headEntity) {
-        this.layerSources.wta.entities.remove(line.headEntity);
-        line.headEntity = null;
-      }
+      line._currentPositions = null;
       line.completed = false;
     }
 
@@ -1109,12 +1419,12 @@ export class CesiumManager {
       if (currentTime < line.startTime) continue;
 
       if (currentTime >= line.endTime) {
-        // 完成：顯示完整弧線，移除飛彈頭
+        // 完成：移除動態 polyline，繪製靜態完成弧線
         if (!line.completed) {
           line.completed = true;
-          if (line.headEntity) {
-            ds.entities.remove(line.headEntity);
-            line.headEntity = null;
+          if (line.trailEntity) {
+            ds.entities.remove(line.trailEntity);
+            line.trailEntity = null;
           }
           this._drawCompletedArc(line, ds);
         }
@@ -1132,26 +1442,9 @@ export class CesiumManager {
     const lat = line.startLat + (line.endLat - line.startLat) * t;
     const lon = line.startLon + (line.endLon - line.startLon) * t;
     const alt = MISSILE_3D_MAX_ALTITUDE * 4 * t * (1 - t);
-
     const headPos = Cesium.Cartesian3.fromDegrees(lon, lat, alt);
 
-    // 飛彈頭
-    if (!line.headEntity) {
-      line.headEntity = ds.entities.add({
-        position: headPos,
-        point: {
-          pixelSize: 8,
-          color: Cesium.Color.fromCssColorString(line.color),
-          outlineColor: Cesium.Color.WHITE,
-          outlineWidth: 2,
-          disableDepthTestDistance: Number.POSITIVE_INFINITY
-        }
-      });
-    } else {
-      line.headEntity.position = headPos;
-    }
-
-    // 尾跡
+    // 計算尾跡位置（含飛彈頭位置）
     const segments = Math.max(1, Math.floor(t * ATTACK_ARC_SEGMENTS));
     const trailPositions = [];
     for (let i = 0; i <= segments; i++) {
@@ -1161,20 +1454,23 @@ export class CesiumManager {
       const talt = MISSILE_3D_MAX_ALTITUDE * 4 * tt * (1 - tt);
       trailPositions.push(Cesium.Cartesian3.fromDegrees(tlon, tlat, talt));
     }
+    trailPositions.push(headPos);
 
-    if (line.trailEntity) {
-      ds.entities.remove(line.trailEntity);
+    // 更新動態位置（CallbackProperty 每幀自動讀取）
+    line._currentPositions = trailPositions;
+
+    if (!line.trailEntity) {
+      // 首次建立：用 CallbackProperty 讓 Cesium 知道位置是動態的
+      line.trailEntity = ds.entities.add({
+        polyline: {
+          positions: new Cesium.CallbackProperty(() => line._currentPositions, false),
+          width: 22,
+          material: new Cesium.PolylineArrowMaterialProperty(
+            Cesium.Color.fromCssColorString(line.color)
+          )
+        }
+      });
     }
-    line.trailEntity = ds.entities.add({
-      polyline: {
-        positions: trailPositions,
-        width: 3,
-        material: new Cesium.PolylineGlowMaterialProperty({
-          glowPower: 0.3,
-          color: Cesium.Color.fromCssColorString(line.color)
-        })
-      }
-    });
   }
 
   _drawCompletedArc(line, ds) {
@@ -1195,11 +1491,10 @@ export class CesiumManager {
     line.trailEntity = ds.entities.add({
       polyline: {
         positions: positions,
-        width: 2,
-        material: new Cesium.PolylineGlowMaterialProperty({
-          glowPower: 0.15,
-          color: Cesium.Color.fromCssColorString(line.color).withAlpha(0.5)
-        })
+        width: 22,
+        material: new Cesium.PolylineArrowMaterialProperty(
+          Cesium.Color.fromCssColorString(line.color).withAlpha(0.7)
+        )
       }
     });
   }

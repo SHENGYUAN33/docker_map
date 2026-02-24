@@ -186,6 +186,24 @@ class MapState:
             tiles=MAP_DEFAULT_TILES
         )
 
+        # 注入自訂底圖圖層（從 config.json 讀取）
+        try:
+            from services import load_config
+            custom_layers = load_config().get('custom_layers', [])
+            for cl in custom_layers:
+                if cl.get('enabled') and cl.get('url_template'):
+                    folium.TileLayer(
+                        tiles=cl['url_template'],
+                        attr=cl.get('attribution', ''),
+                        name=cl.get('name', '自訂圖層'),
+                        max_zoom=cl.get('max_zoom', 18),
+                        opacity=cl.get('opacity', 1.0),
+                        overlay=True,
+                        control=True
+                    ).add_to(m)
+        except Exception as e:
+            print(f"⚠️ 載入自訂圖層失敗: {e}")
+
         # 建立圖層分組（用於 Leaflet LayerControl 切換顯示）
         active_layers = self.get_layers()
         layer_groups = {}
@@ -309,8 +327,21 @@ class MapState:
         </style>
         """
 
+        # postMessage 監聽器（供父視窗搜尋船艦後飛到指定座標）
+        postmessage_js = """
+        <script>
+        window.addEventListener('message', function(event) {
+            if (!event.data || event.data.type !== 'flyTo') return;
+            var maps = document.querySelectorAll('.folium-map');
+            if (!maps.length) return;
+            var map = window[maps[0].id];
+            if (map) map.flyTo([event.data.lat, event.data.lon], event.data.zoom || 10, {duration: 1.5});
+        });
+        </script>
+        """
+
         # 將 JavaScript 與 CSS 注入地圖 HTML
-        header_js = milsymbol_tag + divicon_css + common_js
+        header_js = milsymbol_tag + divicon_css + common_js + postmessage_js
         m.get_root().header.add_child(Element(header_js))
 
         # 添加所有船艦標記（使用 MIL-STD-2525 符號）

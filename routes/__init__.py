@@ -12,6 +12,7 @@ from .prompt_routes import prompt_bp
 from .admin_routes import admin_bp
 from .static_routes import static_bp
 from .stream_routes import stream_bp
+from .layer_routes import layer_bp
 
 
 def register_blueprints(app: Flask):
@@ -47,6 +48,9 @@ def register_blueprints(app: Flask):
     # SSE 串流路由（RAG 問答串流）
     app.register_blueprint(stream_bp)
 
+    # 圖資管理路由（自訂圖層 CRUD）
+    app.register_blueprint(layer_bp)
+
     # 靜態文件路由（地圖文件、首頁）
     app.register_blueprint(static_bp)
 
@@ -62,6 +66,7 @@ def register_blueprints(app: Flask):
 ║  📌 prompt_bp    - Prompt 管理路由                           ║
 ║  📌 admin_bp     - 系統管理路由                              ║
 ║  📌 stream_bp    - SSE 串流路由                               ║
+║  📌 layer_bp     - 圖資管理路由                              ║
 ║  📌 static_bp    - 靜態文件路由                              ║
 ╚═══════════════════════════════════════════════════════════════╝
     """)
