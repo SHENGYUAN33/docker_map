@@ -1,10 +1,28 @@
 {
   "show_source_btn": false,
-  "enable_animation": false,
+  "enable_animation": true,
   "enable_3d_globe": true,
   "enable_measurement": true,
   "cesium_ion_token": "",
   "google_maps_api_key": "AIzaSyBCFhSG2jtlF2oZyvNnZc0PNyhRZwiahUo",
-  "enable_ship_management": true,
-  "custom_layers": []
+  "custom_layers": [
+    {
+      "id": "layer_1772009340196",
+      "name": "暗",
+      "url_template": "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+      "attribution": "",
+      "max_zoom": 18,
+      "opacity": 1,
+      "enabled": false
+    },
+    {
+      "id": "layer_1772009527720",
+      "name": "衛星",
+      "url_template": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      "attribution": "",
+      "max_zoom": 18,
+      "opacity": 1,
+      "enabled": false
+    }
+  ]
 }

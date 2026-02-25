@@ -272,7 +272,7 @@ class MapState:
                 if cl.get('enabled') and cl.get('url_template'):
                     folium.TileLayer(
                         tiles=cl['url_template'],
-                        attr=cl.get('attribution', ''),
+                        attr=cl.get('attribution') or '自訂圖層',
                         name=cl.get('name', '自訂圖層'),
                         max_zoom=cl.get('max_zoom', 18),
                         opacity=cl.get('opacity', 1.0),

@@ -4480,3 +4480,639 @@
 [2026-02-25 15:39:05] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 15:39:05] "GET /api/get_simulation_status HTTP/1.1" 200 -
 [2026-02-25 15:39:09] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 15:39:09] "GET /api/get_simulation_status HTTP/1.1" 200 -
 [2026-02-25 15:39:11] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 15:39:11] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:37:17] INFO [__main__] 正在初始化系統目錄...
+[2026-02-25 16:37:17] INFO [config] 目錄初始化完成: maps, feedbacks, cops, scenarios
+[2026-02-25 16:37:17] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:37:17] INFO [__main__] 正在註冊路由藍圖...
+[2026-02-25 16:37:17] INFO [routes] 所有路由藍圖註冊完成（共 12 個藍圖）
+[2026-02-25 16:37:17] INFO [__main__] 軍事兵推 AI 系統 v6.0 啟動中... 服務地址: http://0.0.0.0:5000
+[2026-02-25 16:37:17] INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.1.22.106:5000
+[2026-02-25 16:37:17] INFO [werkzeug] [33mPress CTRL+C to quit[0m
+[2026-02-25 16:37:17] INFO [werkzeug]  * Restarting with stat
+[2026-02-25 16:37:19] INFO [__main__] 正在初始化系統目錄...
+[2026-02-25 16:37:19] INFO [config] 目錄初始化完成: maps, feedbacks, cops, scenarios
+[2026-02-25 16:37:19] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:37:19] INFO [__main__] 正在註冊路由藍圖...
+[2026-02-25 16:37:19] INFO [routes] 所有路由藍圖註冊完成（共 12 個藍圖）
+[2026-02-25 16:37:19] INFO [__main__] 軍事兵推 AI 系統 v6.0 啟動中... 服務地址: http://0.0.0.0:5000
+[2026-02-25 16:37:19] WARNING [werkzeug]  * Debugger is active!
+[2026-02-25 16:37:19] INFO [werkzeug]  * Debugger PIN: 122-170-244
+[2026-02-25 16:37:23] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:23] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:37:23] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:23] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:37:24] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:24] "GET / HTTP/1.1" 200 -
+[2026-02-25 16:37:24] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:24] "[36mGET /static/js/milsymbol.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:37:24] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:24] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+[2026-02-25 16:37:25] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:25] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:37:25] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:25] "[36mGET /static/js/utils/helpers.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:37:25] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:25] "[36mGET /static/js/modules/ui-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:37:25] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:25] "[36mGET /static/js/modules/map-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:37:25] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:25] "[36mGET /static/js/utils/constants.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:37:25] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:25] "[36mGET /static/js/modules/api-client.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:37:25] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:25] "[36mGET /static/js/modules/file-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:37:25] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:25] "[36mGET /static/js/modules/prompt-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:37:25] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:25] "[36mGET /static/js/modules/feedback-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:37:25] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:25] "[36mGET /static/js/modules/message-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:37:25] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:25] "[36mGET /static/js/modules/cop-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:37:25] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:25] "[36mGET /static/js/modules/settings-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:37:25] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:25] "[36mGET /static/js/modules/simulation-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:37:26] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:26] "[36mGET /static/js/modules/layer-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:37:26] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:26] "[36mGET /static/js/modules/cesium-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:37:26] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:26] "[36mGET /static/js/modules/scenario-save-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:37:26] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:26] "[36mGET /static/js/modules/search-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:37:26] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:26] "[36mGET /static/js/modules/ship-panel-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:37:26] INFO [services.config_loader] 已載入系統配置: system_config.json
+[2026-02-25 16:37:26] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:26] "GET /api/admin/settings HTTP/1.1" 200 -
+[2026-02-25 16:37:26] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:26] "GET /api/llm/models HTTP/1.1" 200 -
+[2026-02-25 16:37:26] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:26] "GET /api/custom_layers HTTP/1.1" 200 -
+[2026-02-25 16:37:27] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:27] "GET /api/prompts/list HTTP/1.1" 200 -
+[2026-02-25 16:37:27] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:27] "POST /api/clear_map HTTP/1.1" 200 -
+[2026-02-25 16:37:27] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:27] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:37:30] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:30] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:37:33] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:33] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:37:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:36] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:37:39] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:39] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:37:42] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:42] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:37:45] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:45] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:37:48] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:48] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:37:51] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:51] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:37:54] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:54] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:37:57] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:37:57] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:38:00] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:38:00] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:38:03] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:38:03] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:38:06] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:38:06] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:38:09] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:38:09] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:38:12] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:38:12] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:38:15] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:38:15] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:38:18] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:38:18] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:38:21] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:38:21] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:38:24] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:38:24] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:38:27] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:38:27] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:38:30] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:38:30] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:38:42] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:38:42] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:39:42] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:39:42] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:39:51] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:39:51] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:39:51] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:39:51] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:39:54] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:39:54] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:39:57] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:39:57] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:00] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:00] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:03] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:03] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:06] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:06] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:09] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:09] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:12] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:12] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:15] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:15] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:18] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:18] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:21] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:21] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:24] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:24] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:27] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:27] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:30] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:30] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:33] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:33] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:36] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:39] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:39] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:42] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:42] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:45] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:45] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:48] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:48] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:50] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:40:50] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:50] "POST /api/custom_layers HTTP/1.1" 200 -
+[2026-02-25 16:40:50] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:50] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:40:51] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:51] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:54] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:54] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:57] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:57] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:40:58] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:40:58] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:58] "PUT /api/custom_layers/layer_1772008850350 HTTP/1.1" 200 -
+[2026-02-25 16:40:58] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:58] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:40:59] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:40:59] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:59] "PUT /api/custom_layers/layer_1772008850350 HTTP/1.1" 200 -
+[2026-02-25 16:40:59] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:40:59] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:41:00] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:00] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:41:03] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:03] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:41:06] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:06] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:41:09] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:41:09] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:09] "POST /api/admin/settings HTTP/1.1" 200 -
+[2026-02-25 16:41:09] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:41:09] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:09] "POST /api/admin/settings HTTP/1.1" 200 -
+[2026-02-25 16:41:09] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:09] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:41:12] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:12] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:41:15] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:15] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:41:16] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:41:16] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:16] "PUT /api/custom_layers/layer_1772008850350 HTTP/1.1" 200 -
+[2026-02-25 16:41:17] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:17] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:41:18] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:18] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:41:21] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:21] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:41:24] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:24] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:41:27] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:27] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:41:30] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:30] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:41:33] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:33] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:41:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:36] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:41:39] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:39] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:41:42] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:42] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:41:45] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:45] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:41:48] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:48] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:41:51] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:51] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:41:54] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:54] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:41:57] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:41:57] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:42:00] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:00] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:42:03] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:03] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:42:06] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:06] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:42:09] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:09] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:42:12] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:12] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:42:15] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:15] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:42:18] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:18] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:42:21] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:21] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:42:23] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:42:23] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:23] "PUT /api/custom_layers/layer_1772008850350 HTTP/1.1" 200 -
+[2026-02-25 16:42:23] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:23] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:42:24] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:24] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:42:27] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:27] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:42:30] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:30] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:42:33] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:42:33] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:33] "PUT /api/custom_layers/layer_1772008850350 HTTP/1.1" 200 -
+[2026-02-25 16:42:33] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:33] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:42:33] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:33] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:42:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:36] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:42:39] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:39] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:42:42] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:42] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:42:45] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:45] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:42:48] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:48] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:42:51] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:51] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:42:54] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:54] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:42:57] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:42:57] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:43:00] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:00] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:43:03] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:03] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:43:06] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:06] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:43:09] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:09] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:43:12] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:12] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:43:15] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:15] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:43:18] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:18] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:43:21] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:21] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:43:24] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:24] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:43:27] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:27] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:43:30] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:30] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:43:33] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:33] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:43:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:36] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:43:37] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:43:37] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:37] "PUT /api/custom_layers/layer_1772008850350 HTTP/1.1" 200 -
+[2026-02-25 16:43:37] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:37] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:43:39] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:39] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:43:42] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:42] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:43:45] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:45] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:43:48] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:48] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:43:51] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:51] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:43:54] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:54] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:43:57] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:43:57] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:00] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:00] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:03] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:03] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:06] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:06] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:09] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:09] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:12] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:12] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:15] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:15] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:15] INFO [werkzeug]  * Detected change in 'C:\\Users\\User\\Desktop\\map\\routes\\layer_routes.py', reloading
+[2026-02-25 16:44:16] INFO [werkzeug]  * Restarting with stat
+[2026-02-25 16:44:18] INFO [__main__] 正在初始化系統目錄...
+[2026-02-25 16:44:18] INFO [config] 目錄初始化完成: maps, feedbacks, cops, scenarios
+[2026-02-25 16:44:18] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:44:18] INFO [__main__] 正在註冊路由藍圖...
+[2026-02-25 16:44:18] INFO [routes] 所有路由藍圖註冊完成（共 12 個藍圖）
+[2026-02-25 16:44:18] INFO [__main__] 軍事兵推 AI 系統 v6.0 啟動中... 服務地址: http://0.0.0.0:5000
+[2026-02-25 16:44:18] WARNING [werkzeug]  * Debugger is active!
+[2026-02-25 16:44:18] INFO [werkzeug]  * Debugger PIN: 122-170-244
+[2026-02-25 16:44:18] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:18] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:21] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:21] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:24] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:24] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:27] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:27] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:30] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:30] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:33] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:33] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:36] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:39] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:44:39] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:39] "PUT /api/custom_layers/layer_1772008850350 HTTP/1.1" 200 -
+[2026-02-25 16:44:39] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:39] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:44:39] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:39] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:39] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:39] "GET /maps/refresh_map_20260225_164439.html?t=1772009079677 HTTP/1.1" 200 -
+[2026-02-25 16:44:40] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:44:40] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:40] "PUT /api/custom_layers/layer_1772008850350 HTTP/1.1" 200 -
+[2026-02-25 16:44:40] WARNING [models.map_state] 載入自訂圖層失敗: Custom tiles must have an attribution.
+[2026-02-25 16:44:40] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:40] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:44:40] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:40] "GET /maps/refresh_map_20260225_164440.html?t=1772009080393 HTTP/1.1" 200 -
+[2026-02-25 16:44:41] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:44:41] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:41] "PUT /api/custom_layers/layer_1772008850350 HTTP/1.1" 200 -
+[2026-02-25 16:44:41] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:41] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:44:41] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:41] "GET /maps/refresh_map_20260225_164441.html?t=1772009081849 HTTP/1.1" 200 -
+[2026-02-25 16:44:42] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:42] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:44] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:44:44] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:44] "PUT /api/custom_layers/layer_1772008850350 HTTP/1.1" 200 -
+[2026-02-25 16:44:44] WARNING [models.map_state] 載入自訂圖層失敗: Custom tiles must have an attribution.
+[2026-02-25 16:44:45] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:45] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:44:45] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:45] "GET /maps/refresh_map_20260225_164445.html?t=1772009085060 HTTP/1.1" 200 -
+[2026-02-25 16:44:45] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:45] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:48] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:48] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:51] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:51] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:54] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:54] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:55] INFO [routes.data_routes] [功能五：武器分派] 收到指令: 攻擊配對線繪製
+[2026-02-25 16:44:55] INFO [routes.data_routes] [使用模型]: gpt-4
+[2026-02-25 16:44:55] INFO [routes.data_routes] [Provider]: openai
+[2026-02-25 16:44:55] INFO [routes.data_routes] [Prompt 配置]: 預設配置
+[2026-02-25 16:44:55] INFO [services.config_service] [System Prompt 獲取]
+[2026-02-25 16:44:55] INFO [services.config_service]   請求配置: 預設配置
+[2026-02-25 16:44:55] INFO [services.config_service]   請求功能: get_wta
+[2026-02-25 16:44:55] INFO [services.config_service]   成功獲取 System Prompt
+[2026-02-25 16:44:55] INFO [services.config_service]   可編輯部分長度: 14 字元
+[2026-02-25 16:44:55] INFO [services.config_service]   固定部分長度: 1352 字元
+[2026-02-25 16:44:55] INFO [services.config_service]   完整 Prompt 長度: 1366 字元
+[2026-02-25 16:44:55] INFO [services.config_service]   Prompt 內容預覽 (前 200 字): 你是一個武器分派參數提取器。
+    【規則】:
+    1. 識別查詢模式：按敵艦類型 OR 按波次編號
+    2. 按敵艦類型查詢：
+       - 「所有」、「全部」、「全部的」-> {"enemy": []}
+       - 特定船艦名稱 -> {"enemy": ["052D", "055"]}
+       - 嚴禁使用 "all" 字串
+    3. 按波次編號查詢（✅ 新增）...
+[2026-02-25 16:44:55] INFO [services.config_loader] 已載入系統配置: system_config.json
+[2026-02-25 16:44:57] INFO [routes.data_routes] [提取參數]: {'enemy': []}
+[2026-02-25 16:44:57] INFO [routes.data_routes] [送出 API 參數]: {'enemy': []}
+[2026-02-25 16:44:57] INFO [services.api_mode_service] [API Mode: real] 呼叫端點: get_wta
+[2026-02-25 16:44:57] INFO [services.api_mode_service]    URL: https://2238e735-b9e0-45df-a24e-07d987a4ee9a.mock.pstmn.io/get_wta
+[2026-02-25 16:44:57] INFO [services.api_mode_service]    Timeout: 300s
+[2026-02-25 16:44:57] INFO [services.api_mode_service]    Request Body: {"enemy": []}
+[2026-02-25 16:44:57] INFO [services.api_mode_service]    Method: POST
+[2026-02-25 16:44:57] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:57] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:44:58] INFO [services.api_mode_service]    Response Status: 200
+[2026-02-25 16:44:58] INFO [services.api_mode_service]    Response Body: {
+     "wta_table_columns":       
+     [                                           
+           {"attack_wave": "波次"},
+           {"enemy_unit": "敵艦船型"},
+           {"roc_unit": "我方單位"},
+           {"weapon": "飛彈種類"},
+           {"launched_number": "發射數量"},
+           {"launched_time": "發射時間"}
+     ],
+     "wta_results":        
+     [
+           { 
+                "id": 1,               
+                "attack_wave": "第1波", 
+                "enemy_unit": "052D-1",
+                "enemy_location": [23.280819,119.038618],           
+                "roc_unit": "Tuo Chiang-1", 
+                "roc_location": [23.093695,121.567613],                    
+                "weapon": "雄三飛彈", 
+                "launched_number": "4枚",
+                "launched_time": "14:56"
+           },
+           { 
+                "id": 2,            
+                "attack_wave": "第2波",
+                "enemy_unit": "052D-2",
+                "enemy_location": [23.046975,118.946
+[2026-02-25 16:44:58] INFO [routes.data_routes] [API 回傳]: 取得 2 筆記錄
+[2026-02-25 16:44:58] INFO [utils.ship_registry] [ship_registry] Loaded: C:\Users\User\Desktop\map\ship_registry.json
+[2026-02-25 16:44:58] INFO [routes.data_routes] [動畫設定]: 關閉
+[2026-02-25 16:44:58] WARNING [models.map_state] 載入自訂圖層失敗: Custom tiles must have an attribution.
+[2026-02-25 16:44:59] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:59] "POST /api/get_wta HTTP/1.1" 200 -
+[2026-02-25 16:44:59] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:59] "GET /api/ships HTTP/1.1" 200 -
+[2026-02-25 16:44:59] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:44:59] "GET /maps/wta_map_20260225_164459.html?t=1772009099118 HTTP/1.1" 200 -
+[2026-02-25 16:45:00] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:00] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:45:03] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:03] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:45:06] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:06] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:45:08] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:45:08] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:08] "PUT /api/custom_layers/layer_1772008850350 HTTP/1.1" 200 -
+[2026-02-25 16:45:09] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:09] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:45:09] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:09] "GET /maps/refresh_map_20260225_164509.html?t=1772009109355 HTTP/1.1" 200 -
+[2026-02-25 16:45:09] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:09] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:45:12] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:45:12] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:12] "PUT /api/custom_layers/layer_1772008850350 HTTP/1.1" 200 -
+[2026-02-25 16:45:12] WARNING [models.map_state] 載入自訂圖層失敗: Custom tiles must have an attribution.
+[2026-02-25 16:45:12] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:12] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:45:12] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:12] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:45:13] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:13] "GET /maps/refresh_map_20260225_164512.html?t=1772009112886 HTTP/1.1" 200 -
+[2026-02-25 16:45:15] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:15] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:45:18] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:18] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:45:21] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:21] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:45:24] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:24] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:45:25] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:45:25] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:25] "PUT /api/custom_layers/layer_1772008850350 HTTP/1.1" 200 -
+[2026-02-25 16:45:26] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:26] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:45:26] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:26] "GET /maps/refresh_map_20260225_164526.html?t=1772009126298 HTTP/1.1" 200 -
+[2026-02-25 16:45:27] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:27] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:45:30] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:45:30] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:30] "PUT /api/custom_layers/layer_1772008850350 HTTP/1.1" 200 -
+[2026-02-25 16:45:30] WARNING [models.map_state] 載入自訂圖層失敗: Custom tiles must have an attribution.
+[2026-02-25 16:45:31] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:31] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:45:31] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:31] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:45:31] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:31] "GET /maps/refresh_map_20260225_164531.html?t=1772009131191 HTTP/1.1" 200 -
+[2026-02-25 16:45:33] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:33] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:45:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:36] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:45:39] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:39] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:45:42] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:42] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:45:45] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:45] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:45:48] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:48] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:45:51] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:51] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:45:54] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:54] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:45:57] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:45:57] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:46:00] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:00] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:46:01] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:46:01] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:01] "PUT /api/custom_layers/layer_1772008850350 HTTP/1.1" 200 -
+[2026-02-25 16:46:02] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:02] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:46:02] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:02] "GET /maps/refresh_map_20260225_164602.html?t=1772009162181 HTTP/1.1" 200 -
+[2026-02-25 16:46:03] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:03] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:46:04] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:46:04] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:04] "DELETE /api/custom_layers/layer_1772008850350 HTTP/1.1" 200 -
+[2026-02-25 16:46:05] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:05] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:46:05] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:05] "GET /maps/refresh_map_20260225_164605.html?t=1772009165093 HTTP/1.1" 200 -
+[2026-02-25 16:46:06] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:06] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:46:09] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:09] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:46:12] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:12] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:46:15] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:15] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:46:18] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:18] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:46:21] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:21] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:46:24] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:24] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:46:27] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:27] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:46:30] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:30] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:46:31] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:46:31] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:31] "POST /api/custom_layers HTTP/1.1" 200 -
+[2026-02-25 16:46:32] WARNING [models.map_state] 載入自訂圖層失敗: Custom tiles must have an attribution.
+[2026-02-25 16:46:32] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:32] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:46:32] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:32] "GET /maps/refresh_map_20260225_164632.html?t=1772009192644 HTTP/1.1" 200 -
+[2026-02-25 16:46:33] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:33] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:46:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:36] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:46:39] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:46:39] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:39] "PUT /api/custom_layers/layer_1772009191826 HTTP/1.1" 200 -
+[2026-02-25 16:46:39] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:39] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:46:40] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:40] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:46:40] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:40] "GET /maps/refresh_map_20260225_164640.html?t=1772009200096 HTTP/1.1" 200 -
+[2026-02-25 16:46:42] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:42] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:46:43] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:46:43] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:43] "PUT /api/custom_layers/layer_1772009191826 HTTP/1.1" 200 -
+[2026-02-25 16:46:43] WARNING [models.map_state] 載入自訂圖層失敗: Custom tiles must have an attribution.
+[2026-02-25 16:46:43] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:43] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:46:43] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:43] "GET /maps/refresh_map_20260225_164643.html?t=1772009203828 HTTP/1.1" 200 -
+[2026-02-25 16:46:45] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:45] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:46:48] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:48] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:46:51] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:51] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:46:54] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:54] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:46:57] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:46:57] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:47:00] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:00] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:47:03] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:03] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:47:06] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:06] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:47:09] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:09] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:47:12] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:12] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:47:15] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:15] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:47:18] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:18] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:47:21] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:21] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:47:24] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:24] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:47:27] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:27] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:47:30] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:30] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:47:33] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:33] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:47:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:36] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:47:39] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:39] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:47:42] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:42] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:47:45] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:45] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:47:47] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:47:47] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:47] "DELETE /api/custom_layers/layer_1772009191826 HTTP/1.1" 200 -
+[2026-02-25 16:47:48] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:48] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:47:48] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:48] "GET /maps/refresh_map_20260225_164748.html?t=1772009268119 HTTP/1.1" 200 -
+[2026-02-25 16:47:48] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:48] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:47:51] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:51] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:47:54] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:54] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:47:55] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:47:55] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:55] "POST /api/custom_layers HTTP/1.1" 200 -
+[2026-02-25 16:47:55] WARNING [models.map_state] 載入自訂圖層失敗: Custom tiles must have an attribution.
+[2026-02-25 16:47:55] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:55] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:47:56] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:56] "GET /maps/refresh_map_20260225_164755.html?t=1772009275883 HTTP/1.1" 200 -
+[2026-02-25 16:47:57] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:47:57] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:48:00] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:00] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:48:02] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:48:02] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:02] "PUT /api/custom_layers/layer_1772009275476 HTTP/1.1" 200 -
+[2026-02-25 16:48:02] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:02] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:48:02] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:02] "GET /maps/refresh_map_20260225_164802.html?t=1772009282570 HTTP/1.1" 200 -
+[2026-02-25 16:48:03] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:03] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:48:04] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:48:04] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:04] "PUT /api/custom_layers/layer_1772009275476 HTTP/1.1" 200 -
+[2026-02-25 16:48:05] WARNING [models.map_state] 載入自訂圖層失敗: Custom tiles must have an attribution.
+[2026-02-25 16:48:05] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:05] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:48:05] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:05] "GET /maps/refresh_map_20260225_164805.html?t=1772009285469 HTTP/1.1" 200 -
+[2026-02-25 16:48:06] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:06] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:48:09] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:09] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:48:12] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:12] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:48:15] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:15] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:48:18] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:18] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:48:21] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:48:21] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:21] "PUT /api/custom_layers/layer_1772009275476 HTTP/1.1" 200 -
+[2026-02-25 16:48:21] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:21] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:48:21] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:21] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:48:22] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:48:22] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:22] "PUT /api/custom_layers/layer_1772009275476 HTTP/1.1" 200 -
+[2026-02-25 16:48:22] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:22] "GET /maps/refresh_map_20260225_164821.html?t=1772009301718 HTTP/1.1" 200 -
+[2026-02-25 16:48:22] WARNING [models.map_state] 載入自訂圖層失敗: Custom tiles must have an attribution.
+[2026-02-25 16:48:22] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:22] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:48:23] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:23] "GET /maps/refresh_map_20260225_164822.html?t=1772009302845 HTTP/1.1" 200 -
+[2026-02-25 16:48:24] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:24] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:48:27] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:27] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:48:30] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:30] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:48:33] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:33] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:48:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:36] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:48:39] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:39] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:48:42] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:42] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:48:45] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:45] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:48:48] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:48] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:48:49] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:48:49] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:49] "DELETE /api/custom_layers/layer_1772009275476 HTTP/1.1" 200 -
+[2026-02-25 16:48:50] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:50] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:48:50] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:50] "GET /maps/refresh_map_20260225_164850.html?t=1772009330131 HTTP/1.1" 200 -
+[2026-02-25 16:48:51] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:51] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:48:54] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:54] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:48:57] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:48:57] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:49:00] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:49:00] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:00] "POST /api/custom_layers HTTP/1.1" 200 -
+[2026-02-25 16:49:00] WARNING [models.map_state] 載入自訂圖層失敗: Custom tiles must have an attribution.
+[2026-02-25 16:49:00] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:00] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:49:01] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:01] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:49:01] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:01] "GET /maps/refresh_map_20260225_164900.html?t=1772009341031 HTTP/1.1" 200 -
+[2026-02-25 16:49:03] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:03] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:49:06] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:06] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:49:09] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:49:09] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:09] "PUT /api/custom_layers/layer_1772009340196 HTTP/1.1" 200 -
+[2026-02-25 16:49:09] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:09] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:49:09] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:09] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:49:09] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:09] "GET /maps/refresh_map_20260225_164909.html?t=1772009349525 HTTP/1.1" 200 -
+[2026-02-25 16:49:10] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:49:10] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:10] "PUT /api/custom_layers/layer_1772009340196 HTTP/1.1" 200 -
+[2026-02-25 16:49:10] WARNING [models.map_state] 載入自訂圖層失敗: Custom tiles must have an attribution.
+[2026-02-25 16:49:11] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:11] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:49:11] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:11] "GET /maps/refresh_map_20260225_164911.html?t=1772009351057 HTTP/1.1" 200 -
+[2026-02-25 16:49:12] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:12] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:49:15] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:15] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:49:18] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:18] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:49:21] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:21] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:49:22] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:49:22] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:22] "PUT /api/custom_layers/layer_1772009340196 HTTP/1.1" 200 -
+[2026-02-25 16:49:22] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:22] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:49:22] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:22] "GET /maps/refresh_map_20260225_164922.html?t=1772009362321 HTTP/1.1" 200 -
+[2026-02-25 16:49:23] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:49:23] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:23] "PUT /api/custom_layers/layer_1772009340196 HTTP/1.1" 200 -
+[2026-02-25 16:49:23] WARNING [models.map_state] 載入自訂圖層失敗: Custom tiles must have an attribution.
+[2026-02-25 16:49:23] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:23] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:49:23] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:23] "GET /maps/refresh_map_20260225_164923.html?t=1772009363649 HTTP/1.1" 200 -
+[2026-02-25 16:49:24] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:24] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:49:27] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:27] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:49:30] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:30] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:49:33] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:33] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:49:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:36] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:49:39] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:39] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:49:42] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:49:42] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:51:30] INFO [__main__] 正在初始化系統目錄...
+[2026-02-25 16:51:30] INFO [config] 目錄初始化完成: maps, feedbacks, cops, scenarios
+[2026-02-25 16:51:30] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:51:30] INFO [__main__] 正在註冊路由藍圖...
+[2026-02-25 16:51:30] INFO [routes] 所有路由藍圖註冊完成（共 12 個藍圖）
+[2026-02-25 16:51:30] INFO [__main__] 軍事兵推 AI 系統 v6.0 啟動中... 服務地址: http://0.0.0.0:5000
+[2026-02-25 16:51:30] INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.1.22.106:5000
+[2026-02-25 16:51:30] INFO [werkzeug] [33mPress CTRL+C to quit[0m
+[2026-02-25 16:51:30] INFO [werkzeug]  * Restarting with stat
+[2026-02-25 16:51:32] INFO [__main__] 正在初始化系統目錄...
+[2026-02-25 16:51:32] INFO [config] 目錄初始化完成: maps, feedbacks, cops, scenarios
+[2026-02-25 16:51:32] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:51:32] INFO [__main__] 正在註冊路由藍圖...
+[2026-02-25 16:51:32] INFO [routes] 所有路由藍圖註冊完成（共 12 個藍圖）
+[2026-02-25 16:51:32] INFO [__main__] 軍事兵推 AI 系統 v6.0 啟動中... 服務地址: http://0.0.0.0:5000
+[2026-02-25 16:51:32] WARNING [werkzeug]  * Debugger is active!
+[2026-02-25 16:51:32] INFO [werkzeug]  * Debugger PIN: 122-170-244
+[2026-02-25 16:51:34] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:34] "GET / HTTP/1.1" 200 -
+[2026-02-25 16:51:34] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:34] "[36mGET /static/js/milsymbol.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:51:34] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:34] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+[2026-02-25 16:51:34] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:34] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:51:35] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:35] "[36mGET /static/js/modules/api-client.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:51:35] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:35] "[36mGET /static/js/utils/helpers.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:51:35] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:35] "[36mGET /static/js/utils/constants.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:51:35] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:35] "[36mGET /static/js/modules/ui-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:51:35] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:35] "[36mGET /static/js/modules/map-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:51:35] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:35] "[36mGET /static/js/modules/prompt-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:51:35] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:35] "[36mGET /static/js/modules/file-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:51:35] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:35] "[36mGET /static/js/modules/message-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:51:35] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:35] "[36mGET /static/js/modules/feedback-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:51:35] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:35] "[36mGET /static/js/modules/cop-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:51:35] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:35] "[36mGET /static/js/modules/settings-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:51:35] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:35] "[36mGET /static/js/modules/simulation-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:51:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:36] "[36mGET /static/js/modules/cesium-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:51:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:36] "[36mGET /static/js/modules/layer-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:51:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:36] "[36mGET /static/js/modules/search-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:51:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:36] "[36mGET /static/js/modules/scenario-save-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:51:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:36] "[36mGET /static/js/modules/ship-panel-manager.js HTTP/1.1[0m" 304 -
+[2026-02-25 16:51:36] INFO [services.config_loader] 已載入系統配置: system_config.json
+[2026-02-25 16:51:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:36] "GET /api/admin/settings HTTP/1.1" 200 -
+[2026-02-25 16:51:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:36] "GET /api/llm/models HTTP/1.1" 200 -
+[2026-02-25 16:51:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:36] "GET /api/custom_layers HTTP/1.1" 200 -
+[2026-02-25 16:51:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:36] "GET /api/prompts/list HTTP/1.1" 200 -
+[2026-02-25 16:51:37] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:37] "POST /api/clear_map HTTP/1.1" 200 -
+[2026-02-25 16:51:37] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:37] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:51:38] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:51:38] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:38] "PUT /api/custom_layers/layer_1772009340196 HTTP/1.1" 200 -
+[2026-02-25 16:51:38] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:38] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:51:38] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:38] "GET /maps/refresh_map_20260225_165138.html?t=1772009498724 HTTP/1.1" 200 -
+[2026-02-25 16:51:39] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:51:39] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:39] "PUT /api/custom_layers/layer_1772009340196 HTTP/1.1" 200 -
+[2026-02-25 16:51:39] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:39] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:51:39] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:39] "GET /maps/refresh_map_20260225_165139.html?t=1772009499544 HTTP/1.1" 200 -
+[2026-02-25 16:51:40] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:40] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:51:43] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:43] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:51:46] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:46] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:51:49] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:49] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:51:52] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:52] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:51:55] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:55] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:51:58] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:51:58] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:52:01] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:01] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:52:04] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:04] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:52:07] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:07] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:52:07] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:52:07] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:07] "POST /api/custom_layers HTTP/1.1" 200 -
+[2026-02-25 16:52:08] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:08] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:52:08] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:08] "GET /maps/refresh_map_20260225_165208.html?t=1772009528133 HTTP/1.1" 200 -
+[2026-02-25 16:52:10] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:10] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:52:11] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:52:11] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:11] "PUT /api/custom_layers/layer_1772009340196 HTTP/1.1" 200 -
+[2026-02-25 16:52:11] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:11] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:52:12] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:12] "GET /maps/refresh_map_20260225_165211.html?t=1772009531857 HTTP/1.1" 200 -
+[2026-02-25 16:52:13] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:13] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:52:16] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:16] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:52:18] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:52:18] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:18] "POST /api/admin/settings HTTP/1.1" 200 -
+[2026-02-25 16:52:19] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:19] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:52:19] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:52:19] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:19] "POST /api/admin/settings HTTP/1.1" 200 -
+[2026-02-25 16:52:22] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:22] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:52:25] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:25] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:52:28] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:28] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:52:31] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:31] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:52:34] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:34] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:52:37] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:37] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:52:39] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:52:39] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:39] "PUT /api/custom_layers/layer_1772009340196 HTTP/1.1" 200 -
+[2026-02-25 16:52:40] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:40] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:52:40] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:40] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:52:40] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:40] "GET /maps/refresh_map_20260225_165240.html?t=1772009560450 HTTP/1.1" 200 -
+[2026-02-25 16:52:41] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:52:41] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:41] "PUT /api/custom_layers/layer_1772009340196 HTTP/1.1" 200 -
+[2026-02-25 16:52:41] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:41] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:52:41] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:52:41] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:41] "PUT /api/custom_layers/layer_1772009527720 HTTP/1.1" 200 -
+[2026-02-25 16:52:41] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:41] "GET /maps/refresh_map_20260225_165241.html?t=1772009561468 HTTP/1.1" 200 -
+[2026-02-25 16:52:42] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:52:42] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:42] "PUT /api/custom_layers/layer_1772009527720 HTTP/1.1" 200 -
+[2026-02-25 16:52:42] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:42] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:52:43] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:43] "GET /maps/refresh_map_20260225_165242.html?t=1772009562244 HTTP/1.1" 200 -
+[2026-02-25 16:52:43] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:43] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:52:43] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:43] "GET /maps/refresh_map_20260225_165243.html?t=1772009563144 HTTP/1.1" 200 -
+[2026-02-25 16:52:43] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:43] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:52:46] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:46] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:52:49] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:49] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:52:52] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:52] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:52:55] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:55] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:52:58] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:52:58] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:53:01] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:01] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:53:04] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:04] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:53:07] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:07] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:53:10] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:10] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:53:13] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:13] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:53:16] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:16] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:53:19] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:19] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:53:22] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:22] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:53:25] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:25] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:53:28] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:53:28] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:28] "PUT /api/custom_layers/layer_1772009340196 HTTP/1.1" 200 -
+[2026-02-25 16:53:28] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:28] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:53:28] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:28] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:53:28] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:28] "GET /maps/refresh_map_20260225_165328.html?t=1772009608556 HTTP/1.1" 200 -
+[2026-02-25 16:53:29] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:53:29] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:29] "PUT /api/custom_layers/layer_1772009527720 HTTP/1.1" 200 -
+[2026-02-25 16:53:29] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:29] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:53:29] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:29] "GET /maps/refresh_map_20260225_165329.html?t=1772009609763 HTTP/1.1" 200 -
+[2026-02-25 16:53:31] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:31] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:53:32] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:53:32] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:32] "PUT /api/custom_layers/layer_1772009527720 HTTP/1.1" 200 -
+[2026-02-25 16:53:33] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:33] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:53:33] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:33] "GET /maps/refresh_map_20260225_165333.html?t=1772009613318 HTTP/1.1" 200 -
+[2026-02-25 16:53:34] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:34] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:53:35] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:53:35] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:35] "PUT /api/custom_layers/layer_1772009340196 HTTP/1.1" 200 -
+[2026-02-25 16:53:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:36] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:53:36] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:36] "GET /maps/refresh_map_20260225_165336.html?t=1772009616307 HTTP/1.1" 200 -
+[2026-02-25 16:53:37] INFO [services.config_service] 配置已保存到 config.json
+[2026-02-25 16:53:37] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:37] "PUT /api/custom_layers/layer_1772009527720 HTTP/1.1" 200 -
+[2026-02-25 16:53:37] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:37] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:53:38] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:38] "POST /api/refresh_map HTTP/1.1" 200 -
+[2026-02-25 16:53:38] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:38] "GET /maps/refresh_map_20260225_165338.html?t=1772009618068 HTTP/1.1" 200 -
+[2026-02-25 16:53:40] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:40] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:53:43] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:43] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:53:46] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:46] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:53:49] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:49] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:53:52] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:52] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:53:55] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:55] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:53:58] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:53:58] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:54:01] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:54:01] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:54:04] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:54:04] "GET /api/get_simulation_status HTTP/1.1" 200 -
+[2026-02-25 16:54:07] INFO [werkzeug] 127.0.0.1 - - [25/Feb/2026 16:54:07] "GET /api/get_simulation_status HTTP/1.1" 200 -

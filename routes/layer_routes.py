@@ -136,10 +136,6 @@ def refresh_map():
     """
     map_state = get_map_state()
 
-    # 如果沒有任何地圖內容，返回空
-    if not map_state.markers and not map_state.lines and not map_state.tracks:
-        return jsonify({'success': True, 'map_url': None})
-
     try:
         map_obj = map_state.create_map()
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
