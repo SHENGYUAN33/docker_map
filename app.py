@@ -23,11 +23,17 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
     except Exception:
         pass
 
+import logging
 from flask import Flask
 from flask_cors import CORS
 from routes import register_blueprints
-from config import ensure_directories, FLASK_HOST, FLASK_PORT, FLASK_DEBUG, CONFIG_DEFAULTS
+from config import ensure_directories, FLASK_HOST, FLASK_PORT, FLASK_DEBUG, CONFIG_DEFAULTS, CORS_ORIGINS
 from services import save_config
+from utils.logger import setup_logging
+
+# 初始化 logging 系統（必須在其他模組之前）
+setup_logging()
+logger = logging.getLogger(__name__)
 
 # ==================== 創建 Flask 應用程式 ====================
 # 用途：初始化 Flask app 並配置靜態文件目錄
@@ -40,14 +46,14 @@ app = Flask(
 # ==================== 配置 CORS ====================
 # 用途：允許跨域請求（前端可能部署在不同域名/端口）
 # 這對於前後端分離的應用程式是必要的
-CORS(app)
+CORS(app, origins=CORS_ORIGINS)
 
 # ==================== 初始化系統配置 ====================
 # 用途：確保所有必要的目錄存在
 # - maps/      : 儲存生成的地圖 HTML 檔案
 # - feedbacks/ : 儲存使用者反饋資料
 # - cops/      : 儲存 COP 截圖
-print("🔧 正在初始化系統目錄...")
+logger.info("正在初始化系統目錄...")
 ensure_directories()
 
 # 重置 config.json 為預設值（確保每次啟動回到初始狀態）
@@ -72,42 +78,12 @@ save_config(_reset_config)
 # - prompt_bp    : Prompt 配置管理
 # - admin_bp     : 系統管理
 # - static_bp    : 靜態文件服務
-print("🔗 正在註冊路由藍圖...")
+logger.info("正在註冊路由藍圖...")
 register_blueprints(app)
 
 # ==================== 啟動應用程式 ====================
 if __name__ == '__main__':
-    print("""
-╔═══════════════════════════════════════════════════════════════╗
-║           🚀 軍事兵推 AI 系統 v6.0 啟動中...                 ║
-╠═══════════════════════════════════════════════════════════════╣
-║  系統架構：模組化重構版本                                     ║
-║  ├─ models/      : 數據模型層（MapState）                    ║
-║  ├─ services/    : 業務邏輯層（LLM、地圖、配置服務）         ║
-║  ├─ handlers/    : 處理器層（Fallback 處理器）              ║
-║  ├─ utils/       : 工具函數層（解析器、輔助函數）            ║
-║  └─ routes/      : 路由層（22 個 API 端點）                  ║
-╠═══════════════════════════════════════════════════════════════╣
-║  核心功能：                                                   ║
-║  ✅ 功能一: 兵棋場景匯入 (POST /api/import_scenario)         ║
-║  ✅ 功能二: 兵棋模擬啟動 (POST /api/start_scenario)          ║
-║  ✅ 功能三: 武器分派查詢 (POST /api/get_wta)                 ║
-║  ✅ 功能四: 航跡繪製     (POST /api/get_track)               ║
-║  ✅ 功能五: 軍事問答     (POST /api/get_answer)              ║
-║  ✅ 功能六: 反饋管理     (POST /api/submit_feedback)         ║
-║  ✅ 功能七: COP 管理     (POST /api/save_cop)                ║
-║  ✅ 功能八: Prompt 管理  (GET/POST /api/prompts/*)           ║
-╠═══════════════════════════════════════════════════════════════╣
-║  輔助功能：                                                   ║
-║  🔍 健康檢查: GET  /health                                   ║
-║  🗑️  清除地圖: POST /api/clear_map                          ║
-║  ⚙️  系統設置: GET/POST /api/admin/settings                  ║
-╠═══════════════════════════════════════════════════════════════╣
-║  🌐 服務地址: http://localhost:5000                          ║
-║  📖 API 文檔: 請參閱 API_ENDPOINTS.md                        ║
-║  📝 使用指南: 請參閱 USAGE_GUIDE.md                          ║
-╚═══════════════════════════════════════════════════════════════╝
-    """)
+    logger.info("軍事兵推 AI 系統 v6.0 啟動中... 服務地址: http://%s:%s", FLASK_HOST, FLASK_PORT)
 
     # 啟動 Flask 開發伺服器
     # host='0.0.0.0' : 允許外部訪問（不僅限於 localhost）

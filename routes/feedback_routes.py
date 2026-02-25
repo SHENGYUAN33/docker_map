@@ -6,8 +6,11 @@ from flask import Blueprint, request, jsonify
 from datetime import datetime
 import os
 import json
+import logging
 
 from config import FEEDBACK_DIR
+
+logger = logging.getLogger(__name__)
 
 # 創建反饋管理藍圖
 feedback_bp = Blueprint('feedback', __name__)
@@ -57,12 +60,10 @@ def submit_feedback():
                 })
 
         # 詳細日誌以便調試
-        print(f"\n{'='*60}")
-        print(f"【收到反饋】")
-        print(f"原始數據: {json.dumps(data, ensure_ascii=False, indent=2)}")
-        print(f"feedback_text 內容: '{data.get('feedback_text', '')}'")
-        print(f"feedback_text 長度: {len(data.get('feedback_text', ''))}")
-        print(f"{'='*60}\n")
+        logger.info("[收到反饋]")
+        logger.info("原始數據: %s", json.dumps(data, ensure_ascii=False, indent=2))
+        logger.info("feedback_text 內容: '%s'", data.get('feedback_text', ''))
+        logger.info("feedback_text 長度: %s", len(data.get('feedback_text', '')))
 
         # 生成反饋 ID（時間戳）
         timestamp = datetime.now()
@@ -95,8 +96,8 @@ def submit_feedback():
         # 驗證文件內容
         with open(feedback_path, 'r', encoding='utf-8') as f:
             saved_data = json.load(f)
-            print(f"✅ 已保存反饋: {feedback_filename}")
-            print(f"   feedback_text: '{saved_data.get('feedback_text', '')}'")
+            logger.info("已保存反饋: %s", feedback_filename)
+            logger.info("   feedback_text: '%s'", saved_data.get('feedback_text', ''))
 
         return jsonify({
             'success': True,
@@ -106,7 +107,7 @@ def submit_feedback():
         })
 
     except Exception as e:
-        print(f"❌ 反饋提交錯誤: {str(e)}")
+        logger.error("反饋提交錯誤: %s", str(e))
         import traceback
         traceback.print_exc()
         return jsonify({
@@ -156,7 +157,7 @@ def get_feedbacks():
                         feedback_data = json.load(f)
                         feedback_files.append(feedback_data)
                 except Exception as e:
-                    print(f"⚠️  讀取反饋文件失敗: {filename}, 錯誤: {e}")
+                    logger.warning("讀取反饋文件失敗: %s, 錯誤: %s", filename, e)
                     continue
 
         # 按時間戳排序（最新的在前）
@@ -186,7 +187,7 @@ def get_feedbacks():
         })
 
     except Exception as e:
-        print(f"❌ 獲取反饋錯誤: {str(e)}")
+        logger.error("獲取反饋錯誤: %s", str(e))
         return jsonify({
             'success': False,
             'error': str(e)

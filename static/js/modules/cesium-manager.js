@@ -302,6 +302,17 @@ export class CesiumManager {
     if (btn) btn.textContent = '🌐 切換 3D 地球儀';
   }
 
+  /**
+   * 清除所有 3D 資料（供清除地圖時使用）
+   */
+  clearAll() {
+    this.lastMapData = null;
+    this._stopAnimation();
+    for (const ds of Object.values(this.layerSources)) {
+      if (ds) ds.entities.removeAll();
+    }
+  }
+
   // ==================== 資料渲染 ====================
 
   /**

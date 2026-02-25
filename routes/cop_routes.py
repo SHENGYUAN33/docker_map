@@ -7,9 +7,12 @@ from datetime import datetime
 import os
 import json
 import base64
+import logging
 
 from config import COP_DIR, MAP_DIR, SELENIUM_WINDOW_WIDTH, SELENIUM_WINDOW_HEIGHT, COP_PAGE_LOAD_WAIT, COP_FILENAME_FORMAT
 from utils import get_map_state, cleanup_old_files
+
+logger = logging.getLogger(__name__)
 
 # 創建 COP 管理藍圖
 cop_bp = Blueprint('cop', __name__)
@@ -48,7 +51,7 @@ def save_cop():
         - 其他錯誤：返回錯誤堆疊
     """
     try:
-        print("\n【COP 截圖】開始處理...")
+        logger.info("[COP 截圖] 開始處理...")
 
         # 獲取最新的地圖文件
         map_files = [f for f in os.listdir(MAP_DIR) if f.endswith('.html')]
@@ -63,7 +66,7 @@ def save_cop():
         latest_map = map_files[0]
         map_path = os.path.join(MAP_DIR, latest_map)
 
-        print(f"【使用地圖】: {latest_map}")
+        logger.info("[使用地圖]: %s", latest_map)
 
         # 使用 Selenium 截圖
         from selenium import webdriver
@@ -82,7 +85,7 @@ def save_cop():
         chrome_options.add_argument(f'--window-size={SELENIUM_WINDOW_WIDTH},{SELENIUM_WINDOW_HEIGHT}')
         chrome_options.add_argument('--disable-gpu')
 
-        print("【啟動 Selenium】...")
+        logger.info("[啟動 Selenium]...")
 
         try:
             # 創建 WebDriver
@@ -92,7 +95,7 @@ def save_cop():
             absolute_path = os.path.abspath(map_path)
             map_url = f"file://{absolute_path}"
 
-            print(f"【載入地圖】: {map_url}")
+            logger.info("[載入地圖]: %s", map_url)
             driver.get(map_url)
 
             # 等待地圖載入完成
@@ -104,26 +107,26 @@ def save_cop():
             cop_path = os.path.join(COP_DIR, cop_filename)
 
             # 截圖 - 只截取地圖元素
-            print(f"【截圖中】...")
+            logger.info("[截圖中]...")
             try:
                 # 嘗試找到地圖容器並只截取該元素
                 map_container = WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.CLASS_NAME, "folium-map"))
                 )
-                print(f"✅ 找到地圖元素，截取地圖區域")
+                logger.info("找到地圖元素，截取地圖區域")
                 map_container.screenshot(cop_path)
             except Exception as find_error:
                 # 如果找不到特定元素，退回到全頁截圖
-                print(f"⚠️ 找不到地圖元素，使用全頁截圖: {find_error}")
+                logger.warning("找不到地圖元素，使用全頁截圖: %s", find_error)
                 driver.save_screenshot(cop_path)
 
             # 關閉瀏覽器
             driver.quit()
 
-            print(f"✅ 截圖成功: {cop_filename}")
+            logger.info("截圖成功: %s", cop_filename)
 
         except Exception as selenium_error:
-            print(f"❌ Selenium 錯誤: {str(selenium_error)}")
+            logger.error("Selenium 錯誤: %s", str(selenium_error))
             import traceback
             traceback.print_exc()
             return jsonify({
@@ -169,7 +172,7 @@ def save_cop():
         })
 
     except Exception as e:
-        print(f"❌ COP 保存錯誤: {str(e)}")
+        logger.error("COP 保存錯誤: %s", str(e))
         import traceback
         traceback.print_exc()
         return jsonify({

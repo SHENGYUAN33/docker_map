@@ -4,12 +4,15 @@
 """
 import os
 import time
+import logging
 from datetime import datetime
 from flask import Blueprint, request, jsonify
 
 from services import load_config, save_config
 from config import MAP_DIR
 from utils import get_map_state
+
+logger = logging.getLogger(__name__)
 
 layer_bp = Blueprint('layer', __name__)
 
@@ -149,7 +152,7 @@ def refresh_map():
             'map_url': f'/maps/{map_filename}'
         })
     except Exception as e:
-        print(f"❌ refresh_map 錯誤: {e}")
+        logger.error("refresh_map 錯誤: %s", e)
         return jsonify({
             'success': False,
             'error': str(e)

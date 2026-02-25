@@ -19,6 +19,8 @@ import { SimulationManager } from './modules/simulation-manager.js';
 import { CesiumManager } from './modules/cesium-manager.js';
 import { LayerManager } from './modules/layer-manager.js';
 import { SearchManager } from './modules/search-manager.js';
+import { ScenarioSaveManager } from './modules/scenario-save-manager.js';
+import { ShipPanelManager } from './modules/ship-panel-manager.js';
 
 /**
  * 應用程式狀態
@@ -55,6 +57,19 @@ class Application {
     this.cesiumManager = new CesiumManager(this.settingsManager);
     this.layerManager = new LayerManager(apiClient, this.mapManager, this.cesiumManager);
     this.searchManager = new SearchManager(this.mapManager, this.cesiumManager);
+    this.scenarioSaveManager = new ScenarioSaveManager(
+      apiClient, this.uiManager, this.mapManager,
+      this.messageManager, this.cesiumManager, this.searchManager
+    );
+
+    this.shipPanelManager = new ShipPanelManager(
+      apiClient, this.uiManager, this.mapManager,
+      this.cesiumManager, this.searchManager
+    );
+
+    // 注入跨管理器參考
+    this.mapManager.cesiumManager = this.cesiumManager;
+    this.mapManager.shipPanelManager = this.shipPanelManager;
 
     // 暴露全域函數供 HTML 調用
     this.exposeGlobalFunctions();
@@ -94,7 +109,14 @@ class Application {
     // 初始化上圖台/下文本拖曳分隔線
     this.uiManager.initSplitLayout();
 
-    // 設置事件監聽器
+    // 還原深色模式偏好
+    if (localStorage.getItem('dark_mode') === '1') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      const chk = document.getElementById('setting-dark-mode');
+      if (chk) chk.checked = true;
+    }
+
+    // 設置事件監聯器
     this.setupEventListeners();
 
     // 清空本分頁的後端 MapState
@@ -192,6 +214,34 @@ class Application {
 
     // 船艦搜尋
     window._searchManager = this.searchManager;
+
+    // 船艦管理
+    window._shipPanelManager = this.shipPanelManager;
+
+    // 場景儲存/載入
+    window._scenarioSaveManager = this.scenarioSaveManager;
+    window.saveScenario = () => this.scenarioSaveManager.save();
+    window.openScenarioList = () => this.scenarioSaveManager.openList();
+    window.closeScenarioList = () => this.scenarioSaveManager.closeList();
+
+    // 取消請求
+    window.cancelCurrentRequest = () => {
+      apiClient.cancelCurrentRequest();
+      this.uiManager.hideLoading();
+      this.messageManager.addSystemMessage('已取消操作');
+    };
+
+    // 深色模式
+    window.toggleDarkMode = () => {
+      const checkbox = document.getElementById('setting-dark-mode');
+      const isDark = checkbox && checkbox.checked;
+      if (isDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+      }
+      localStorage.setItem('dark_mode', isDark ? '1' : '0');
+    };
   }
 
   /**
@@ -317,6 +367,9 @@ class Application {
             this.searchManager.updateShipIndex(result.map_data);
           }
 
+          // 更新船艦管理面板
+          this.shipPanelManager.refreshShipList();
+
           if (this.state.currentMode === 'import_scenario' ||
               this.state.currentMode === 'get_wta' ||
               this.state.currentMode === 'get_track') {
@@ -344,6 +397,10 @@ class Application {
 
     } catch (error) {
       this.uiManager.hideLoading();
+      if (error.name === 'AbortError') {
+        // 使用者主動取消，不顯示錯誤
+        return;
+      }
       console.error('發送訊息錯誤:', error);
       this.messageManager.addSystemMessage(`❌ 系統錯誤：${error.message}`, 'error');
     } finally {

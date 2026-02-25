@@ -2,7 +2,10 @@
 路由藍圖模組
 用途：集中管理所有 Flask 路由藍圖並提供統一註冊接口
 """
+import logging
 from flask import Flask
+
+logger = logging.getLogger(__name__)
 from .scenario_routes import scenario_bp
 from .data_routes import data_bp
 from .answer_routes import answer_bp
@@ -13,6 +16,8 @@ from .admin_routes import admin_bp
 from .static_routes import static_bp
 from .stream_routes import stream_bp
 from .layer_routes import layer_bp
+from .scenario_save_routes import scenario_save_bp
+from .ship_routes import ship_bp
 
 
 def register_blueprints(app: Flask):
@@ -51,25 +56,16 @@ def register_blueprints(app: Flask):
     # 圖資管理路由（自訂圖層 CRUD）
     app.register_blueprint(layer_bp)
 
+    # 場景儲存/載入路由
+    app.register_blueprint(scenario_save_bp)
+
+    # 船艦管理路由（查詢/刪除船艦）
+    app.register_blueprint(ship_bp)
+
     # 靜態文件路由（地圖文件、首頁）
     app.register_blueprint(static_bp)
 
-    print("""
-╔═══════════════════════════════════════════════════════════════╗
-║           ✅ 所有路由藍圖註冊完成                            ║
-╠═══════════════════════════════════════════════════════════════╣
-║  📌 scenario_bp  - 場景管理路由                              ║
-║  📌 data_bp      - 數據查詢路由                              ║
-║  📌 answer_bp    - RAG 問答路由                              ║
-║  📌 feedback_bp  - 反饋管理路由                              ║
-║  📌 cop_bp       - COP 管理路由                              ║
-║  📌 prompt_bp    - Prompt 管理路由                           ║
-║  📌 admin_bp     - 系統管理路由                              ║
-║  📌 stream_bp    - SSE 串流路由                               ║
-║  📌 layer_bp     - 圖資管理路由                              ║
-║  📌 static_bp    - 靜態文件路由                              ║
-╚═══════════════════════════════════════════════════════════════╝
-    """)
+    logger.info("所有路由藍圖註冊完成（共 12 個藍圖）")
 
 
 __all__ = ['register_blueprints']

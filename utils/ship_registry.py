@@ -5,6 +5,9 @@
 """
 import json
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 _REGISTRY_FILE = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
@@ -20,9 +23,9 @@ def _load_registry():
         try:
             with open(_REGISTRY_FILE, 'r', encoding='utf-8') as f:
                 _registry_cache = json.load(f)
-            print(f"[ship_registry] Loaded: {_REGISTRY_FILE}")
+            logger.info("[ship_registry] Loaded: %s", _REGISTRY_FILE)
         except Exception as e:
-            print(f"[ship_registry] WARNING: Cannot load ship_registry.json: {e}")
+            logger.warning("[ship_registry] Cannot load ship_registry.json: %s", e)
             _registry_cache = {"roc": {"faction_terms": [], "additional_keywords": [], "ships": []},
                                "enemy": {"faction_terms": [], "additional_keywords": [], "ships": []}}
     return _registry_cache
@@ -121,6 +124,47 @@ def get_roc_ship_names():
     for ship in roc['ships']:
         names.append(ship['name'])
     return _dedupe(names)
+
+
+def lookup_ship_info(ship_name, faction=None):
+    """
+    根據船艦名稱查找完整資訊（支援 name / chinese_name / hull_number / alias）
+
+    參數:
+        ship_name: 船艦名稱（英文名、中文名、舷號或別名）
+        faction: 限定陣營 ('roc' / 'enemy')，None 表示全搜
+
+    返回:
+        dict: {'faction': str, 'ship_class': str, 'weapons': list, ...} 或 None
+    """
+    reg = _load_registry()
+    name_lower = ship_name.lower().strip() if ship_name else ''
+    if not name_lower:
+        return None
+
+    factions = [faction] if faction else ['roc', 'enemy']
+
+    for fac in factions:
+        section = reg.get(fac, {})
+        for ship in section.get('ships', []):
+            # ROC 船艦欄位較多
+            if fac == 'roc':
+                candidates = [
+                    (ship.get('name') or '').lower(),
+                    (ship.get('chinese_name') or '').lower(),
+                    (ship.get('hull_number') or '').lower(),
+                ]
+            else:
+                candidates = [
+                    (ship.get('name') or '').lower(),
+                ] + [(a or '').lower() for a in ship.get('aliases', [])]
+
+            if name_lower in candidates:
+                result = dict(ship)
+                result['faction'] = fac
+                return result
+
+    return None
 
 
 def generate_faction_guide():

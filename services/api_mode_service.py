@@ -5,8 +5,11 @@ API 模式切換服務
 import requests
 import json
 import os
+import logging
 
 from services.config_loader import get_api_mode, get_real_api_config, get_local_api_config, get_local_data_config
+
+logger = logging.getLogger(__name__)
 
 
 class APIModeService:
@@ -39,7 +42,7 @@ class APIModeService:
         """
         api_mode = get_api_mode()
 
-        print(f"📡 [API Mode: {api_mode}] 呼叫端點: {endpoint_key}")
+        logger.info("[API Mode: %s] 呼叫端點: %s", api_mode, endpoint_key)
 
         if api_mode == 'real':
             return APIModeService._call_http_api(get_real_api_config(), endpoint_key, json_data, method)
@@ -48,7 +51,7 @@ class APIModeService:
         elif api_mode == 'mock':
             return APIModeService._get_mock_response(endpoint_key, json_data)
         else:
-            print(f"⚠️ 未知的 API 模式: {api_mode}，回退到 local")
+            logger.warning("未知的 API 模式: %s，回退到 local", api_mode)
             return APIModeService._call_http_api(get_local_api_config(), endpoint_key, json_data, method)
 
     @staticmethod
@@ -66,10 +69,10 @@ class APIModeService:
         endpoint_path = endpoints.get(endpoint_key, f'/{endpoint_key}')
         url = f"{base_url}{endpoint_path}"
 
-        print(f"   URL: {url}")
-        print(f"   Timeout: {timeout}s")
+        logger.info("   URL: %s", url)
+        logger.info("   Timeout: %ss", timeout)
         if json_data:
-            print(f"   Request Body: {json.dumps(json_data, ensure_ascii=False)}")
+            logger.info("   Request Body: %s", json.dumps(json_data, ensure_ascii=False))
 
         headers = {'Content-Type': 'application/json'}
 
@@ -80,7 +83,7 @@ class APIModeService:
         if 'mock.pstmn.io' in base_url and method.upper() == 'POST' and json_data and endpoint_key in BODY_MATCH_ENDPOINTS:
             headers['x-mock-match-request-body'] = 'true'
 
-        print(f"   Method: {method.upper()}")
+        logger.info("   Method: %s", method.upper())
 
         if method.upper() == 'POST':
             response = requests.post(url, json=json_data, headers=headers, timeout=timeout)
@@ -89,8 +92,8 @@ class APIModeService:
         else:
             raise ValueError(f"不支援的 HTTP 方法: {method}")
 
-        print(f"   Response Status: {response.status_code}")
-        print(f"   Response Body: {response.text[:1000]}")
+        logger.info("   Response Status: %s", response.status_code)
+        logger.info("   Response Body: %s", response.text[:1000])
 
         return response
 
@@ -109,7 +112,7 @@ class APIModeService:
         api_mode = get_api_mode()
 
         if api_mode != 'real':
-            print(f"📡 [API Mode: {api_mode}] 不支援串流，將使用模擬串流")
+            logger.info("[API Mode: %s] 不支援串流，將使用模擬串流", api_mode)
             return None
 
         api_config = get_real_api_config()
@@ -119,9 +122,9 @@ class APIModeService:
         endpoint_path = endpoints.get(endpoint_key, f'/{endpoint_key}')
         url = f"{base_url}{endpoint_path}"
 
-        print(f"📡 [API Mode: real / Stream] 呼叫端點: {endpoint_key}")
-        print(f"   URL: {url}")
-        print(f"   Timeout: {timeout}s")
+        logger.info("[API Mode: real / Stream] 呼叫端點: %s", endpoint_key)
+        logger.info("   URL: %s", url)
+        logger.info("   Timeout: %ss", timeout)
 
         headers = {'Content-Type': 'application/json'}
 
@@ -130,7 +133,7 @@ class APIModeService:
             timeout=timeout, stream=True
         )
 
-        print(f"   Response Status: {response.status_code}")
+        logger.info("   Response Status: %s", response.status_code)
         return response
 
     @staticmethod
@@ -145,16 +148,16 @@ class APIModeService:
         mock_dir = local_config.get('mock_responses_dir', 'mock_responses')
         mock_path = os.path.join(project_root, mock_dir, f'{endpoint_key}_response.json')
 
-        print(f"   模式: Mock 回應")
+        logger.info("   模式: Mock 回應")
 
         if os.path.exists(mock_path):
             with open(mock_path, 'r', encoding='utf-8') as f:
                 mock_data = json.load(f)
-            print(f"   ✅ 從 {mock_path} 載入 Mock 回應")
+            logger.info("   從 %s 載入 Mock 回應", mock_path)
             return _LocalResponse(200, mock_data)
 
         # 若無 Mock 檔案，返回基本的成功回應
-        print(f"   ⚠️ Mock 檔案不存在: {mock_path}，返回預設回應")
+        logger.warning("   Mock 檔案不存在: %s，返回預設回應", mock_path)
         return _LocalResponse(200, {"status": "mock", "message": f"Mock response for {endpoint_key}"})
 
 

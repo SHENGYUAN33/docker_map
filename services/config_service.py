@@ -4,8 +4,11 @@
 """
 import json
 import os
+import logging
 from datetime import datetime
 from config import PROMPTS_CONFIG_FILE, CONFIG_FILE, CONFIG_DEFAULTS
+
+logger = logging.getLogger(__name__)
 
 
 # ==================== SYSTEM PROMPT 配置管理 ====================
@@ -81,22 +84,20 @@ def get_system_prompt(config_name, function_name):
     返回:
         str: 完整的 system prompt（可編輯部分 + 固定部分），若失敗則返回 None
     """
-    print(f"\n{'='*80}")
-    print(f"📋 [System Prompt 獲取]")
-    print(f"  ➤ 請求配置: {config_name}")
-    print(f"  ➤ 請求功能: {function_name}")
+    logger.info("[System Prompt 獲取]")
+    logger.info("  請求配置: %s", config_name)
+    logger.info("  請求功能: %s", function_name)
 
     config = load_prompts_config()
 
     if config_name not in config['prompts']:
-        print(f"  ⚠️  配置 '{config_name}' 不存在，切換到預設配置: {config['default_config']}")
+        logger.warning("  配置 '%s' 不存在，切換到預設配置: %s", config_name, config['default_config'])
         config_name = config['default_config']
 
     prompt_config = config['prompts'][config_name]
 
     if function_name not in prompt_config:
-        print(f"  ❌ 錯誤: 功能 '{function_name}' 不存在於配置中")
-        print(f"{'='*80}\n")
+        logger.error("  錯誤: 功能 '%s' 不存在於配置中", function_name)
         return None
 
     func_prompt = prompt_config[function_name]
@@ -107,13 +108,11 @@ def get_system_prompt(config_name, function_name):
         from utils.ship_registry import generate_faction_guide
         full_prompt += generate_faction_guide()
 
-    print(f"  ✅ 成功獲取 System Prompt")
-    print(f"  📏 可編輯部分長度: {len(func_prompt['editable'])} 字元")
-    print(f"  📏 固定部分長度: {len(func_prompt['fixed'])} 字元")
-    print(f"  📏 完整 Prompt 長度: {len(full_prompt)} 字元")
-    print(f"  📝 Prompt 內容預覽 (前 200 字):")
-    print(f"     {full_prompt[:200]}...")
-    print(f"{'='*80}\n")
+    logger.info("  成功獲取 System Prompt")
+    logger.info("  可編輯部分長度: %s 字元", len(func_prompt['editable']))
+    logger.info("  固定部分長度: %s 字元", len(func_prompt['fixed']))
+    logger.info("  完整 Prompt 長度: %s 字元", len(full_prompt))
+    logger.info("  Prompt 內容預覽 (前 200 字): %s...", full_prompt[:200])
 
     return full_prompt
 
@@ -140,7 +139,7 @@ def load_config():
         with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
     except Exception as e:
-        print(f"⚠️ 載入 config.json 失敗: {e}，使用預設配置")
+        logger.warning("載入 config.json 失敗: %s，使用預設配置", e)
         return dict(CONFIG_DEFAULTS)
 
 
@@ -155,6 +154,6 @@ def save_config(config):
     try:
         with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
             json.dump(config, f, ensure_ascii=False, indent=2)
-        print(f"✅ 配置已保存到 {CONFIG_FILE}")
+        logger.info("配置已保存到 %s", CONFIG_FILE)
     except Exception as e:
-        print(f"⚠️ 保存 config.json 失敗: {e}")
+        logger.warning("保存 config.json 失敗: %s", e)

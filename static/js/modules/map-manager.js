@@ -12,6 +12,13 @@ export class MapManager {
   constructor(apiClient, uiManager) {
     this.apiClient = apiClient;
     this.uiManager = uiManager;
+    this.cesiumManager = null;       // 3D 管理器（由 main.js 注入）
+    this.shipPanelManager = null;    // 船艦管理面板（由 main.js 注入）
+    this._wtaRawData = null;       // 原始 WTA 資料
+    this._wtaSortKey = null;       // 目前排序欄位
+    this._wtaSortAsc = true;       // 排序方向
+    this._wtaFilterWave = '';      // 篩選：攻擊波次
+    this._wtaFilterWeapon = '';    // 篩選：武器種類
   }
 
   /**
@@ -49,6 +56,17 @@ export class MapManager {
 
     try {
       await this.apiClient.clearMap();
+
+      // 清除 3D Cesium 資料
+      if (this.cesiumManager) {
+        this.cesiumManager.clearAll();
+      }
+
+      // 清空船艦管理面板
+      if (this.shipPanelManager) {
+        this.shipPanelManager.clearPanel();
+      }
+
       this.uiManager.showNotification('✅ 地圖已清除', 'success');
 
       // 重新載入地圖
@@ -62,7 +80,7 @@ export class MapManager {
   }
 
   /**
-   * 顯示武器分派表格
+   * 顯示武器分派表格（含排序、篩選、匯出功能）
    * @param {Object} wtaData - 武器分派數據
    */
   displayWTATable(wtaData) {
@@ -72,7 +90,6 @@ export class MapManager {
       return;
     }
 
-    // 清空容器
     container.innerHTML = '';
 
     if (!wtaData || !wtaData.wta_results || wtaData.wta_results.length === 0) {
@@ -81,48 +98,183 @@ export class MapManager {
       return;
     }
 
-    // 創建表格標題
-    let tableHtml = `<h3 style="color: ${THEME_COLORS.primary}; margin-bottom: 15px;">📊 武器分派結果</h3>`;
-    tableHtml += '<table class="wta-table">';
-    tableHtml += '<thead><tr>';
+    // 儲存原始資料
+    this._wtaRawData = wtaData;
+    this._wtaSortKey = null;
+    this._wtaSortAsc = true;
+    this._wtaFilterWave = '';
+    this._wtaFilterWeapon = '';
 
-    // 表頭
+    this._renderWTATable(container);
+  }
+
+  /**
+   * 渲染 WTA 表格（內部方法，支援排序/篩選狀態）
+   */
+  _renderWTATable(container) {
+    if (!container) container = document.getElementById('wta-table-container');
+    if (!container || !this._wtaRawData) return;
+
+    const wtaData = this._wtaRawData;
+    let results = [...wtaData.wta_results];
+
+    // 篩選
+    if (this._wtaFilterWave) {
+      results = results.filter(r => String(r.attack_wave) === this._wtaFilterWave);
+    }
+    if (this._wtaFilterWeapon) {
+      results = results.filter(r => (r.weapon || '') === this._wtaFilterWeapon);
+    }
+
+    // 排序
+    if (this._wtaSortKey) {
+      const key = this._wtaSortKey;
+      const asc = this._wtaSortAsc;
+      results.sort((a, b) => {
+        const va = a[key] || '';
+        const vb = b[key] || '';
+        const cmp = typeof va === 'number' && typeof vb === 'number'
+          ? va - vb
+          : String(va).localeCompare(String(vb), 'zh-TW');
+        return asc ? cmp : -cmp;
+      });
+    }
+
+    // 提取唯一值供篩選
+    const waves = [...new Set(wtaData.wta_results.map(r => String(r.attack_wave || '')))].filter(Boolean).sort();
+    const weapons = [...new Set(wtaData.wta_results.map(r => r.weapon || ''))].filter(Boolean).sort();
+
+    // 欄位 key 映射
+    const COL_KEYS = ['attack_wave', 'enemy_unit', 'roc_unit', 'weapon', 'launched_number', 'launched_time'];
     const columns = wtaData.wta_table_columns || WTA_TABLE_COLUMNS;
 
-    columns.forEach(col => {
-      const key = Object.keys(col)[0];
-      const label = col[key];
-      tableHtml += `<th>${label}</th>`;
+    // 標題列 + 工具列
+    let html = `<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; gap:8px;">`;
+    html += `<h3 style="color:${THEME_COLORS.primary}; margin:0;">武器分派結果 (${results.length}/${wtaData.wta_results.length})</h3>`;
+    html += `<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">`;
+
+    // 篩選：攻擊波次
+    html += `<select id="wta-filter-wave" style="padding:4px 8px; border:1px solid #ccc; border-radius:4px; font-size:12px;">`;
+    html += `<option value="">全部波次</option>`;
+    waves.forEach(w => {
+      html += `<option value="${w}" ${this._wtaFilterWave === w ? 'selected' : ''}>第 ${w} 波</option>`;
+    });
+    html += `</select>`;
+
+    // 篩選：武器種類
+    html += `<select id="wta-filter-weapon" style="padding:4px 8px; border:1px solid #ccc; border-radius:4px; font-size:12px;">`;
+    html += `<option value="">全部武器</option>`;
+    weapons.forEach(w => {
+      html += `<option value="${w}" ${this._wtaFilterWeapon === w ? 'selected' : ''}>${w}</option>`;
+    });
+    html += `</select>`;
+
+    // 匯出 CSV 按鈕
+    html += `<button id="wta-export-csv" style="padding:4px 12px; background:#4CAF50; color:white; border:none; border-radius:4px; font-size:12px; cursor:pointer;">CSV</button>`;
+    html += `</div></div>`;
+
+    // 表格
+    html += '<div style="overflow-x:auto;"><table class="wta-table">';
+    html += '<thead><tr>';
+
+    columns.forEach((col, i) => {
+      const key = COL_KEYS[i] || Object.keys(col)[0];
+      const label = col[Object.keys(col)[0]];
+      const arrow = this._wtaSortKey === key ? (this._wtaSortAsc ? ' ▲' : ' ▼') : '';
+      html += `<th data-sort-key="${key}" style="cursor:pointer; user-select:none; white-space:nowrap;">${label}${arrow}</th>`;
     });
 
-    tableHtml += '</tr></thead><tbody>';
+    html += '</tr></thead><tbody>';
 
-    // 表格內容
-    wtaData.wta_results.forEach(row => {
-      tableHtml += '<tr>';
-      tableHtml += `<td>${row.attack_wave || '-'}</td>`;
-      tableHtml += `<td>${row.enemy_unit || '-'}</td>`;
-      tableHtml += `<td>${row.roc_unit || '-'}</td>`;
+    results.forEach(row => {
+      html += '<tr>';
+      html += `<td>${row.attack_wave || '-'}</td>`;
+      html += `<td>${row.enemy_unit || '-'}</td>`;
+      html += `<td>${row.roc_unit || '-'}</td>`;
 
-      // 飛彈種類加上顏色
       let weaponClass = '';
-      if (row.weapon && row.weapon.includes('雄三')) {
-        weaponClass = 'weapon-hf3';
-      } else if (row.weapon && row.weapon.includes('雄二')) {
-        weaponClass = 'weapon-hf2';
-      }
-      tableHtml += `<td class="${weaponClass}">${row.weapon || '-'}</td>`;
+      if (row.weapon && row.weapon.includes('雄三')) weaponClass = 'weapon-hf3';
+      else if (row.weapon && row.weapon.includes('雄二')) weaponClass = 'weapon-hf2';
+      html += `<td class="${weaponClass}">${row.weapon || '-'}</td>`;
 
-      tableHtml += `<td>${row.launched_number || '-'}</td>`;
-      tableHtml += `<td>${row.launched_time || '-'}</td>`;
-      tableHtml += '</tr>';
+      html += `<td>${row.launched_number || '-'}</td>`;
+      html += `<td>${row.launched_time || '-'}</td>`;
+      html += '</tr>';
     });
 
-    tableHtml += '</tbody></table>';
+    html += '</tbody></table></div>';
 
-    container.innerHTML = tableHtml;
+    container.innerHTML = html;
     container.style.display = 'block';
 
-    console.log(`✅ 武器分派表格已顯示，共 ${wtaData.wta_results.length} 筆記錄`);
+    // 綁定排序事件
+    container.querySelectorAll('th[data-sort-key]').forEach(th => {
+      th.addEventListener('click', () => {
+        const key = th.dataset.sortKey;
+        if (this._wtaSortKey === key) {
+          this._wtaSortAsc = !this._wtaSortAsc;
+        } else {
+          this._wtaSortKey = key;
+          this._wtaSortAsc = true;
+        }
+        this._renderWTATable(container);
+      });
+    });
+
+    // 綁定篩選事件
+    const filterWave = container.querySelector('#wta-filter-wave');
+    const filterWeapon = container.querySelector('#wta-filter-weapon');
+    if (filterWave) {
+      filterWave.addEventListener('change', () => {
+        this._wtaFilterWave = filterWave.value;
+        this._renderWTATable(container);
+      });
+    }
+    if (filterWeapon) {
+      filterWeapon.addEventListener('change', () => {
+        this._wtaFilterWeapon = filterWeapon.value;
+        this._renderWTATable(container);
+      });
+    }
+
+    // 綁定 CSV 匯出
+    const exportBtn = container.querySelector('#wta-export-csv');
+    if (exportBtn) {
+      exportBtn.addEventListener('click', () => this._exportWTACSV(results, columns, COL_KEYS));
+    }
+
+    console.log(`武器分派表格已顯示，共 ${results.length} 筆記錄`);
+  }
+
+  /**
+   * 匯出 WTA 結果為 CSV
+   */
+  _exportWTACSV(results, columns, colKeys) {
+    const headers = columns.map(col => col[Object.keys(col)[0]]);
+    const rows = results.map(row =>
+      colKeys.map(key => {
+        const val = String(row[key] || '-');
+        return val.includes(',') ? `"${val}"` : val;
+      })
+    );
+
+    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const now = new Date();
+    const ts = now.getFullYear()
+      + String(now.getMonth() + 1).padStart(2, '0')
+      + String(now.getDate()).padStart(2, '0')
+      + '_' + String(now.getHours()).padStart(2, '0')
+      + String(now.getMinutes()).padStart(2, '0')
+      + String(now.getSeconds()).padStart(2, '0');
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `WTA_結果_${ts}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 }

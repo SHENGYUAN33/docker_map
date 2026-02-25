@@ -5,11 +5,14 @@ RAG 問答路由藍圖
 from flask import Blueprint, request, jsonify
 import requests
 import json
+import logging
 
 from config import RAG_DEFAULT_MODE, RAG_DEFAULT_MODEL, RAG_DEFAULT_PROMPT, RAG_MAX_SOURCES, DEFAULT_PROMPT_CONFIG
 from services.config_loader import get_rag_settings
 from services.config_service import load_prompts_config
 from services.api_mode_service import APIModeService
+
+logger = logging.getLogger(__name__)
 
 # 前端 mode → prompts_config.json 的 key 映射
 MODE_TO_PROMPT_KEY = {
@@ -66,11 +69,11 @@ def get_answer():
         prompt_key = MODE_TO_PROMPT_KEY.get(mode, 'military_rag')
         system_prompt = _get_rag_system_prompt(prompt_config_name, prompt_key)
 
-        print(f"\n【RAG 問答】收到問題: {user_input}")
-        print(f"【模式】: {mode}")
-        print(f"【使用模型】: {selected_model}（來源: UI LLM 選單）")
-        print(f"【Prompt 配置】: {prompt_config_name} → {prompt_key}")
-        print(f"【System Prompt】: {system_prompt}")
+        logger.info("[RAG 問答] 收到問題: %s", user_input)
+        logger.info("[模式]: %s", mode)
+        logger.info("[使用模型]: %s (來源: UI LLM 選單)", selected_model)
+        logger.info("[Prompt 配置]: %s -> %s", prompt_config_name, prompt_key)
+        logger.info("[System Prompt]: %s", system_prompt)
 
         # 構建中科院 API 格式的請求
         stream_mode = rag_settings.get('stream', 0)
@@ -83,7 +86,7 @@ def get_answer():
             ]
         }
 
-        print(f"【調用中科院 RAG API】: {json.dumps(rag_request, ensure_ascii=False)}")
+        logger.info("[調用中科院 RAG API]: %s", json.dumps(rag_request, ensure_ascii=False))
 
         # 步驟 1: 調用 RAG API（根據 api_mode 自動切換來源）
         try:
@@ -96,7 +99,7 @@ def get_answer():
                 })
 
             api_data = res.json()
-            print(f"【RAG 回應】: {json.dumps(api_data, ensure_ascii=False)[:200]}...")
+            logger.info("[RAG 回應]: %s...", json.dumps(api_data, ensure_ascii=False)[:200])
 
         except requests.exceptions.Timeout:
             return jsonify({
@@ -148,7 +151,7 @@ def get_answer():
         })
 
     except Exception as e:
-        print(f"錯誤: {str(e)}")
+        logger.error("錯誤: %s", str(e))
         import traceback
         traceback.print_exc()
         return jsonify({
@@ -181,6 +184,6 @@ def _get_rag_system_prompt(config_name, prompt_key):
             return editable
 
     except Exception as e:
-        print(f"⚠️ 讀取 prompts_config 失敗: {e}")
+        logger.warning("讀取 prompts_config 失敗: %s", e)
 
     return RAG_DEFAULT_PROMPT

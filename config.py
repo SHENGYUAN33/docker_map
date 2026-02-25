@@ -39,6 +39,10 @@ LLM_API_TIMEOUT = int(os.getenv('LLM_API_TIMEOUT', '300'))
 # 預設 Prompt 配置名稱
 DEFAULT_PROMPT_CONFIG = os.getenv('DEFAULT_PROMPT_CONFIG', '預設配置')
 
+# LLM 重試配置
+LLM_MAX_RETRIES = int(os.getenv('LLM_MAX_RETRIES', '2'))
+LLM_RETRY_DELAY = float(os.getenv('LLM_RETRY_DELAY', '1.0'))
+
 # ==================== RAG 配置 ====================
 # RAG 預設模式
 RAG_DEFAULT_MODE = os.getenv('RAG_DEFAULT_MODE', 'military_qa')
@@ -62,6 +66,9 @@ FEEDBACK_DIR = os.getenv('FEEDBACK_DIR', 'feedbacks')
 # COP（Common Operational Picture，共同作戰圖像）截圖儲存目錄
 COP_DIR = os.getenv('COP_DIR', 'cops')
 
+# 場景存檔儲存目錄
+SCENARIO_DIR = os.getenv('SCENARIO_DIR', 'scenarios')
+
 # ==================== 配置檔案路徑 ====================
 # SYSTEM PROMPT 配置檔案路徑（儲存各種 LLM prompt 模板）
 PROMPTS_CONFIG_FILE = "prompts_config.json"
@@ -74,10 +81,15 @@ CONFIG_DEFAULTS = {
     "show_source_btn": False,
     "enable_animation": False,
     "enable_3d_globe": False,
+    "enable_measurement": True,
     "cesium_ion_token": "",
     "google_maps_api_key": "AIzaSyBCFhSG2jtlF2oZyvNnZc0PNyhRZwiahUo",
     "custom_layers": []
 }
+
+# ==================== CORS 配置 ====================
+# 允許的跨域來源（逗號分隔，設為 * 允許所有來源）
+CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'http://localhost:5000,http://127.0.0.1:5000').split(',')
 
 # ==================== 會話管理配置 ====================
 # Client ID 最大長度（安全限制）
@@ -241,7 +253,8 @@ def _load_ship_registry():
         with open(_registry_file, 'r', encoding='utf-8') as f:
             return json.load(f)
     except Exception as e:
-        print(f"[config] WARNING: Cannot load ship_registry.json: {e}")
+        import logging as _logging
+        _logging.getLogger(__name__).warning("Cannot load ship_registry.json: %s", e)
         return {"roc": {"faction_terms": [], "additional_keywords": [], "ships": []},
                 "enemy": {"faction_terms": [], "additional_keywords": [], "ships": []}}
 
@@ -326,4 +339,6 @@ def ensure_directories():
     os.makedirs(MAP_DIR, exist_ok=True)
     os.makedirs(FEEDBACK_DIR, exist_ok=True)
     os.makedirs(COP_DIR, exist_ok=True)
-    print(f"✅ 目錄初始化完成: {MAP_DIR}, {FEEDBACK_DIR}, {COP_DIR}")
+    os.makedirs(SCENARIO_DIR, exist_ok=True)
+    import logging as _logging
+    _logging.getLogger(__name__).info("目錄初始化完成: %s, %s, %s, %s", MAP_DIR, FEEDBACK_DIR, COP_DIR, SCENARIO_DIR)

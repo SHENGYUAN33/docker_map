@@ -14,7 +14,18 @@ export class APIClient {
     this.apiBase = API_BASE;
     this.nodeApiBase = NODE_API_BASE;
     this.clientId = this.initClientId();
+    this.currentAbortController = null;
     this.setupFetchHook();
+  }
+
+  /**
+   * 取消當前進行中的請求
+   */
+  cancelCurrentRequest() {
+    if (this.currentAbortController) {
+      this.currentAbortController.abort();
+      this.currentAbortController = null;
+    }
   }
 
   /**
@@ -61,11 +72,14 @@ export class APIClient {
    * @returns {Promise<Object>} 響應數據
    */
   async post(endpoint, data = {}) {
+    this.currentAbortController = new AbortController();
     const response = await fetch(`${this.apiBase}${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+      signal: this.currentAbortController.signal
     });
+    this.currentAbortController = null;
     return await response.json();
   }
 
@@ -354,6 +368,25 @@ export class APIClient {
     return await this.post('/api/refresh_map', {});
   }
 
+  // ==================== 船艦管理 API ====================
+
+  /**
+   * 列出地圖上所有船艦
+   * @returns {Promise<Object>} 響應數據
+   */
+  async listShips() {
+    return await this.get('/api/ships');
+  }
+
+  /**
+   * 刪除指定船艦
+   * @param {Object} params - {marker_id: string, also_remove_wta?: boolean}
+   * @returns {Promise<Object>} 響應數據
+   */
+  async deleteShip(params) {
+    return await this.post('/api/ships/delete', params);
+  }
+
   // ==================== 反饋相關 API ====================
 
   /**
@@ -457,7 +490,40 @@ export class APIClient {
     return await this.delete(`/api/prompts/delete?config_name=${encodeURIComponent(configName)}`);
   }
 
-  // ==================== Node.js API（模擬狀態監聽）====================
+  // ==================== 場景儲存/載入 API ====================
+
+  /**
+   * 儲存當前場景
+   * @param {string} name - 場景名稱
+   */
+  async saveScenario(name) {
+    return await this.post('/api/scenarios/save', { name });
+  }
+
+  /**
+   * 列出所有已儲存場景
+   */
+  async listScenarios() {
+    return await this.get('/api/scenarios/list');
+  }
+
+  /**
+   * 載入指定場景
+   * @param {string} filename - 場景檔案名稱
+   */
+  async loadScenario(filename) {
+    return await this.post('/api/scenarios/load', { filename });
+  }
+
+  /**
+   * 刪除場景
+   * @param {string} filename - 場景檔案名稱
+   */
+  async deleteScenario(filename) {
+    return await this.post('/api/scenarios/delete', { filename });
+  }
+
+  // ==================== Node.js API（模擬狀態監聯）====================
 
   /**
    * 獲取模擬狀態（Node.js 後端）

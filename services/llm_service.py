@@ -4,9 +4,13 @@ LLM 服務模組
 透過 Provider 抽象層支援 Ollama / OpenAI / Anthropic 等多個 LLM 提供者
 """
 import json
+import logging
 import os
-from config import DEFAULT_LLM_MODEL
+import time
+from config import DEFAULT_LLM_MODEL, LLM_MAX_RETRIES, LLM_RETRY_DELAY
 from services.llm_providers import get_provider
+
+logger = logging.getLogger(__name__)
 
 # 預設 Prompt 檔案路徑
 _DEFAULT_PROMPTS_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'default_prompts.json')
@@ -20,9 +24,9 @@ def _load_default_prompts():
         try:
             with open(_DEFAULT_PROMPTS_FILE, 'r', encoding='utf-8') as f:
                 _default_prompts_cache = json.load(f)
-            print(f"✅ 已載入預設 Prompt 檔案: {_DEFAULT_PROMPTS_FILE}")
+            logger.info("已載入預設 Prompt 檔案: %s", _DEFAULT_PROMPTS_FILE)
         except Exception as e:
-            print(f"⚠️ 無法載入 default_prompts.json: {e}，將使用最小化內建 Prompt")
+            logger.warning("無法載入 default_prompts.json: %s，將使用最小化內建 Prompt", e)
             _default_prompts_cache = {}
     return _default_prompts_cache
 
@@ -65,7 +69,7 @@ class LLMService:
 
     def _call_with_provider(self, function_label, model, system_prompt, user_prompt, tools, provider_name=None):
         """
-        統一的 Provider 調用入口
+        統一的 Provider 調用入口（含指數退避重試）
 
         參數:
             function_label: 功能標籤（用於日誌，例如 "import_scenario"）
@@ -78,26 +82,33 @@ class LLMService:
         返回:
             dict: {"tool": str, "parameters": dict} 或 None
         """
-        try:
-            provider = self._get_provider(provider_name)
-            result = provider.call_function(
-                model=model,
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-                tools=tools
-            )
+        for attempt in range(LLM_MAX_RETRIES + 1):
+            try:
+                provider = self._get_provider(provider_name)
+                result = provider.call_function(
+                    model=model,
+                    system_prompt=system_prompt,
+                    user_prompt=user_prompt,
+                    tools=tools
+                )
 
-            if result:
-                return {
-                    "tool": result["function_name"],
-                    "parameters": result.get("arguments", {})
-                }
+                if result:
+                    return {
+                        "tool": result["function_name"],
+                        "parameters": result.get("arguments", {})
+                    }
 
-            return None
+                return None
 
-        except Exception as e:
-            print(f"❌ [{function_label}] Provider 調用錯誤: {type(e).__name__}: {e}")
-            return None
+            except Exception as e:
+                if attempt < LLM_MAX_RETRIES:
+                    delay = LLM_RETRY_DELAY * (2 ** attempt)
+                    logger.warning("[%s] 第 %d 次嘗試失敗，%.1f 秒後重試: %s", function_label, attempt + 1, delay, e)
+                    time.sleep(delay)
+                else:
+                    logger.error("[%s] 重試 %d 次後仍失敗: %s: %s", function_label, LLM_MAX_RETRIES, type(e).__name__, e)
+
+        return None
 
     def call_import_scenario(self, user_prompt, model=None, custom_prompt=None, provider_name=None):
         """

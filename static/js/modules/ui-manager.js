@@ -192,6 +192,8 @@ export class UIManager {
     document.getElementById('loading-message').textContent = message;
     document.getElementById('progress-fill').style.width = '0%';
     document.getElementById('loading-overlay').classList.add('active');
+    const cancelBtn = document.getElementById('cancel-request-btn');
+    if (cancelBtn) cancelBtn.style.display = 'inline-block';
   }
 
   /**
@@ -199,6 +201,8 @@ export class UIManager {
    */
   hideLoading() {
     document.getElementById('loading-overlay').classList.remove('active');
+    const cancelBtn = document.getElementById('cancel-request-btn');
+    if (cancelBtn) cancelBtn.style.display = 'none';
   }
 
   /**

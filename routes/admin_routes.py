@@ -3,11 +3,14 @@
 用途：處理系統設置、健康檢查等管理功能
 """
 from flask import Blueprint, request, jsonify
+import logging
 
 from services import load_config, save_config
 from services.config_loader import get_all_providers, get_active_provider_name, get_api_mode, get_rag_settings
 from utils import get_client_id, get_map_state
 from config import _STATES, CONFIG_DEFAULTS
+
+logger = logging.getLogger(__name__)
 
 # 創建系統管理藍圖
 admin_bp = Blueprint('admin', __name__)
@@ -82,7 +85,7 @@ def admin_settings():
                 'settings': config
             })
     except Exception as e:
-        print(f"❌ admin_settings 錯誤: {e}")
+        logger.error("admin_settings 錯誤: %s", e)
         import traceback
         traceback.print_exc()
         # 即使失敗也返回默認配置
@@ -113,7 +116,7 @@ def get_llm_models():
             'providers': providers
         })
     except Exception as e:
-        print(f"❌ get_llm_models 錯誤: {e}")
+        logger.error("get_llm_models 錯誤: %s", e)
         return jsonify({
             'success': False,
             'error': str(e)

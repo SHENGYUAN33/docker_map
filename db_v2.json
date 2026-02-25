@@ -560,7 +560,7 @@
     "is_running": false,
     "is_completed": true,
     "started_at": "2026-02-12T09:15:31.509Z",
-    "completed_at": "2026-02-12T09:16:42.041Z",
+    "completed_at": "2026-02-25T06:22:39.115Z",
     "last_message": "mock callback from trigger"
   },
   "wta_results": {

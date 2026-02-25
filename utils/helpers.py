@@ -4,6 +4,7 @@
 """
 import os
 import time
+import logging
 from flask import request
 from models.map_state import MapState
 from config import (
@@ -11,6 +12,8 @@ from config import (
     SESSION_CLEANUP_BATCH, FILE_RETENTION_DAYS,
     _STATE_LOCK, _STATES
 )
+
+logger = logging.getLogger(__name__)
 
 
 def _sanitize_client_id(raw: str) -> str:
@@ -109,10 +112,10 @@ def cleanup_old_files(directory, days=None):
                 if file_mtime < cutoff_time:
                     os.remove(filepath)
                     cleaned_count += 1
-                    print(f"🗑️  已清理舊文件: {filename}")
+                    logger.info("已清理舊文件: %s", filename)
 
         if cleaned_count > 0:
-            print(f"✅ 清理完成，共清理 {cleaned_count} 個舊文件")
+            logger.info("清理完成，共清理 %s 個舊文件", cleaned_count)
 
     except Exception as e:
-        print(f"⚠️  清理舊文件時發生錯誤: {e}")
+        logger.warning("清理舊文件時發生錯誤: %s", e)

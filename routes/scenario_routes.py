@@ -7,8 +7,11 @@ from datetime import datetime
 import requests
 import os
 import ast
+import logging
 
 from config import MAP_DIR, DEFAULT_LLM_MODEL, DEFAULT_PROMPT_CONFIG, ENEMY_KEYWORDS, ROC_KEYWORDS, _STATE_LOCK, _SIMULATION_STATUS
+
+logger = logging.getLogger(__name__)
 from services import get_system_prompt
 from services.llm_service import LLMService
 from services.map_service import MapService
@@ -63,29 +66,26 @@ def import_scenario():
         llm_provider = data.get('llm_provider')
         prompt_config = data.get('prompt_config', DEFAULT_PROMPT_CONFIG)
 
-        print(f"\n{'='*80}")
-        print(f"🚀 [API 請求] /api/import_scenario")
-        print(f"{'='*80}")
-        print(f"  用戶指令: {user_input}")
-        print(f"  選擇模型: {llm_model}")
-        print(f"  Provider: {llm_provider or '(使用預設)'}")
-        print(f"  配置名稱: {prompt_config}")
-        print(f"{'='*80}\n")
+        logger.info("[API 請求] /api/import_scenario")
+        logger.info("  用戶指令: %s", user_input)
+        logger.info("  選擇模型: %s", llm_model)
+        logger.info("  Provider: %s", llm_provider or '(使用預設)')
+        logger.info("  配置名稱: %s", prompt_config)
 
         # 步驟 1: 獲取自定義 system prompt
         custom_prompt = get_system_prompt(prompt_config, 'import_scenario')
 
         if custom_prompt:
-            print(f"✅ System Prompt 已載入 (長度: {len(custom_prompt)} 字元)")
+            logger.info("System Prompt 已載入 (長度: %s 字元)", len(custom_prompt))
         else:
-            print(f"⚠️  警告: System Prompt 載入失敗，將使用預設 Prompt")
+            logger.warning("警告: System Prompt 載入失敗，將使用預設 Prompt")
 
         # 步驟 2: 使用 LLM 提取參數
         decision = llm_service.call_import_scenario(user_input, model=llm_model, custom_prompt=custom_prompt, provider_name=llm_provider)
 
         # Fallback: 如果 LLM 失敗，使用規則匹配
         if not decision or not decision.get('parameters'):
-            print("⚠️  LLM 不可用，使用 Fallback 規則解析...")
+            logger.warning("LLM 不可用，使用 Fallback 規則解析...")
             decision = FallbackHandler.fallback_import_scenario(user_input)
 
         if not decision or not decision.get('parameters'):
@@ -95,7 +95,7 @@ def import_scenario():
             })
 
         params = decision['parameters']
-        print(f"【LLM 原始輸出】: {params}")
+        logger.info("[LLM 原始輸出]: %s", params)
 
         # 核心修正：智能清理和修正參數
         cleaned_params = {}
@@ -113,9 +113,9 @@ def import_scenario():
             if isinstance(enemy_ships, list) and len(enemy_ships) == 0:
                 if has_enemy_in_input:
                     cleaned_params['enemy'] = []
-                    print(f"✅ 保留 enemy:[] 參數（用戶要求所有敵軍）")
+                    logger.info("保留 enemy:[] 參數（用戶要求所有敵軍）")
                 else:
-                    print(f"🔥 移除 enemy:[] 參數（用戶未提到敵軍，LLM 誤判）")
+                    logger.info("移除 enemy:[] 參數（用戶未提到敵軍，LLM 誤判）")
 
             # 如果有具體船艦名稱
             elif isinstance(enemy_ships, list) and len(enemy_ships) > 0:
@@ -124,21 +124,21 @@ def import_scenario():
 
                 for ship in enemy_ships:
                     if not ship or not ship.strip():
-                        print(f"🔥 跳過空字串參數：enemy 中的空值")
+                        logger.info("跳過空字串參數: enemy 中的空值")
                         continue
 
                     # 關鍵邏輯：檢查船艦是否被 LLM 放錯陣營
                     if ship in ROC_KEYWORDS:
                         # 這艘船是我軍，LLM 放錯了！自動修正
                         moved_to_roc.append(ship)
-                        print(f"🔧 修正：{ship} 是我軍，從 enemy 移到 roc")
+                        logger.info("修正: %s 是我軍，從 enemy 移到 roc", ship)
                     else:
                         corrected_enemy.append(ship)
 
                 # 保存修正後的敵軍列表
                 if corrected_enemy:
                     cleaned_params['enemy'] = corrected_enemy
-                    print(f"✅ 保留 enemy 參數：{corrected_enemy}")
+                    logger.info("保留 enemy 參數: %s", corrected_enemy)
 
                 # 將錯誤分類的船艦移到 roc
                 if moved_to_roc:
@@ -154,9 +154,9 @@ def import_scenario():
             if isinstance(roc_ships, list) and len(roc_ships) == 0:
                 if has_roc_in_input:
                     cleaned_params['roc'] = []
-                    print(f"✅ 保留 roc:[] 參數（用戶要求所有我軍）")
+                    logger.info("保留 roc:[] 參數（用戶要求所有我軍）")
                 else:
-                    print(f"🔥 移除 roc:[] 參數（用戶未提到我軍，LLM 誤判）")
+                    logger.info("移除 roc:[] 參數（用戶未提到我軍，LLM 誤判）")
 
             # 如果有具體船艦名稱
             elif isinstance(roc_ships, list) and len(roc_ships) > 0:
@@ -165,14 +165,14 @@ def import_scenario():
 
                 for ship in roc_ships:
                     if not ship or not ship.strip():
-                        print(f"🔥 跳過空字串參數：roc 中的空值")
+                        logger.info("跳過空字串參數: roc 中的空值")
                         continue
 
                     # 關鍵邏輯：檢查船艦是否被 LLM 放錯陣營
                     if ship in ENEMY_KEYWORDS:
                         # 這艘船是敵軍，LLM 放錯了！自動修正
                         moved_to_enemy.append(ship)
-                        print(f"🔧 修正：{ship} 是敵軍，從 roc 移到 enemy")
+                        logger.info("修正: %s 是敵軍，從 roc 移到 enemy", ship)
                     else:
                         corrected_roc.append(ship)
 
@@ -181,7 +181,7 @@ def import_scenario():
                     if 'roc' not in cleaned_params:
                         cleaned_params['roc'] = []
                     cleaned_params['roc'].extend(corrected_roc)
-                    print(f"✅ 保留 roc 參數：{cleaned_params['roc']}")
+                    logger.info("保留 roc 參數: %s", cleaned_params['roc'])
 
                 # 將錯誤分類的船艦移到 enemy
                 if moved_to_enemy:
@@ -196,7 +196,7 @@ def import_scenario():
                 'error': '無法識別船艦類型。請明確指定解放軍或國軍船艦。或再次輸入指令。'
             })
 
-        print(f"【清理後參數】: {cleaned_params}")
+        logger.info("[清理後參數]: %s", cleaned_params)
         params = cleaned_params
 
         # 轉換字符串列表為真實列表
@@ -208,7 +208,7 @@ def import_scenario():
                         parsed = ast.literal_eval(value)
                         if isinstance(parsed, list):
                             converted[key] = parsed
-                            print(f"🔧 自動修正：{key} 從字串 '{value}' 轉換為列表 {parsed}")
+                            logger.info("自動修正: %s 從字串 '%s' 轉換為列表 %s", key, value, parsed)
                         else:
                             converted[key] = value
                     except (ValueError, SyntaxError):
@@ -218,13 +218,13 @@ def import_scenario():
             return converted
 
         params = convert_string_lists(params)
-        print(f"【參數預處理後】: {params}")
+        logger.info("[參數預處理後]: %s", params)
 
         # 步驟 3: 調用 API 獲取座標（根據 api_mode 自動切換來源）
         try:
             res = APIModeService.call_api("import_scenario", params)
             api_data = res.json()
-            print(f"【API 回傳數據】: {api_data}")
+            logger.info("[API 回傳數據]: %s", api_data)
         except Exception as e:
             return jsonify({
                 'success': False,
@@ -277,7 +277,7 @@ def import_scenario():
         })
 
     except Exception as e:
-        print(f"錯誤: {str(e)}")
+        logger.error("錯誤: %s", str(e))
         return jsonify({
             'success': False,
             'error': str(e)
@@ -315,10 +315,10 @@ def start_scenario():
         llm_model = data.get('llm_model', DEFAULT_LLM_MODEL)
         llm_provider = data.get('llm_provider')
         prompt_config = data.get('prompt_config', DEFAULT_PROMPT_CONFIG)
-        print(f"\n【功能四：啟動模擬】收到指令: {user_input}")
-        print(f"【使用模型】: {llm_model}")
-        print(f"【Provider】: {llm_provider or '(使用預設)'}")
-        print(f"【Prompt 配置】: {prompt_config}")
+        logger.info("[功能四：啟動模擬] 收到指令: %s", user_input)
+        logger.info("[使用模型]: %s", llm_model)
+        logger.info("[Provider]: %s", llm_provider or '(使用預設)')
+        logger.info("[Prompt 配置]: %s", prompt_config)
 
         # 獲取自定義 system prompt
         custom_prompt = get_system_prompt(prompt_config, 'star_scenario')
@@ -328,7 +328,7 @@ def start_scenario():
 
         # Fallback
         if not decision or decision.get('tool') != 'star_scenario':
-            print("⚠️  LLM 不可用，使用 Fallback 規則解析...")
+            logger.warning("LLM 不可用，使用 Fallback 規則解析...")
             decision = FallbackHandler.fallback_star_scenario(user_input)
 
         if not decision or decision.get('tool') != 'star_scenario':
@@ -337,7 +337,7 @@ def start_scenario():
                 'error': '無法識別為啟動模擬指令。請使用關鍵詞：「開始模擬」、「執行CMO兵推」等'
             })
 
-        print(f"【LLM 識別】: 啟動模擬")
+        logger.info("[LLM 識別]: 啟動模擬")
 
         # 重置全域模擬狀態（確保前端能偵測 false→true 轉換）
         with _STATE_LOCK:
@@ -347,13 +347,13 @@ def start_scenario():
 
         # 步驟 2: 調用 API 啟動模擬（根據 api_mode 自動切換來源）
         try:
-            print(f"📡 正在通知中科院啟動武器分派演算...")
+            logger.info("正在通知中科院啟動武器分派演算...")
             res = APIModeService.call_api("star_scenario", {})
 
             if res.status_code == 200:
-                print(f"✅ 中科院已接收啟動指令")
+                logger.info("中科院已接收啟動指令")
             else:
-                print(f"⚠️  中科院回應狀態碼: {res.status_code}")
+                logger.warning("中科院回應狀態碼: %s", res.status_code)
 
         except requests.exceptions.Timeout:
             return jsonify({
@@ -378,7 +378,7 @@ def start_scenario():
         })
 
     except Exception as e:
-        print(f"錯誤: {str(e)}")
+        logger.error("錯誤: %s", str(e))
         return jsonify({
             'success': False,
             'error': str(e)

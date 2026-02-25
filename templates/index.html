@@ -61,6 +61,8 @@
         <button class="global-btn btn-save-cop" onclick="handleSaveCOP()">💾 儲存 COP</button>
         <button class="global-btn btn-clear-map" onclick="clearMap()">🗑️ 清除地圖</button>
         <button class="global-btn btn-clear-text" onclick="clearText()">🧹 清除文本</button>
+        <button class="global-btn btn-save-cop" onclick="saveScenario()">📦 儲存場景</button>
+        <button class="global-btn btn-back" onclick="openScenarioList()">📂 載入場景</button>
       </div>
 
       <!-- 功能一：情境模擬 -->
@@ -114,6 +116,25 @@
           <div class="mode-button" onclick="setMode('military_qa')">
             <div class="mode-button-title">💬 智能問答</div>
             <div class="mode-button-desc">基於軍事知識的問答系統</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 船艦管理面板 -->
+      <div id="ship-panel" class="function-section">
+        <div class="function-header" onclick="toggleFunction(this)">
+          <span>船艦管理 <span id="ship-panel-count" style="font-size:12px;color:#888;"></span></span>
+          <span class="icon">▶</span>
+        </div>
+        <div class="function-content">
+          <div style="padding:4px 0;">
+            <button onclick="window._shipPanelManager && window._shipPanelManager.refreshShipList()"
+              style="width:100%;padding:6px 12px;background:var(--primary-color, #1e3c72);color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;">
+              🔄 重新整理船艦清單
+            </button>
+          </div>
+          <div id="ship-panel-list">
+            <div class="ship-panel-empty">尚未匯入船艦</div>
           </div>
         </div>
       </div>
@@ -181,6 +202,12 @@
       <div class="progress-bar">
         <div id="progress-fill" class="progress-fill"></div>
       </div>
+      <button id="cancel-request-btn" onclick="cancelCurrentRequest()"
+        style="margin-top:16px; padding:8px 28px; background:transparent; color:#ff6b6b; border:2px solid #ff6b6b; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; display:none;"
+        onmouseover="this.style.background='#ff6b6b';this.style.color='white'"
+        onmouseout="this.style.background='transparent';this.style.color='#ff6b6b'">
+        ✖ 取消請求
+      </button>
     </div>
   </div>
 
@@ -212,6 +239,15 @@
         <label>3D 地球儀模式</label>
         <label class="toggle-switch">
           <input type="checkbox" id="setting-enable-3d" onchange="updateSettings()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <!-- 深色模式開關 -->
+      <div class="setting-item">
+        <label>深色模式</label>
+        <label class="toggle-switch">
+          <input type="checkbox" id="setting-dark-mode" onchange="toggleDarkMode()">
           <span class="toggle-slider"></span>
         </label>
       </div>
@@ -292,6 +328,17 @@
       <!-- 關閉按鈕 -->
       <div style="text-align:right;margin-top:20px;">
         <button class="global-btn btn-save-chat" onclick="closeLayerPanel()">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 場景管理 Modal ==================== -->
+  <div class="modal" id="scenario-modal">
+    <div class="modal-content" style="width:450px;">
+      <div class="modal-title">📂 場景管理</div>
+      <div id="scenario-list" style="max-height:400px;overflow-y:auto;margin:15px 0;"></div>
+      <div style="text-align:right;margin-top:15px;">
+        <button class="global-btn btn-save-chat" onclick="closeScenarioList()">關閉</button>
       </div>
     </div>
   </div>

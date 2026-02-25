@@ -4,8 +4,11 @@
 """
 from flask import Blueprint, send_file, render_template
 import os
+import logging
 
 from config import MAP_DIR
+
+logger = logging.getLogger(__name__)
 
 # 創建靜態文件藍圖
 static_bp = Blueprint('static', __name__)
@@ -44,7 +47,7 @@ def index():
     try:
         return render_template('index.html')
     except Exception as e:
-        print(f"❌ 載入前端頁面失敗: {e}")
+        logger.error("載入前端頁面失敗: %s", e)
         import traceback
         traceback.print_exc()
         return f"<h1>錯誤</h1><p>{str(e)}</p>", 500

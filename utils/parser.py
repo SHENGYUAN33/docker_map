@@ -3,6 +3,9 @@
 用途：提供 LLM Function Calling 參數解析和修正功能
 """
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def parse_function_arguments(arguments):
@@ -34,9 +37,9 @@ def parse_function_arguments(arguments):
     # 如果 LLM 返回 {"parameters": {...}, "tool": "..."}
     # 我們只要 parameters 裡面的內容
     if 'parameters' in result and 'tool' in result:
-        print(f"⚠️  檢測到 LLM 錯誤包裝，自動解包: {result}")
+        logger.warning("檢測到 LLM 錯誤包裝，自動解包: %s", result)
         result = result['parameters']
-        print(f"✅ 解包後參數: {result}")
+        logger.info("解包後參數: %s", result)
 
     # 步驟 3: 修正 LLM 將空陣列寫成字符串 "[]" 的錯誤
     for key, value in result.items():
@@ -44,12 +47,12 @@ def parse_function_arguments(arguments):
             # 檢查是否是 "[]" 字符串
             if value.strip() == '[]':
                 result[key] = []
-                print(f"🔧 修正參數 {key}: '[]' → []")
+                logger.info("修正參數 %s: '[]' -> []", key)
             # 檢查是否是 JSON 陣列字符串 (如 "[\"052D\", \"054A\"]")
             elif value.strip().startswith('[') and value.strip().endswith(']'):
                 try:
                     result[key] = json.loads(value)
-                    print(f"🔧 修正參數 {key}: '{value}' → {result[key]}")
+                    logger.info("修正參數 %s: '%s' -> %s", key, value, result[key])
                 except:
                     pass  # 如果解析失敗，保持原值
 

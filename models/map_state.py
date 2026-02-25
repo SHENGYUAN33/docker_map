@@ -8,6 +8,7 @@ from branca.element import Element
 import os
 import math
 import json
+import logging
 from config import (
     MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM, MAP_DEFAULT_TILES,
     MIL_SYMBOL_SIZE, MIL_SYMBOL_RETRY_MAX, MIL_SYMBOL_RETRY_INTERVAL,
@@ -30,6 +31,8 @@ LAYER_DISPLAY_NAMES = {
     LAYER_TRACKS: '航跡',
 }
 
+logger = logging.getLogger(__name__)
+
 
 class MapState:
     """
@@ -46,6 +49,7 @@ class MapState:
         self.lines = []    # 所有攻擊線（武器分派）
         self.tracks = []  # 所有航跡線段（船艦移動軌跡）
         self.wta_animation_data = None  # 動畫控制器數據（持久化）
+        self._marker_id_counter = 0  # 標記唯一 ID 計數器
 
     def add_marker(self, location, popup, color, icon='ship', shape='circle', layer=None):
         """
@@ -58,8 +62,14 @@ class MapState:
             icon: 圖標名稱（保留用於相容性）
             shape: 形狀類型 ('circle'=圓形代表友方, 'diamond'=菱形代表敵方)
             layer: 所屬圖層名稱（例如 'scenario', 'wta', 'tracks'）
+
+        返回:
+            str: 標記唯一 ID
         """
+        marker_id = f"marker_{self._marker_id_counter}"
+        self._marker_id_counter += 1
         marker_data = {
+            'id': marker_id,
             'location': location,
             'popup': popup,
             'color': color,
@@ -68,6 +78,7 @@ class MapState:
             'layer': layer
         }
         self.markers.append(marker_data)
+        return marker_id
 
     def add_line(self, start_location, end_location, color, popup, weight=8, dash_array=None, layer=None):
         """
@@ -128,6 +139,73 @@ class MapState:
         # 清除 WTA 圖層時，同時清除動畫數據
         if layer_name == LAYER_WTA:
             self.wta_animation_data = None
+
+    def remove_marker(self, marker_id):
+        """
+        根據唯一 ID 移除單一船艦標記
+
+        參數:
+            marker_id: 標記的唯一 ID（例如 'marker_3'）
+
+        返回:
+            dict|None: 被移除的標記資料，若未找到則返回 None
+        """
+        for i, m in enumerate(self.markers):
+            if m.get('id') == marker_id:
+                return self.markers.pop(i)
+        return None
+
+    def remove_related_lines(self, marker):
+        """
+        移除與指定標記相關的 WTA 攻擊線（根據座標比對）
+
+        參數:
+            marker: 被刪除的標記資料字典
+
+        返回:
+            int: 被移除的攻擊線數量
+        """
+        if not marker or not marker.get('location'):
+            return 0
+        loc = marker['location']
+        original_count = len(self.lines)
+        self.lines = [
+            line for line in self.lines
+            if not (line.get('start') == loc or line.get('end') == loc)
+        ]
+        removed_count = original_count - len(self.lines)
+        if removed_count > 0 and not self.lines:
+            self.wta_animation_data = None
+        return removed_count
+
+    def list_ships(self):
+        """
+        列出所有船艦標記摘要（用於前端顯示船艦清單）
+
+        返回:
+            list: [{'id': str, 'name': str, 'faction': str, 'location': [lat, lon], 'layer': str}]
+        """
+        import re
+        ships = []
+        for m in self.markers:
+            popup_text = re.sub(r'<[^>]*>', '', m.get('popup', '')).strip()
+            # 從 popup 提取船艦名稱（格式如 "🔴 052D" 或 "🔵 成功艦"）
+            # 嘗試匹配第一行的主要名稱
+            lines = popup_text.split('\n')
+            name = lines[0].strip() if lines else popup_text[:30]
+            # 移除 emoji 前綴
+            name = re.sub(r'^[🔴🔵⚫⚪\s]+', '', name).strip()
+            if not name:
+                name = '未知船艦'
+
+            ships.append({
+                'id': m.get('id', ''),
+                'name': name,
+                'faction': 'enemy' if m.get('shape') == 'diamond' else 'roc',
+                'location': m.get('location', []),
+                'layer': m.get('layer', '')
+            })
+        return ships
 
     def get_layers(self):
         """
@@ -202,7 +280,7 @@ class MapState:
                         control=True
                     ).add_to(m)
         except Exception as e:
-            print(f"⚠️ 載入自訂圖層失敗: {e}")
+            logger.warning("載入自訂圖層失敗: %s", e)
 
         # 建立圖層分組（用於 Leaflet LayerControl 切換顯示）
         active_layers = self.get_layers()
@@ -226,7 +304,7 @@ class MapState:
             with open(ms_path, 'r', encoding='utf-8') as f:
                 ms_code = f.read()
         except Exception as e:
-            print(f"⚠️ 無法讀取本地 milsymbol.js（{e}），將回退使用 /static/js/milsymbol.js 引用。")
+            logger.warning("無法讀取本地 milsymbol.js (%s)，將回退使用 /static/js/milsymbol.js 引用。", e)
 
         # 將 milsymbol.js 內容內嵌到地圖 HTML 中（確保離線可用）
         milsymbol_tag = f"<script>\n{ms_code}\n</script>\n" if ms_code else '<script src="/static/js/milsymbol.js"></script>\n'
@@ -379,11 +457,11 @@ class MapState:
 
         # 繪製航跡線段（在攻擊線之前）
         if hasattr(self, 'tracks') and self.tracks:
-            print(f"🛤️  正在繪製 {len(self.tracks)} 條航跡線段...")
+            logger.info("正在繪製 %s 條航跡線段...", len(self.tracks))
             for track in self.tracks:
                 coordinates = track['coordinates']
                 if len(coordinates) < 2:
-                    print(f"⚠️  跳過座標點不足的航跡：{track.get('ship_name', '未知')}")
+                    logger.warning("跳過座標點不足的航跡: %s", track.get('ship_name', '未知'))
                     continue
 
                 ship_name = track.get('ship_name', '未知船艦')
@@ -681,6 +759,184 @@ class MapState:
             </script>
             """
             m.get_root().html.add_child(Element(redraw_script))
+
+        # 注入 2D 量測工具（距離 / 面積）
+        try:
+            from services import load_config as _load_cfg
+            if _load_cfg().get('enable_measurement', True):
+                measure_script = """
+                <style>
+                .measure-btn {
+                    position: absolute; z-index: 1000; right: 10px;
+                    background: white; border: 2px solid rgba(0,0,0,0.2); border-radius: 4px;
+                    padding: 6px 10px; cursor: pointer; font-size: 14px;
+                    box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+                }
+                .measure-btn:hover { background: #f4f4f4; }
+                .measure-btn.active { background: #2196F3; color: white; border-color: #2196F3; }
+                #measure-dist-btn { top: 80px; }
+                #measure-area-btn { top: 116px; }
+                #measure-clear-btn { top: 152px; font-size: 12px; }
+                .measure-tooltip {
+                    background: rgba(0,0,0,0.7); color: white; padding: 3px 8px;
+                    border-radius: 4px; font-size: 12px; white-space: nowrap;
+                }
+                </style>
+                <div id="measure-dist-btn" class="measure-btn" title="距離量測">📏</div>
+                <div id="measure-area-btn" class="measure-btn" title="面積量測">📐</div>
+                <div id="measure-clear-btn" class="measure-btn" title="清除量測">✖</div>
+                <script>
+                (function() {
+                    function initMeasure() {
+                        var mapEls = document.querySelectorAll('.folium-map');
+                        if (!mapEls.length) { setTimeout(initMeasure, 300); return; }
+                        var map = window[mapEls[0].id];
+                        if (!map) { setTimeout(initMeasure, 300); return; }
+
+                        var mode = null;
+                        var points = [];
+                        var tempMarkers = [];
+                        var tempLines = [];
+                        var tempPolygon = null;
+                        var tooltipLayer = null;
+                        var measureGroup = L.layerGroup().addTo(map);
+
+                        var distBtn = document.getElementById('measure-dist-btn');
+                        var areaBtn = document.getElementById('measure-area-btn');
+                        var clearBtn = document.getElementById('measure-clear-btn');
+
+                        function toRad(d) { return d * Math.PI / 180; }
+
+                        function haversine(a, b) {
+                            var R = 6371;
+                            var dLat = toRad(b[0]-a[0]), dLon = toRad(b[1]-a[1]);
+                            var x = Math.sin(dLat/2)*Math.sin(dLat/2) +
+                                    Math.cos(toRad(a[0]))*Math.cos(toRad(b[0]))*
+                                    Math.sin(dLon/2)*Math.sin(dLon/2);
+                            return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+                        }
+
+                        function totalDist() {
+                            var d = 0;
+                            for (var i = 1; i < points.length; i++) d += haversine(points[i-1], points[i]);
+                            return d;
+                        }
+
+                        function polyArea(pts) {
+                            if (pts.length < 3) return 0;
+                            var R = 6371;
+                            var total = 0;
+                            for (var i = 0; i < pts.length; i++) {
+                                var j = (i+1) % pts.length;
+                                total += toRad(pts[j][1]-pts[i][1]) *
+                                         (2 + Math.sin(toRad(pts[i][0])) + Math.sin(toRad(pts[j][0])));
+                            }
+                            return Math.abs(total * R * R / 2);
+                        }
+
+                        function formatDist(km) {
+                            var nm = km / 1.852;
+                            return km.toFixed(2) + ' km / ' + nm.toFixed(2) + ' nm';
+                        }
+
+                        function addPoint(latlng) {
+                            var pt = [latlng.lat, latlng.lng];
+                            points.push(pt);
+                            var marker = L.circleMarker(latlng, {radius:4, color:'#e74c3c', fillColor:'#e74c3c', fillOpacity:1});
+                            marker.addTo(measureGroup);
+                            tempMarkers.push(marker);
+
+                            if (mode === 'dist' && points.length > 1) {
+                                var line = L.polyline([points[points.length-2], pt], {color:'#e74c3c', weight:2, dashArray:'6'});
+                                line.addTo(measureGroup);
+                                tempLines.push(line);
+                                updateDistLabel();
+                            }
+
+                            if (mode === 'area' && points.length > 1) {
+                                if (tempPolygon) measureGroup.removeLayer(tempPolygon);
+                                tempPolygon = L.polygon(points, {color:'#2196F3', weight:2, fillOpacity:0.15});
+                                tempPolygon.addTo(measureGroup);
+                                updateAreaLabel();
+                            }
+                        }
+
+                        function updateDistLabel() {
+                            if (tooltipLayer) measureGroup.removeLayer(tooltipLayer);
+                            var d = totalDist();
+                            var last = points[points.length-1];
+                            tooltipLayer = L.marker(last, {
+                                icon: L.divIcon({className:'measure-tooltip', html: formatDist(d)})
+                            });
+                            tooltipLayer.addTo(measureGroup);
+                        }
+
+                        function updateAreaLabel() {
+                            if (tooltipLayer) measureGroup.removeLayer(tooltipLayer);
+                            var a = polyArea(points);
+                            var center = points[Math.floor(points.length/2)];
+                            tooltipLayer = L.marker(center, {
+                                icon: L.divIcon({className:'measure-tooltip', html: a.toFixed(2) + ' km\\u00B2'})
+                            });
+                            tooltipLayer.addTo(measureGroup);
+                        }
+
+                        function clearMeasure() {
+                            measureGroup.clearLayers();
+                            points = []; tempMarkers = []; tempLines = [];
+                            tempPolygon = null; tooltipLayer = null;
+                        }
+
+                        function setMode(newMode) {
+                            clearMeasure();
+                            if (mode === newMode) {
+                                mode = null;
+                                distBtn.classList.remove('active');
+                                areaBtn.classList.remove('active');
+                                map.getContainer().style.cursor = '';
+                                return;
+                            }
+                            mode = newMode;
+                            distBtn.classList.toggle('active', mode === 'dist');
+                            areaBtn.classList.toggle('active', mode === 'area');
+                            map.getContainer().style.cursor = 'crosshair';
+                        }
+
+                        distBtn.addEventListener('click', function() { setMode('dist'); });
+                        areaBtn.addEventListener('click', function() { setMode('area'); });
+                        clearBtn.addEventListener('click', function() {
+                            clearMeasure();
+                            mode = null;
+                            distBtn.classList.remove('active');
+                            areaBtn.classList.remove('active');
+                            map.getContainer().style.cursor = '';
+                        });
+
+                        map.on('click', function(e) {
+                            if (mode) addPoint(e.latlng);
+                        });
+
+                        map.on('contextmenu', function(e) {
+                            if (mode) {
+                                mode = null;
+                                distBtn.classList.remove('active');
+                                areaBtn.classList.remove('active');
+                                map.getContainer().style.cursor = '';
+                            }
+                        });
+                    }
+
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', function() { setTimeout(initMeasure, 500); });
+                    } else {
+                        setTimeout(initMeasure, 500);
+                    }
+                })();
+                </script>
+                """
+                m.get_root().html.add_child(Element(measure_script))
+        except Exception as e:
+            logger.warning("量測工具注入失敗: %s", e)
 
         return m
 

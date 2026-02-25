@@ -4,11 +4,14 @@ SSE 串流路由藍圖
 """
 from flask import Blueprint, request, Response
 import json
+import logging
 
 from config import RAG_DEFAULT_MODE, RAG_DEFAULT_MODEL, RAG_DEFAULT_PROMPT, RAG_MAX_SOURCES, DEFAULT_PROMPT_CONFIG
 from services.config_loader import get_rag_settings, get_api_mode
 from services.config_service import load_prompts_config
 from services.api_mode_service import APIModeService
+
+logger = logging.getLogger(__name__)
 
 # 前端 mode → prompts_config.json 的 key 映射（與 answer_routes 一致）
 MODE_TO_PROMPT_KEY = {
@@ -52,10 +55,10 @@ def get_answer_stream():
         prompt_key = MODE_TO_PROMPT_KEY.get(mode, 'military_rag')
         system_prompt = _get_rag_system_prompt(prompt_config_name, prompt_key)
 
-        print(f"\n【RAG 串流】收到問題: {user_input}")
-        print(f"【模式】: {mode}")
-        print(f"【使用模型】: {selected_model}")
-        print(f"【System Prompt】: {system_prompt}")
+        logger.info("[RAG 串流] 收到問題: %s", user_input)
+        logger.info("[模式]: %s", mode)
+        logger.info("[使用模型]: %s", selected_model)
+        logger.info("[System Prompt]: %s", system_prompt)
 
         # 構建中科院 API 格式的請求
         stream_mode = rag_settings.get('stream', 0)
@@ -70,7 +73,7 @@ def get_answer_stream():
             ]
         }
 
-        print(f"【串流模式】: stream={stream_mode}, api_mode={api_mode}")
+        logger.info("[串流模式]: stream=%s, api_mode=%s", stream_mode, api_mode)
 
         def generate():
             try:
@@ -79,7 +82,7 @@ def get_answer_stream():
                 else:
                     yield from _simulate_stream(rag_request, user_input)
             except Exception as e:
-                print(f"串流產生器錯誤: {e}")
+                logger.error("串流產生器錯誤: %s", e)
                 yield _format_sse('error', {'error': str(e)})
                 yield _format_sse('done', {})
 
@@ -93,7 +96,7 @@ def get_answer_stream():
             }
         )
     except Exception as e:
-        print(f"串流路由錯誤: {e}")
+        logger.error("串流路由錯誤: %s", e)
         import traceback
         traceback.print_exc()
         return Response(
@@ -111,7 +114,7 @@ def _stream_from_real_api(rag_request, user_input):
     response = APIModeService.call_api_stream("get_answer", rag_request)
 
     if response is None or response.status_code != 200:
-        print(f"串流 API 呼叫失敗，降級為模擬串流")
+        logger.warning("串流 API 呼叫失敗，降級為模擬串流")
         yield from _simulate_stream(rag_request, user_input)
         return
 
@@ -144,7 +147,7 @@ def _stream_from_real_api(rag_request, user_input):
                 except json.JSONDecodeError:
                     continue
     except Exception as e:
-        print(f"串流讀取錯誤: {e}")
+        logger.error("串流讀取錯誤: %s", e)
         yield _format_sse('error', {'error': f'串流讀取中斷: {str(e)}'})
 
     # 發送元資料和結束事件
@@ -203,7 +206,7 @@ def _simulate_stream(rag_request, user_input):
         yield _format_sse('done', {})
 
     except Exception as e:
-        print(f"模擬串流錯誤: {e}")
+        logger.error("模擬串流錯誤: %s", e)
         yield _format_sse('error', {'error': str(e)})
         yield _format_sse('done', {})
 
@@ -276,5 +279,5 @@ def _get_rag_system_prompt(config_name, prompt_key):
         if editable:
             return editable
     except Exception as e:
-        print(f"⚠️ 讀取 prompts_config 失敗: {e}")
+        logger.warning("讀取 prompts_config 失敗: %s", e)
     return RAG_DEFAULT_PROMPT

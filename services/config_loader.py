@@ -5,6 +5,9 @@
 """
 import json
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 # 配置檔案路徑（支援 .env 覆寫）
 SYSTEM_CONFIG_PATH = os.getenv('SYSTEM_CONFIG_PATH', 'system_config.json')
@@ -30,22 +33,22 @@ def load_system_config(force_reload=False):
 
     try:
         if not os.path.exists(SYSTEM_CONFIG_PATH):
-            print(f"⚠️ system_config.json 不存在，使用 config.py 預設值")
+            logger.warning("system_config.json 不存在，使用 config.py 預設值")
             _cached_config = _build_default_config()
             return _cached_config
 
         with open(SYSTEM_CONFIG_PATH, 'r', encoding='utf-8') as f:
             _cached_config = json.load(f)
 
-        print(f"✅ 已載入系統配置: {SYSTEM_CONFIG_PATH}")
+        logger.info("已載入系統配置: %s", SYSTEM_CONFIG_PATH)
         return _cached_config
 
     except json.JSONDecodeError as e:
-        print(f"❌ system_config.json 格式錯誤: {e}，使用預設值")
+        logger.error("system_config.json 格式錯誤: %s，使用預設值", e)
         _cached_config = _build_default_config()
         return _cached_config
     except Exception as e:
-        print(f"❌ 載入 system_config.json 失敗: {e}，使用預設值")
+        logger.error("載入 system_config.json 失敗: %s，使用預設值", e)
         _cached_config = _build_default_config()
         return _cached_config
 
@@ -184,7 +187,7 @@ def get_active_provider_config():
     providers = llm_settings.get('providers', {})
 
     if provider_name not in providers:
-        print(f"⚠️ Provider '{provider_name}' 不存在於配置中，回退到 ollama")
+        logger.warning("Provider '%s' 不存在於配置中，回退到 ollama", provider_name)
         provider_name = 'ollama'
 
     if provider_name not in providers:

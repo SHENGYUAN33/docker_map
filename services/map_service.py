@@ -7,6 +7,7 @@ from config import (
     ATTACK_LINE_WEIGHT_WTA, WTA_TABLE_HEADER_BG, WTA_TABLE_ALT_ROW_BG
 )
 from models.map_state import MapState
+from utils.ship_registry import lookup_ship_info
 
 
 class MapService:
@@ -33,6 +34,57 @@ class MapService:
         return FACTION_COLORS['default_weapon']  # 未知武器預設顏色
 
     @staticmethod
+    def _build_ship_popup(ship_name, faction, location=None):
+        """
+        生成船艦資訊卡片 HTML（用於 Folium popup）
+
+        參數:
+            ship_name: 船艦名稱
+            faction: 陣營 ('enemy' / 'roc')
+            location: [lat, lon] 座標（可選）
+
+        返回:
+            str: HTML 字串
+        """
+        info = lookup_ship_info(ship_name, faction)
+
+        faction_label = '解放軍' if faction == 'enemy' else '國軍'
+        icon = '🔴' if faction == 'enemy' else '🔵'
+        border_color = '#e74c3c' if faction == 'enemy' else '#2196F3'
+
+        if not info:
+            # 無詳細資料時退回簡潔 popup
+            return f"<b>{faction_label}: {ship_name}</b>"
+
+        # 構建卡片 HTML
+        display_name = info.get('chinese_name') or ship_name
+        hull = info.get('hull_number') or ''
+        ship_class = info.get('ship_class') or '未知'
+        weapons = info.get('weapons', [])
+
+        lines = []
+        lines.append(
+            f'<div style="min-width:220px;font-family:sans-serif;font-size:13px;">'
+            f'<div style="font-weight:700;font-size:15px;border-bottom:2px solid {border_color};'
+            f'padding-bottom:5px;margin-bottom:6px;">'
+            f'{icon} {display_name}'
+            f'</div>'
+        )
+        if hull:
+            lines.append(f'<div><b>舷號：</b>{hull}</div>')
+        english_name = info.get('name', '')
+        if english_name and english_name != display_name:
+            lines.append(f'<div><b>英文：</b>{english_name}</div>')
+        lines.append(f'<div><b>艦級：</b>{ship_class}</div>')
+        if location:
+            lines.append(f'<div><b>座標：</b>{location[0]:.4f}°N, {location[1]:.4f}°E</div>')
+        if weapons:
+            lines.append(f'<div><b>武裝：</b>{", ".join(weapons)}</div>')
+        lines.append('</div>')
+
+        return ''.join(lines)
+
+    @staticmethod
     def add_ships_to_map(ship_data, map_state: MapState, layer=None):
         """
         將船艦標記添加到地圖狀態
@@ -54,7 +106,7 @@ class MapService:
             for ship_name, location in items:
                 map_state.add_marker(
                     location=location,
-                    popup=f"<b>解放軍: {ship_name}</b>",
+                    popup=MapService._build_ship_popup(ship_name, 'enemy', location),
                     color=FACTION_COLORS['enemy_marker'],
                     icon='ship',
                     shape='diamond',  # 紅色菱形
@@ -72,7 +124,7 @@ class MapService:
             for ship_name, location in items:
                 map_state.add_marker(
                     location=location,
-                    popup=f"<b>國軍: {ship_name}</b>",
+                    popup=MapService._build_ship_popup(ship_name, 'roc', location),
                     color=FACTION_COLORS['roc_marker'],
                     icon='ship',
                     shape='circle',  # 藍色圓形
@@ -97,7 +149,7 @@ class MapService:
             # 添加我方單位標記（如果還沒有）- 藍色圓形
             map_state.add_marker(
                 location=result['roc_location'],
-                popup=f"<b>國軍: {result['roc_unit']}</b>",
+                popup=MapService._build_ship_popup(result['roc_unit'], 'roc', result['roc_location']),
                 color=FACTION_COLORS['roc_marker'],
                 icon='ship',
                 shape='circle',  # 藍色圓形
@@ -107,7 +159,7 @@ class MapService:
             # 添加敵方單位標記（如果還沒有）- 紅色菱形
             map_state.add_marker(
                 location=result['enemy_location'],
-                popup=f"<b>解放軍: {result['enemy_unit']}</b>",
+                popup=MapService._build_ship_popup(result['enemy_unit'], 'enemy', result['enemy_location']),
                 color=FACTION_COLORS['enemy_marker'],
                 icon='ship',
                 shape='diamond',  # 紅色菱形
@@ -163,7 +215,7 @@ class MapService:
                 last_position = coordinates[-1]
                 map_state.add_marker(
                     location=last_position,
-                    popup=f"<b>解放軍: {ship_name}</b>",
+                    popup=MapService._build_ship_popup(ship_name, 'enemy', last_position),
                     color=FACTION_COLORS['enemy_marker'],
                     icon='ship',
                     shape='diamond',  # 紅色菱形
@@ -192,7 +244,7 @@ class MapService:
                 last_position = coordinates[-1]
                 map_state.add_marker(
                     location=last_position,
-                    popup=f"<b>國軍: {ship_name}</b>",
+                    popup=MapService._build_ship_popup(ship_name, 'roc', last_position),
                     color=FACTION_COLORS['roc_marker'],
                     icon='ship',
                     shape='circle',  # 藍色圓形

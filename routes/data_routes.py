@@ -7,8 +7,11 @@ from datetime import datetime
 import requests
 import os
 import json
+import logging
 
 from config import MAP_DIR, _STATE_LOCK, _STATES, _SIMULATION_STATUS, DEFAULT_LLM_MODEL, DEFAULT_PROMPT_CONFIG, WEAPON_COLORS, ENABLE_ANIMATION_DEFAULT
+
+logger = logging.getLogger(__name__)
 from services import get_system_prompt, load_config
 from services.llm_service import LLMService
 from services.map_service import MapService
@@ -63,10 +66,10 @@ def get_wta():
         llm_provider = data.get('llm_provider')
         prompt_config = data.get('prompt_config', DEFAULT_PROMPT_CONFIG)
 
-        print(f"\n【功能五：武器分派】收到指令: {user_input}")
-        print(f"【使用模型】: {llm_model}")
-        print(f"【Provider】: {llm_provider or '(使用預設)'}")
-        print(f"【Prompt 配置】: {prompt_config}")
+        logger.info("[功能五：武器分派] 收到指令: %s", user_input)
+        logger.info("[使用模型]: %s", llm_model)
+        logger.info("[Provider]: %s", llm_provider or '(使用預設)')
+        logger.info("[Prompt 配置]: %s", prompt_config)
 
         # 獲取自定義 system prompt
         custom_prompt = get_system_prompt(prompt_config, 'get_wta')
@@ -76,7 +79,7 @@ def get_wta():
 
         # Fallback
         if not decision or not decision.get('parameters'):
-            print("⚠️  LLM 不可用，使用 Fallback 規則解析...")
+            logger.warning("LLM 不可用，使用 Fallback 規則解析...")
             decision = FallbackHandler.fallback_get_wta(user_input)
 
         if not decision or not decision.get('parameters'):
@@ -86,14 +89,14 @@ def get_wta():
             })
 
         params = decision['parameters']
-        print(f"【提取參數】: {params}")
+        logger.info("[提取參數]: %s", params)
 
         # 清理空陣列參數，避免送出多餘欄位導致 Mock Server 匹配失敗
         api_params = {k: v for k, v in params.items() if v is not None and v != []}
         if not api_params:
             # 若全部清空，預設查詢所有敵艦
             api_params = {'enemy': []}
-        print(f"【送出 API 參數】: {api_params}")
+        logger.info("[送出 API 參數]: %s", api_params)
 
         # 步驟 2: 調用 API（根據 api_mode 自動切換來源）
         try:
@@ -110,7 +113,7 @@ def get_wta():
                 })
 
             api_data = res.json()
-            print(f"【API 回傳】: 取得 {len(api_data['wta_results'])} 筆記錄")
+            logger.info("[API 回傳]: 取得 %s 筆記錄", len(api_data['wta_results']))
         except Exception as e:
             return jsonify({
                 'success': False,
@@ -126,9 +129,9 @@ def get_wta():
         try:
             config = load_config()
             enable_animation = config.get('enable_animation', True)
-            print(f"【動畫設定】: {'開啟' if enable_animation else '關閉'}")
+            logger.info("[動畫設定]: %s", '開啟' if enable_animation else '關閉')
         except Exception as e:
-            print(f"⚠️ 讀取動畫設定失敗: {e}，使用預設值（開啟）")
+            logger.warning("讀取動畫設定失敗: %s，使用預設值（開啟）", e)
 
         wta_animation_data = None
 
@@ -189,7 +192,7 @@ def get_wta():
         })
 
     except Exception as e:
-        print(f"錯誤: {str(e)}")
+        logger.error("錯誤: %s", str(e))
         return jsonify({
             'success': False,
             'error': str(e)
@@ -221,12 +224,9 @@ def wta_completed():
         data = request.json
         message = data.get('message', '武器分派演算已完成')
 
-        print(f"\n{'='*80}")
-        print(f"📢 [中科院回調] 武器分派演算完成")
-        print(f"{'='*80}")
-        print(f"  訊息: {message}")
-        print(f"  時間: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        print(f"{'='*80}\n")
+        logger.info("[中科院回調] 武器分派演算完成")
+        logger.info("  訊息: %s", message)
+        logger.info("  時間: %s", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         # 更新全局狀態（所有 session 共享）
         with _STATE_LOCK:
@@ -234,7 +234,7 @@ def wta_completed():
                 state_record['simulation_completed'] = True
                 state_record['completion_message'] = message
                 state_record['completion_time'] = datetime.now().isoformat()
-                print(f"✅ 已更新 session {client_id} 的模擬狀態")
+                logger.info("已更新 session %s 的模擬狀態", client_id)
 
             # 更新全域模擬狀態（供 real mode 前端輪詢）
             _SIMULATION_STATUS['is_completed'] = True
@@ -248,7 +248,7 @@ def wta_completed():
         })
 
     except Exception as e:
-        print(f"❌ wta_completed 錯誤: {str(e)}")
+        logger.error("wta_completed 錯誤: %s", str(e))
         import traceback
         traceback.print_exc()
         return jsonify({
@@ -318,29 +318,26 @@ def get_track():
         llm_provider = data.get('llm_provider')
         prompt_config = data.get('prompt_config', DEFAULT_PROMPT_CONFIG)
 
-        print(f"\n{'='*80}")
-        print(f"🚀 [API 請求] /api/get_track")
-        print(f"{'='*80}")
-        print(f"  用戶指令: {user_input}")
-        print(f"  選擇模型: {llm_model}")
-        print(f"  Provider: {llm_provider or '(使用預設)'}")
-        print(f"  配置名稱: {prompt_config}")
-        print(f"{'='*80}\n")
+        logger.info("[API 請求] /api/get_track")
+        logger.info("  用戶指令: %s", user_input)
+        logger.info("  選擇模型: %s", llm_model)
+        logger.info("  Provider: %s", llm_provider or '(使用預設)')
+        logger.info("  配置名稱: %s", prompt_config)
 
         # 步驟 1: 獲取自定義 system prompt
         custom_prompt = get_system_prompt(prompt_config, 'get_track')
 
         if custom_prompt:
-            print(f"✅ System Prompt 已載入 (長度: {len(custom_prompt)} 字元)")
+            logger.info("System Prompt 已載入 (長度: %s 字元)", len(custom_prompt))
         else:
-            print(f"⚠️  警告: System Prompt 載入失敗，將使用預設 Prompt")
+            logger.warning("警告: System Prompt 載入失敗，將使用預設 Prompt")
 
         # 步驟 2: 使用 LLM 識別指令
         decision = llm_service.call_get_track(user_input, model=llm_model, custom_prompt=custom_prompt, provider_name=llm_provider)
 
         # Fallback: 如果 LLM 失敗，使用規則匹配
         if not decision or decision.get('tool') != 'get_track':
-            print("⚠️  LLM 不可用，使用 Fallback 規則解析...")
+            logger.warning("LLM 不可用，使用 Fallback 規則解析...")
             decision = FallbackHandler.fallback_get_track(user_input)
 
         if not decision or decision.get('tool') != 'get_track':
@@ -349,34 +346,34 @@ def get_track():
                 'error': '無法識別為航跡繪製指令。請使用關鍵詞：「顯示航跡」、「繪製軌跡」等'
             })
 
-        print(f"【LLM 識別】: 航跡繪製")
+        logger.info("[LLM 識別]: 航跡繪製")
 
         # 步驟 3: 讀取航跡數據（根據 api_mode 自動切換來源）
         try:
-            print(f"📡 正在讀取航跡數據...")
+            logger.info("正在讀取航跡數據...")
             res = APIModeService.call_api("get_track", method='GET')
 
-            print(f"📥 [get_track] API 回應狀態碼: {res.status_code}")
+            logger.info("[get_track] API 回應狀態碼: %s", res.status_code)
             raw_text = res.text if hasattr(res, 'text') else str(res)
-            print(f"📥 [get_track] API 原始回應 (前 2000 字): {raw_text[:2000]}")
+            logger.info("[get_track] API 原始回應 (前 2000 字): %s", raw_text[:2000])
 
             api_data = res.json()
-            print(f"📥 [get_track] 解析後 api_data 的 keys: {list(api_data.keys()) if isinstance(api_data, dict) else type(api_data)}")
+            logger.info("[get_track] 解析後 api_data 的 keys: %s", list(api_data.keys()) if isinstance(api_data, dict) else type(api_data))
 
             if isinstance(api_data, dict) and 'ship' in api_data:
                 ship_data = api_data['ship']
-                print(f"📥 [get_track] ship 的 keys: {list(ship_data.keys()) if isinstance(ship_data, dict) else type(ship_data)}")
+                logger.info("[get_track] ship 的 keys: %s", list(ship_data.keys()) if isinstance(ship_data, dict) else type(ship_data))
                 if isinstance(ship_data, dict):
                     enemy_ships = ship_data.get('enemy', {})
                     roc_ships = ship_data.get('roc', {})
-                    print(f"📥 [get_track] enemy 船艦: {list(enemy_ships.keys()) if isinstance(enemy_ships, dict) else enemy_ships}")
-                    print(f"📥 [get_track] roc 船艦: {list(roc_ships.keys()) if isinstance(roc_ships, dict) else roc_ships}")
+                    logger.info("[get_track] enemy 船艦: %s", list(enemy_ships.keys()) if isinstance(enemy_ships, dict) else enemy_ships)
+                    logger.info("[get_track] roc 船艦: %s", list(roc_ships.keys()) if isinstance(roc_ships, dict) else roc_ships)
             else:
-                print(f"⚠️ [get_track] api_data 中沒有 'ship' 欄位! 完整資料: {str(api_data)[:1000]}")
+                logger.warning("[get_track] api_data 中沒有 'ship' 欄位! 完整資料: %s", str(api_data)[:1000])
 
             enemy_count = len(api_data.get('ship', {}).get('enemy', {}))
             roc_count = len(api_data.get('ship', {}).get('roc', {}))
-            print(f"【數據載入成功】: {enemy_count} 艘敵方船艦, {roc_count} 艘我方船艦")
+            logger.info("[數據載入成功]: %s 艘敵方船艦, %s 艘我方船艦", enemy_count, roc_count)
 
         except FileNotFoundError as e:
             return jsonify({
@@ -392,7 +389,7 @@ def get_track():
         # 步驟 4: 清除航跡圖層（標記 + 航跡線段），不影響其他圖層
         map_state = get_map_state()
         map_state.clear_layer(LAYER_TRACKS)
-        print("🧹 已清除舊的航跡圖層")
+        logger.info("已清除舊的航跡圖層")
 
         # 步驟 5: 將航跡數據添加到地圖（航跡圖層）
         map_service.add_tracks_to_map(api_data, map_state, layer=LAYER_TRACKS)
@@ -432,20 +429,18 @@ def get_track():
             'llm_model_used': llm_model
         }
 
-        print(f"\n{'='*80}")
-        print(f"📤 [get_track] 最終回傳給前端的資料:")
-        print(f"   success: {response_data['success']}")
-        print(f"   answer: {response_data['answer']}")
-        print(f"   map_url: {response_data['map_url']}")
-        print(f"   ship_count: {response_data['ship_count']}")
-        print(f"   track_data 類型: {type(response_data['track_data'])}")
-        print(f"   track_data 內容 (前 1000 字): {str(response_data['track_data'])[:1000]}")
-        print(f"{'='*80}\n")
+        logger.info("[get_track] 最終回傳給前端的資料:")
+        logger.info("   success: %s", response_data['success'])
+        logger.info("   answer: %s", response_data['answer'])
+        logger.info("   map_url: %s", response_data['map_url'])
+        logger.info("   ship_count: %s", response_data['ship_count'])
+        logger.info("   track_data 類型: %s", type(response_data['track_data']))
+        logger.info("   track_data 內容 (前 1000 字): %s", str(response_data['track_data'])[:1000])
 
         return jsonify(response_data)
 
     except Exception as e:
-        print(f"錯誤: {str(e)}")
+        logger.error("錯誤: %s", str(e))
         import traceback
         traceback.print_exc()
         return jsonify({
