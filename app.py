@@ -61,7 +61,7 @@ ensure_directories()
 from services import load_config as _load_existing
 _existing = _load_existing()
 _reset_config = dict(CONFIG_DEFAULTS)
-_persistent_keys = ["cesium_ion_token", "custom_layers"]
+_persistent_keys = ["cesium_ion_token", "cesium_offline_mode", "custom_layers"]
 for _key in _persistent_keys:
     if _key in _existing and _existing[_key]:
         _reset_config[_key] = _existing[_key]

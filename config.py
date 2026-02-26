@@ -69,6 +69,26 @@ COP_DIR = os.getenv('COP_DIR', 'cops')
 # 場景存檔儲存目錄
 SCENARIO_DIR = os.getenv('SCENARIO_DIR', 'scenarios')
 
+# 本地圖磚儲存目錄
+TILES_DIR = os.getenv('TILES_DIR', 'tiles')
+
+# GeoJSON/KML 圖層儲存目錄
+GEOJSON_LAYERS_DIR = os.getenv('GEOJSON_LAYERS_DIR', 'geojson_layers')
+
+# GeoJSON 上傳檔案大小上限（bytes）
+GEOJSON_MAX_FILE_SIZE = int(os.getenv('GEOJSON_MAX_FILE_SIZE', str(10 * 1024 * 1024)))
+
+# 允許上傳的副檔名
+GEOJSON_ALLOWED_EXTENSIONS = {'.geojson', '.json', '.kml'}
+
+# GeoJSON 預設樣式
+GEOJSON_DEFAULT_STYLE = {
+    'color': '#3388ff',
+    'weight': 2,
+    'fill_color': '#3388ff',
+    'fill_opacity': 0.2
+}
+
 # ==================== 配置檔案路徑 ====================
 # SYSTEM PROMPT 配置檔案路徑（儲存各種 LLM prompt 模板）
 PROMPTS_CONFIG_FILE = "prompts_config.json"
@@ -82,6 +102,7 @@ CONFIG_DEFAULTS = {
     "enable_animation": False,
     "enable_3d_globe": False,
     "enable_measurement": True,
+    "cesium_offline_mode": False,
     "cesium_ion_token": "",
     "google_maps_api_key": "AIzaSyBCFhSG2jtlF2oZyvNnZc0PNyhRZwiahUo",
     "custom_layers": []
@@ -340,5 +361,8 @@ def ensure_directories():
     os.makedirs(FEEDBACK_DIR, exist_ok=True)
     os.makedirs(COP_DIR, exist_ok=True)
     os.makedirs(SCENARIO_DIR, exist_ok=True)
+    os.makedirs(TILES_DIR, exist_ok=True)
+    os.makedirs(GEOJSON_LAYERS_DIR, exist_ok=True)
     import logging as _logging
-    _logging.getLogger(__name__).info("目錄初始化完成: %s, %s, %s, %s", MAP_DIR, FEEDBACK_DIR, COP_DIR, SCENARIO_DIR)
+    _logging.getLogger(__name__).info("目錄初始化完成: %s, %s, %s, %s, %s, %s",
+                                     MAP_DIR, FEEDBACK_DIR, COP_DIR, SCENARIO_DIR, TILES_DIR, GEOJSON_LAYERS_DIR)

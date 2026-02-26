@@ -6,7 +6,8 @@ from flask import Blueprint, send_file, render_template
 import os
 import logging
 
-from config import MAP_DIR
+from config import MAP_DIR, TILES_DIR
+from services import load_config
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,23 @@ def serve_map(filename):
     return send_file(os.path.join(MAP_DIR, filename))
 
 
+@static_bp.route('/tiles/<folder_name>/<int:z>/<int:x>/<int:y>.png')
+def serve_tile(folder_name, z, x, y):
+    """
+    服務本地圖磚檔案
+
+    參數：
+        folder_name: 圖磚資料夾名稱（位於 tiles/ 目錄下）
+        z, x, y: 圖磚座標
+    """
+    if '..' in folder_name:
+        return 'Invalid folder name', 400
+    tile_path = os.path.join(TILES_DIR, folder_name, str(z), str(x), f'{y}.png')
+    if not os.path.exists(tile_path):
+        return '', 204
+    return send_file(tile_path, mimetype='image/png')
+
+
 @static_bp.route('/')
 def index():
     """
@@ -45,7 +63,9 @@ def index():
         前端 HTML 文件或錯誤提示頁面
     """
     try:
-        return render_template('index.html')
+        config = load_config()
+        cesium_offline = config.get('cesium_offline_mode', False)
+        return render_template('index.html', cesium_offline_mode=cesium_offline)
     except Exception as e:
         logger.error("載入前端頁面失敗: %s", e)
         import traceback

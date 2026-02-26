@@ -368,6 +368,36 @@ export class APIClient {
     return await this.post('/api/refresh_map', {});
   }
 
+  // ==================== 擴充圖資管理 API ====================
+
+  /**
+   * 新增本地圖磚圖層
+   * @param {Object} data - {name, folder_name, attribution, max_zoom, opacity}
+   */
+  async addLocalTileLayer(data) {
+    return await this.post('/api/custom_layers/local_tile', data);
+  }
+
+  /**
+   * 取得可用的本地圖磚資料夾清單
+   */
+  async getAvailableTileFolders() {
+    return await this.get('/api/available_tile_folders');
+  }
+
+  /**
+   * 上傳 GeoJSON/KML 檔案作為向量圖層
+   * @param {FormData} formData - 包含 file, name, color, weight, fill_color, fill_opacity, opacity
+   */
+  async uploadGeoJsonLayer(formData) {
+    const response = await fetch(`${this.apiBase}/api/custom_layers/geojson`, {
+      method: 'POST',
+      headers: this.clientId ? { 'X-Client-ID': this.clientId } : {},
+      body: formData
+    });
+    return await response.json();
+  }
+
   // ==================== 船艦管理 API ====================
 
   /**

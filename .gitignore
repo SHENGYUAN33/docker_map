@@ -15,6 +15,9 @@ maps/
 cops/
 feedbacks/
 
+# Cesium 離線檔案（約 110 MB，不進版控）
+static/cesium/
+
 # IDE
 .vscode/
 .idea/

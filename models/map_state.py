@@ -16,7 +16,8 @@ from config import (
     FACTION_COLORS, ATTACK_LINE_WEIGHT_DEFAULT,
     ARROW_ICON_SIZE, ARROW_ICON_ANCHOR,
     MISSILE_FLIGHT_TIME, WAVE_INTERVAL,
-    MISSILE_TRAIL_WEIGHT, ATTACK_LINE_WEIGHT_WTA
+    MISSILE_TRAIL_WEIGHT, ATTACK_LINE_WEIGHT_WTA,
+    GEOJSON_LAYERS_DIR, GEOJSON_DEFAULT_STYLE
 )
 
 # ==================== 圖層名稱常數 ====================
@@ -281,6 +282,73 @@ class MapState:
                     ).add_to(m)
         except Exception as e:
             logger.warning("載入自訂圖層失敗: %s", e)
+
+        # 注入 GeoJSON 向量圖層（從 config.json 讀取，type == 'geojson'）
+        # 支援 simplestyle-spec（geojson.io 格式）：優先讀取 feature 內的 stroke/fill 屬性
+        try:
+            from services import load_config as _load_cfg
+            _all_layers = _load_cfg().get('custom_layers', [])
+            for cl in _all_layers:
+                if cl.get('type') == 'geojson' and cl.get('enabled') and cl.get('filename'):
+                    geojson_path = os.path.join(
+                        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                        GEOJSON_LAYERS_DIR,
+                        cl['filename']
+                    )
+                    if not os.path.exists(geojson_path):
+                        continue
+                    with open(geojson_path, 'r', encoding='utf-8') as gf:
+                        geojson_data = json.load(gf)
+
+                    fallback = cl.get('style', GEOJSON_DEFAULT_STYLE)
+
+                    def _style_fn(feature, fb=fallback):
+                        """優先使用 feature 內的 simplestyle-spec 屬性，否則用使用者設定的 fallback"""
+                        props = feature.get('properties', {}) or {}
+                        return {
+                            'color': props.get('stroke', fb.get('color', '#3388ff')),
+                            'weight': props.get('stroke-width', fb.get('weight', 2)),
+                            'opacity': props.get('stroke-opacity', 1),
+                            'fillColor': props.get('fill', fb.get('fill_color', '#3388ff')),
+                            'fillOpacity': props.get('fill-opacity', fb.get('fill_opacity', 0.2))
+                        }
+
+                    def _point_to_layer(feature, latlng):
+                        """將 Point 以 CircleMarker 渲染，支援 marker-color 屬性"""
+                        props = feature.get('properties', {}) or {}
+                        color = props.get('marker-color', fallback.get('color', '#3388ff'))
+                        radius = {'small': 5, 'medium': 8, 'large': 12}.get(
+                            props.get('marker-size', 'medium'), 8)
+                        return {
+                            'radius': radius,
+                            'fillColor': color,
+                            'color': color,
+                            'weight': 2,
+                            'fillOpacity': 0.8
+                        }
+
+                    # 檢查是否含有 Point 類型
+                    has_points = any(
+                        f.get('geometry', {}).get('type') in ('Point', 'MultiPoint')
+                        for f in geojson_data.get('features', [])
+                    ) if geojson_data.get('features') else False
+
+                    geojson_kwargs = {
+                        'data': geojson_data,
+                        'name': cl.get('name', 'GeoJSON 圖層'),
+                        'style_function': _style_fn,
+                    }
+
+                    if has_points:
+                        # 用 CircleMarker 渲染 Point，讓顏色生效
+                        geojson_kwargs['marker'] = folium.CircleMarker(
+                            radius=8, fill=True, fill_opacity=0.8, weight=2
+                        )
+
+                    folium.GeoJson(**geojson_kwargs).add_to(m)
+                    logger.info("已載入 GeoJSON 圖層: %s", cl.get('name'))
+        except Exception as e:
+            logger.warning("載入 GeoJSON 圖層失敗: %s", e)
 
         # 建立圖層分組（用於 Leaflet LayerControl 切換顯示）
         active_layers = self.get_layers()

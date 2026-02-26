@@ -87,14 +87,33 @@ export class CesiumManager {
     // 設定 Cesium Ion Token（從 config.json 讀取）
     const settings = this.settingsManager ? this.settingsManager.getSystemSettings() : {};
     const token = settings.cesium_ion_token || '';
+    const offlineMode = settings.cesium_offline_mode === true;
+
     if (token) {
       Cesium.Ion.defaultAccessToken = token;
     } else {
       Cesium.Ion.defaultAccessToken = undefined;
     }
 
-    // 免費底圖選項
-    const imageryViewModels = [
+    // 底圖選項
+    const imageryViewModels = [];
+
+    // 離線底圖（NaturalEarthII，內建於 Cesium Assets）
+    if (offlineMode) {
+      imageryViewModels.push(
+        new Cesium.ProviderViewModel({
+          name: '離線底圖 (NaturalEarthII)',
+          iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/naturalEarthII.png'),
+          tooltip: 'NaturalEarthII 離線底圖 — 無需網路',
+          creationFunction: () => Cesium.TileMapServiceImageryProvider.fromUrl(
+            Cesium.buildModuleUrl('Assets/Textures/NaturalEarthII')
+          )
+        })
+      );
+    }
+
+    // 線上底圖（保留所有既有選項，聯網時可從 baseLayerPicker 切換）
+    imageryViewModels.push(
       new Cesium.ProviderViewModel({
         name: '深色地圖（軍事風格）',
         iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/openStreetMap.png'),
@@ -123,12 +142,12 @@ export class CesiumManager {
           maximumLevel: 18
         })
       })
-    ];
+    );
 
     this.viewer = new Cesium.Viewer('cesium-container', {
       imageryProviderViewModels: imageryViewModels,
       selectedImageryProviderViewModel: imageryViewModels[0],
-      terrainProvider: token ? Cesium.createWorldTerrain() : undefined,
+      terrainProvider: (!offlineMode && token) ? Cesium.createWorldTerrain() : new Cesium.EllipsoidTerrainProvider(),
       terrainProviderViewModels: [],
       baseLayerPicker: true,
       sceneModePicker: true,
@@ -166,8 +185,10 @@ export class CesiumManager {
     // 設定底部狀態列
     this._setupStatusBar();
 
-    // 載入 Google Photorealistic 3D Tiles（如果有 API Key）
-    await this._loadGoogle3DTiles(settings);
+    // 載入 Google Photorealistic 3D Tiles（離線模式跳過，避免無謂的網路請求）
+    if (!offlineMode) {
+      await this._loadGoogle3DTiles(settings);
+    }
 
     // 建立圖層控制面板
     this._createLayerPanel();

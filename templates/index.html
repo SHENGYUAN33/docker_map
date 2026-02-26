@@ -6,8 +6,16 @@
   <!-- html2canvas 庫 - 用於截圖功能 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- Cesium.js 3D 地球儀（免費開源，無需 Token） -->
+  {% if cesium_offline_mode %}
+  <!-- 離線模式：從本地載入 Cesium -->
+  <link id="cesium-css" rel="stylesheet" href="/static/cesium/Cesium/Widgets/widgets.css">
+  <script>window.CESIUM_BASE_URL = '/static/cesium/Cesium/';</script>
+  <script src="/static/cesium/Cesium/Cesium.js"></script>
+  {% else %}
+  <!-- 線上模式：從 CDN 載入 Cesium -->
   <link id="cesium-css" rel="stylesheet" href="https://cesium.com/downloads/cesiumjs/releases/1.124/Build/Cesium/Widgets/widgets.css">
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.124/Build/Cesium/Cesium.js"></script>
+  {% endif %}
   <!-- milsymbol 軍事符號庫（供 3D Cesium billboard 使用） -->
   <script src="/static/js/milsymbol.js"></script>
   <title>軍事兵推 AI 系統 v6.0 - Hermes-2-Pro Agent</title>
@@ -292,24 +300,80 @@
       <div style="border-top:1px solid #e0e0e0;padding-top:16px;">
         <h4 style="margin:0 0 12px 0;font-size:14px;color:#1e3c72;">新增圖層</h4>
 
+        <!-- 圖層類型選擇 -->
+        <div style="margin-bottom:10px;">
+          <label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">圖層類型</label>
+          <select id="layer-add-type" onchange="window._layerManager._onTypeChange()"
+            style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;">
+            <option value="tile">圖磚 URL（遠端）</option>
+            <option value="local_tile">本地圖磚資料夾</option>
+            <option value="geojson">GeoJSON / KML 檔案上傳</option>
+          </select>
+        </div>
+
+        <!-- 圖層名稱（共用） -->
         <div style="margin-bottom:10px;">
           <label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">圖層名稱 *</label>
           <input type="text" id="layer-add-name" placeholder="例：海軍航海圖"
             style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;">
         </div>
 
-        <div style="margin-bottom:10px;">
-          <label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">URL 模板 * (需含 {z}/{x}/{y})</label>
-          <input type="text" id="layer-add-url" placeholder="https://example.com/tiles/{z}/{x}/{y}.png"
-            style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;">
-        </div>
-
-        <div style="display:flex;gap:10px;margin-bottom:14px;">
-          <div style="flex:1;">
+        <!-- ===== 遠端圖磚區塊 ===== -->
+        <div id="layer-section-tile">
+          <div style="margin-bottom:10px;">
+            <label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">URL 模板 * (需含 {z}/{x}/{y})</label>
+            <input type="text" id="layer-add-url" placeholder="https://example.com/tiles/{z}/{x}/{y}.png"
+              style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;">
+          </div>
+          <div style="margin-bottom:10px;">
             <label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">來源標註</label>
             <input type="text" id="layer-add-attribution" placeholder="選填"
               style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;">
           </div>
+        </div>
+
+        <!-- ===== 本地圖磚區塊 ===== -->
+        <div id="layer-section-local-tile" style="display:none;">
+          <div style="margin-bottom:10px;">
+            <label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">圖磚資料夾</label>
+            <select id="layer-add-folder"
+              style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;">
+              <option value="">（點擊重新整理載入）</option>
+            </select>
+            <div style="font-size:11px;color:#999;margin-top:4px;">
+              請將圖磚資料夾放入專案根目錄的 <code>tiles/</code> 目錄（需含 z/x/y.png 結構）
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== GeoJSON/KML 區塊 ===== -->
+        <div id="layer-section-geojson" style="display:none;">
+          <div style="margin-bottom:10px;">
+            <label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">選擇檔案 * (.geojson, .json, .kml)</label>
+            <input type="file" id="layer-add-file" accept=".geojson,.json,.kml"
+              style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;">
+          </div>
+          <div style="display:flex;gap:10px;margin-bottom:10px;">
+            <div style="flex:1;">
+              <label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">線條/邊框顏色</label>
+              <input type="color" id="layer-add-color" value="#3388ff"
+                style="width:100%;height:36px;border:1px solid #ddd;border-radius:6px;cursor:pointer;">
+            </div>
+            <div style="width:80px;">
+              <label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">線寬</label>
+              <input type="number" id="layer-add-weight" value="2" min="1" max="10" step="1"
+                style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;">
+            </div>
+            <div style="width:80px;">
+              <label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">填充透明</label>
+              <input type="number" id="layer-add-fill-opacity" value="0.2" min="0" max="1" step="0.1"
+                style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;">
+            </div>
+          </div>
+        </div>
+
+        <!-- 透明度（共用） -->
+        <div style="margin-bottom:14px;">
           <div style="width:100px;">
             <label style="display:block;font-size:12px;color:#666;margin-bottom:4px;">透明度</label>
             <input type="number" id="layer-add-opacity" value="1.0" min="0" max="1" step="0.1"
