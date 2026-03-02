@@ -98,13 +98,50 @@ export class CesiumManager {
     // 底圖選項
     const imageryViewModels = [];
 
-    // 離線底圖（NaturalEarthII，內建於 Cesium Assets）
+    // 離線底圖（本地圖磚 + NaturalEarthII 備用）
     if (offlineMode) {
+      // 本地衛星影像（需先用 download_tiles.py 下載）
       imageryViewModels.push(
         new Cesium.ProviderViewModel({
-          name: '離線底圖 (NaturalEarthII)',
+          name: '離線衛星影像',
           iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/naturalEarthII.png'),
-          tooltip: 'NaturalEarthII 離線底圖 — 無需網路',
+          tooltip: '本地衛星影像圖磚（tiles/esri_satellite/）',
+          creationFunction: () => new Cesium.UrlTemplateImageryProvider({
+            url: '/tiles/esri_satellite/{z}/{x}/{y}.png',
+            maximumLevel: 14
+          })
+        })
+      );
+      // 本地深色底圖
+      imageryViewModels.push(
+        new Cesium.ProviderViewModel({
+          name: '離線深色地圖',
+          iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/openStreetMap.png'),
+          tooltip: '本地深色底圖圖磚（tiles/carto_dark/）',
+          creationFunction: () => new Cesium.UrlTemplateImageryProvider({
+            url: '/tiles/carto_dark/{z}/{x}/{y}.png',
+            maximumLevel: 14
+          })
+        })
+      );
+      // 本地 OSM 底圖
+      imageryViewModels.push(
+        new Cesium.ProviderViewModel({
+          name: '離線街道地圖',
+          iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/openStreetMap.png'),
+          tooltip: '本地 OpenStreetMap 圖磚（tiles/osm/）',
+          creationFunction: () => new Cesium.UrlTemplateImageryProvider({
+            url: '/tiles/osm/{z}/{x}/{y}.png',
+            maximumLevel: 14
+          })
+        })
+      );
+      // NaturalEarthII 備用（低解析度但保證有圖）
+      imageryViewModels.push(
+        new Cesium.ProviderViewModel({
+          name: '備用底圖 (NaturalEarthII)',
+          iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/naturalEarthII.png'),
+          tooltip: 'NaturalEarthII 低解析度備用底圖',
           creationFunction: () => Cesium.TileMapServiceImageryProvider.fromUrl(
             Cesium.buildModuleUrl('Assets/Textures/NaturalEarthII')
           )
