@@ -33,17 +33,28 @@ TILE_SOURCES = {
     }
 }
 
-# 下載區域（經緯度範圍）— 預設台灣及周邊海域
-BOUNDS = {
-    "min_lat": 21.0,   # 南界（巴士海峽）
-    "max_lat": 26.5,   # 北界（東海）
-    "min_lon": 117.0,  # 西界（台灣海峽）
-    "max_lon": 123.0,  # 東界（太平洋）
+# 全球範圍（低 zoom 使用，確保縮小時無白邊）
+BOUNDS_GLOBAL = {
+    "min_lat": -85.0,
+    "max_lat": 85.0,
+    "min_lon": -180.0,
+    "max_lon": 180.0,
 }
+
+# 區域範圍（高 zoom 使用，台灣及周邊海域 + 第一島鏈）
+BOUNDS_REGION = {
+    "min_lat": 18.0,   # 南界（南海北部 / 巴士海峽以南）
+    "max_lat": 30.0,   # 北界（東海 / 琉球群島）
+    "min_lon": 110.0,  # 西界（中國大陸沿海）
+    "max_lon": 128.0,  # 東界（太平洋 / 琉球以東）
+}
+
+# 低 zoom 全球下載的最大層級（zoom 3 = 64 張, 4 = 256 張, 5 = 1024 張）
+GLOBAL_MAX_ZOOM = 5
 
 # 下載的縮放層級範圍
 MIN_ZOOM = 3
-MAX_ZOOM = 10   # 10 層級約 150m/pixel，檔案量適中（約數千張）
+MAX_ZOOM = 10   # 10 層級約 150m/pixel，檔案量適中
 
 # 輸出目錄（相對於專案根目錄）
 OUTPUT_BASE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tiles")
@@ -54,43 +65,55 @@ DELAY = 0.05
 # ==================== 工具函式 ====================
 
 def lat_lon_to_tile(lat, lon, zoom):
-    """經緯度轉圖磚座標"""
+    """經緯度轉圖磚座標（自動 clamp 到有效範圍）"""
     lat_rad = math.radians(lat)
     n = 2 ** zoom
     x = int((lon + 180.0) / 360.0 * n)
     y = int((1.0 - math.log(math.tan(lat_rad) + 1.0 / math.cos(lat_rad)) / math.pi) / 2.0 * n)
+    x = min(max(x, 0), n - 1)
+    y = min(max(y, 0), n - 1)
     return x, y
 
 
-def count_tiles(bounds, min_zoom, max_zoom):
-    """計算總圖磚數量"""
+def _get_bounds_for_zoom(z):
+    """根據 zoom 層級決定使用全球或區域範圍"""
+    if z <= GLOBAL_MAX_ZOOM:
+        return BOUNDS_GLOBAL
+    return BOUNDS_REGION
+
+
+def count_tiles(min_zoom, max_zoom):
+    """計算總圖磚數量（自動切換全球/區域範圍）"""
     total = 0
     for z in range(min_zoom, max_zoom + 1):
+        bounds = _get_bounds_for_zoom(z)
         x_min, y_max = lat_lon_to_tile(bounds["min_lat"], bounds["min_lon"], z)
         x_max, y_min = lat_lon_to_tile(bounds["max_lat"], bounds["max_lon"], z)
         total += (x_max - x_min + 1) * (y_max - y_min + 1)
     return total
 
 
-def download_tiles(source_name, source_config, bounds, min_zoom, max_zoom):
-    """下載指定來源的圖磚"""
+def download_tiles(source_name, source_config, min_zoom, max_zoom):
+    """下載指定來源的圖磚（低 zoom 全球、高 zoom 區域）"""
     url_template = source_config["url"]
     output_dir = os.path.join(OUTPUT_BASE, source_name)
 
-    total = count_tiles(bounds, min_zoom, max_zoom)
+    total = count_tiles(min_zoom, max_zoom)
     downloaded = 0
     skipped = 0
     failed = 0
 
     print(f"\n{'='*60}")
     print(f"來源：{source_config['description']} ({source_name})")
-    print(f"區域：{bounds['min_lat']}~{bounds['max_lat']}N, {bounds['min_lon']}~{bounds['max_lon']}E")
+    print(f"策略：zoom {min_zoom}-{GLOBAL_MAX_ZOOM} 全球, zoom {GLOBAL_MAX_ZOOM+1}-{max_zoom} 區域")
+    print(f"區域：{BOUNDS_REGION['min_lat']}~{BOUNDS_REGION['max_lat']}N, {BOUNDS_REGION['min_lon']}~{BOUNDS_REGION['max_lon']}E")
     print(f"層級：{min_zoom} ~ {max_zoom}")
     print(f"預估圖磚數：{total}")
     print(f"輸出目錄：{output_dir}")
     print(f"{'='*60}\n")
 
     for z in range(min_zoom, max_zoom + 1):
+        bounds = _get_bounds_for_zoom(z)
         x_min, y_max = lat_lon_to_tile(bounds["min_lat"], bounds["min_lon"], z)
         x_max, y_min = lat_lon_to_tile(bounds["max_lat"], bounds["max_lon"], z)
 
@@ -154,10 +177,10 @@ def main():
 
     if choice == "0":
         for name in sources:
-            download_tiles(name, TILE_SOURCES[name], BOUNDS, MIN_ZOOM, MAX_ZOOM)
+            download_tiles(name, TILE_SOURCES[name], MIN_ZOOM, MAX_ZOOM)
     elif choice.isdigit() and 1 <= int(choice) <= len(sources):
         name = sources[int(choice) - 1]
-        download_tiles(name, TILE_SOURCES[name], BOUNDS, MIN_ZOOM, MAX_ZOOM)
+        download_tiles(name, TILE_SOURCES[name], MIN_ZOOM, MAX_ZOOM)
     else:
         print("無效選擇")
         return

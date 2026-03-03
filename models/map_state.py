@@ -259,11 +259,27 @@ class MapState:
             folium.Map: 完整的地圖物件
         """
         # 創建基礎地圖（台灣海峽中心）
-        m = folium.Map(
-            location=MAP_DEFAULT_CENTER,
-            zoom_start=MAP_DEFAULT_ZOOM,
-            tiles=MAP_DEFAULT_TILES
-        )
+        # 離線模式：使用本地圖磚取代 OpenStreetMap
+        from services import load_config as _load_offline_cfg
+        _offline_mode = _load_offline_cfg().get('cesium_offline_mode', False)
+        if _offline_mode:
+            m = folium.Map(
+                location=MAP_DEFAULT_CENTER,
+                zoom_start=MAP_DEFAULT_ZOOM,
+                tiles=None
+            )
+            folium.TileLayer(
+                tiles='/tiles/esri_satellite/{z}/{x}/{y}.png',
+                attr='離線衛星影像',
+                name='離線衛星影像',
+                max_zoom=14
+            ).add_to(m)
+        else:
+            m = folium.Map(
+                location=MAP_DEFAULT_CENTER,
+                zoom_start=MAP_DEFAULT_ZOOM,
+                tiles=MAP_DEFAULT_TILES
+            )
 
         # 注入自訂底圖圖層（從 config.json 讀取）
         try:

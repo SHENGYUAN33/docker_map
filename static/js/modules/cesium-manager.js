@@ -149,37 +149,39 @@ export class CesiumManager {
       );
     }
 
-    // 線上底圖（保留所有既有選項，聯網時可從 baseLayerPicker 切換）
-    imageryViewModels.push(
-      new Cesium.ProviderViewModel({
-        name: '深色地圖（軍事風格）',
-        iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/openStreetMap.png'),
-        tooltip: 'CartoDB Dark Matter - 軍事沙盤風格深色底圖',
-        creationFunction: () => new Cesium.UrlTemplateImageryProvider({
-          url: 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-          credit: new Cesium.Credit('CartoDB Dark Matter'),
-          maximumLevel: 18
+    // 線上底圖（僅在非離線模式時加入，避免斷網時選到空白圖層）
+    if (!offlineMode) {
+      imageryViewModels.push(
+        new Cesium.ProviderViewModel({
+          name: '深色地圖（軍事風格）',
+          iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/openStreetMap.png'),
+          tooltip: 'CartoDB Dark Matter - 軍事沙盤風格深色底圖',
+          creationFunction: () => new Cesium.UrlTemplateImageryProvider({
+            url: 'https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+            credit: new Cesium.Credit('CartoDB Dark Matter'),
+            maximumLevel: 18
+          })
+        }),
+        new Cesium.ProviderViewModel({
+          name: 'OpenStreetMap',
+          iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/openStreetMap.png'),
+          tooltip: 'OpenStreetMap 標準街道地圖',
+          creationFunction: () => new Cesium.OpenStreetMapImageryProvider({
+            url: 'https://tile.openstreetmap.org/'
+          })
+        }),
+        new Cesium.ProviderViewModel({
+          name: '淺色地圖',
+          iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/openStreetMap.png'),
+          tooltip: 'CartoDB Positron - 簡潔淺色風格',
+          creationFunction: () => new Cesium.UrlTemplateImageryProvider({
+            url: 'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+            credit: new Cesium.Credit('CartoDB Positron'),
+            maximumLevel: 18
+          })
         })
-      }),
-      new Cesium.ProviderViewModel({
-        name: 'OpenStreetMap',
-        iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/openStreetMap.png'),
-        tooltip: 'OpenStreetMap 標準街道地圖',
-        creationFunction: () => new Cesium.OpenStreetMapImageryProvider({
-          url: 'https://tile.openstreetmap.org/'
-        })
-      }),
-      new Cesium.ProviderViewModel({
-        name: '淺色地圖',
-        iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/openStreetMap.png'),
-        tooltip: 'CartoDB Positron - 簡潔淺色風格',
-        creationFunction: () => new Cesium.UrlTemplateImageryProvider({
-          url: 'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-          credit: new Cesium.Credit('CartoDB Positron'),
-          maximumLevel: 18
-        })
-      })
-    );
+      );
+    }
 
     this.viewer = new Cesium.Viewer('cesium-container', {
       imageryProviderViewModels: imageryViewModels,

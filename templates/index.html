@@ -4,7 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- html2canvas 庫 - 用於截圖功能 -->
+  {% if cesium_offline_mode %}
+  <script src="/static/js/html2canvas.min.js"></script>
+  {% else %}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  {% endif %}
   <!-- Cesium.js 3D 地球儀（免費開源，無需 Token） -->
   {% if cesium_offline_mode %}
   <!-- 離線模式：從本地載入 Cesium -->
@@ -156,11 +160,19 @@
           <div id="pane-map">
             <div id="map-content">
               <div id="map-placeholder">底圖已就緒（等待兵推地圖載入）。請選擇功能開始操作。</div>
+              {% if cesium_offline_mode %}
+              <iframe
+                id="folium-map"
+                srcdoc="<!DOCTYPE html>&#10;<html><head>&#10;<meta charset='utf-8'/>&#10;<meta name='viewport' content='width=device-width,initial-scale=1'/>&#10;<link rel='stylesheet' href='/static/css/leaflet.css'/>&#10;<style>&#10;html,body{height:100%;margin:0}&#10;#m{height:100%}&#10;</style>&#10;</head>&#10;<body>&#10;<div id='m'></div>&#10;<script src='/static/js/leaflet.js'></script>&#10;<script>&#10;(function(){&#10;  function fallback(msg){&#10;    document.body.innerHTML = '<div style=&quot;padding:16px;font-family:sans-serif;color:#1e3c72;&quot;>'+msg+'</div>';&#10;  }&#10;  if (typeof L === 'undefined') {&#10;    fallback('底圖載入失敗。請直接執行功能產生 Folium 地圖。');&#10;    return;&#10;  }&#10;  try{&#10;    var map=L.map('m',{zoomControl:true}).setView([23.7,121.0],7);&#10;    L.tileLayer('/tiles/esri_satellite/{z}/{x}/{y}.png',{maxZoom:14,attribution:'離線衛星影像'}).addTo(map);&#10;  }catch(e){&#10;    fallback('底圖初始化失敗。請直接執行功能產生 Folium 地圖。');&#10;  }&#10;})();&#10;</script>&#10;</body></html>"
+                style="width: 100%; height: 100%; border: none; display: block;">
+              </iframe>
+              {% else %}
               <iframe
                 id="folium-map"
                 srcdoc="<!DOCTYPE html>&#10;<html><head>&#10;<meta charset='utf-8'/>&#10;<meta name='viewport' content='width=device-width,initial-scale=1'/>&#10;<link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/>&#10;<style>&#10;html,body{height:100%;margin:0}&#10;#m{height:100%}&#10;</style>&#10;</head>&#10;<body>&#10;<div id='m'></div>&#10;<script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>&#10;<script>&#10;(function(){&#10;  function fallback(msg){&#10;    document.body.innerHTML = '<div style=&quot;padding:16px;font-family:sans-serif;color:#1e3c72;&quot;>'+msg+'</div>';&#10;  }&#10;  if (typeof L === 'undefined') {&#10;    fallback('底圖載入失敗（可能是離線）。請直接執行功能產生 Folium 地圖。');&#10;    return;&#10;  }&#10;  try{&#10;    var map=L.map('m',{zoomControl:true}).setView([23.7,121.0],7);&#10;    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&amp;copy; OpenStreetMap'}).addTo(map);&#10;  }catch(e){&#10;    fallback('底圖初始化失敗。請直接執行功能產生 Folium 地圖。');&#10;  }&#10;})();&#10;</script>&#10;</body></html>"
                 style="width: 100%; height: 100%; border: none; display: block;">
               </iframe>
+              {% endif %}
               <!-- 3D Cesium 地球儀容器 -->
               <div id="cesium-container" style="display:none; position:absolute; inset:0; width:100%; height:100%;"></div>
               <!-- 船艦搜尋框 -->

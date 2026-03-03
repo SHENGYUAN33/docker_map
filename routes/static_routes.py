@@ -45,7 +45,7 @@ def serve_tile(folder_name, z, x, y):
     tile_path = os.path.join(TILES_DIR, folder_name, str(z), str(x), f'{y}.png')
     if not os.path.exists(tile_path):
         return '', 204
-    return send_file(tile_path, mimetype='image/png')
+    return send_file(tile_path, mimetype='image/png', max_age=31536000)
 
 
 @static_bp.route('/')
