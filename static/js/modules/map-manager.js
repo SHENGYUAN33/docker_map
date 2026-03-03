@@ -55,7 +55,7 @@ export class MapManager {
     }
 
     try {
-      await this.apiClient.clearMap();
+      const result = await this.apiClient.clearMap();
 
       // 清除 3D Cesium 資料
       if (this.cesiumManager) {
@@ -69,11 +69,15 @@ export class MapManager {
 
       this.uiManager.showNotification('✅ 地圖已清除', 'success');
 
-      // 重新載入地圖
-      const iframe = document.getElementById('folium-map');
-      iframe.src = 'about:blank';
-      document.getElementById('map-placeholder').style.display = 'block';
-      iframe.style.display = 'none';
+      // 載入空白地圖（保留底圖 + LayerControl）
+      if (result && result.map_url) {
+        this.showMap(result.map_url);
+      } else {
+        const iframe = document.getElementById('folium-map');
+        iframe.src = 'about:blank';
+        document.getElementById('map-placeholder').style.display = 'block';
+        iframe.style.display = 'none';
+      }
     } catch (error) {
       this.uiManager.showNotification('❌ 清除失敗', 'error');
     }

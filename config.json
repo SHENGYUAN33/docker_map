@@ -23,7 +23,7 @@
       "attribution": "",
       "max_zoom": 18,
       "opacity": 1,
-      "enabled": true
+      "enabled": false
     },
     {
       "id": "layer_1772084352836",
@@ -38,7 +38,7 @@
         "fill_opacity": 0.2
       },
       "opacity": 1.0,
-      "enabled": true
+      "enabled": false
     },
     {
       "id": "layer_1772084703949",

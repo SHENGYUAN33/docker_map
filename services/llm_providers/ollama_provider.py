@@ -9,7 +9,7 @@ import requests
 import json
 import re
 from .base_provider import BaseLLMProvider
-from utils.parser import parse_function_arguments
+from utils.parser import parse_function_arguments, normalize_llm_params
 
 
 class OllamaProvider(BaseLLMProvider):
@@ -146,6 +146,11 @@ class OllamaProvider(BaseLLMProvider):
         if expected_keys and expected_keys.intersection(parsed.keys()):
             return expected_fn, parsed
 
+        # 無法識別但仍是 dict — 檢查是否為 schema echo
+        if self._is_schema_fragment(parsed, tools):
+            print(f"⚠️  _normalize_parsed_response: 偵測到 schema echo，拒絕此結果")
+            return None, None
+
         # 無法識別但仍是 dict，當作參數嘗試
         return expected_fn, parsed
 
@@ -175,6 +180,33 @@ class OllamaProvider(BaseLLMProvider):
                     pass
 
         return arguments
+
+    def _is_schema_fragment(self, arguments, tools):
+        """
+        檢測 Ollama 是否將 tool schema 定義當作參數回傳（schema echo 問題）。
+        Schema 片段特徵：包含 'type', 'items', 'properties' 等 JSON Schema 關鍵字，
+        但不包含實際期望的參數 key（如 'enemy', 'roc'）。
+        """
+        if not isinstance(arguments, dict) or not arguments or not tools:
+            return False
+
+        expected_keys = set(
+            tools[0]['function'].get('parameters', {}).get('properties', {}).keys()
+        )
+
+        # 參數中已包含期望的 key → 不是 schema echo
+        if expected_keys and expected_keys.intersection(arguments.keys()):
+            return False
+
+        # JSON Schema 特徵 key
+        schema_keys = {'type', 'items', 'properties', 'description', 'object', 'required', 'enum'}
+        schema_overlap = set(arguments.keys()).intersection(schema_keys)
+
+        if len(schema_overlap) >= 2:
+            print(f"⚠️  偵測到 schema echo！參數包含 schema 關鍵字: {schema_overlap}")
+            return True
+
+        return False
 
     def _call_prompt_based(self, model, system_prompt, user_prompt, tools, url, effective_timeout):
         """
@@ -214,6 +246,7 @@ class OllamaProvider(BaseLLMProvider):
             fn_name, arguments = self._normalize_parsed_response(parsed, tools)
             if fn_name:
                 arguments = parse_function_arguments(arguments or {})
+                arguments = normalize_llm_params(arguments, tools)
                 print(f"✅ Prompt-based 解析成功")
                 print(f"   函數: {fn_name}")
                 print(f"   參數: {arguments}")
@@ -239,7 +272,8 @@ class OllamaProvider(BaseLLMProvider):
                 {"role": "user", "content": user_prompt}
             ],
             "tools": tools,
-            "stream": False
+            "stream": False,
+            "options": {"temperature": 0}
         }
 
         url = self.get_api_url()
@@ -279,16 +313,23 @@ class OllamaProvider(BaseLLMProvider):
             if 'tool_calls' in message and len(message['tool_calls']) > 0:
                 tool_call = message['tool_calls'][0]
                 function_name = tool_call['function']['name']
-                arguments = parse_function_arguments(tool_call['function']['arguments'])
+                raw_arguments = tool_call['function']['arguments']
 
-                print(f"✅ Function Calling 成功")
-                print(f"   函數: {function_name}")
-                print(f"   參數: {arguments}")
+                # 檢測 schema echo：Ollama 有時會把 tool schema 當作參數回傳
+                if self._is_schema_fragment(raw_arguments, tools):
+                    print(f"⚠️  Schema echo 偵測到，忽略 tool_calls，嘗試從 content 解析...")
+                else:
+                    arguments = parse_function_arguments(raw_arguments)
+                    arguments = normalize_llm_params(arguments, tools)
 
-                return {
-                    "function_name": function_name,
-                    "arguments": arguments
-                }
+                    print(f"✅ Function Calling 成功")
+                    print(f"   函數: {function_name}")
+                    print(f"   參數: {arguments}")
+
+                    return {
+                        "function_name": function_name,
+                        "arguments": arguments
+                    }
 
             # Fallback: 嘗試從 content 解析
             content = message.get('content', '')
@@ -298,6 +339,7 @@ class OllamaProvider(BaseLLMProvider):
                     fn_name, arguments = self._normalize_parsed_response(parsed, tools)
                     if fn_name:
                         arguments = parse_function_arguments(arguments or {})
+                        arguments = normalize_llm_params(arguments, tools)
                         print(f"⚠️  未使用 Function Calling，從 content 正規化解析")
                         print(f"   原始: {parsed}")
                         print(f"   函數: {fn_name}")

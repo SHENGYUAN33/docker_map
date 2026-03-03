@@ -268,12 +268,41 @@ class MapState:
                 zoom_start=MAP_DEFAULT_ZOOM,
                 tiles=None
             )
+
+            # 加入三種離線底圖（overlay=False 代表底圖，互斥切換）
+            # 1. 街道地圖（預設顯示）
+            folium.TileLayer(
+                tiles='/tiles/osm/{z}/{x}/{y}.png',
+                attr='離線街道地圖',
+                name='街道地圖',
+                overlay=False,
+                control=True,
+                show=True,
+                max_zoom=14
+            ).add_to(m)
+
+            # 2. 衛星影像（預設隱藏）
             folium.TileLayer(
                 tiles='/tiles/esri_satellite/{z}/{x}/{y}.png',
                 attr='離線衛星影像',
-                name='離線衛星影像',
+                name='衛星影像',
+                overlay=False,
+                control=True,
+                show=False,
                 max_zoom=14
             ).add_to(m)
+
+            # 3. 深色地圖（預設隱藏）
+            folium.TileLayer(
+                tiles='/tiles/carto_dark/{z}/{x}/{y}.png',
+                attr='離線深色地圖',
+                name='深色地圖',
+                overlay=False,
+                control=True,
+                show=False,
+                max_zoom=14
+            ).add_to(m)
+
         else:
             m = folium.Map(
                 location=MAP_DEFAULT_CENTER,
@@ -814,8 +843,9 @@ class MapState:
             m.get_root().html.add_child(Element(animation_html))
 
         # 添加圖層控制器（Leaflet L.control.layers）
-        if layer_groups:
-            folium.LayerControl(collapsed=True).add_to(m)
+        # 離線模式下即使無 overlay 圖層也需要 LayerControl 以切換底圖
+        if layer_groups or _offline_mode:
+            folium.LayerControl(position='topright', collapsed=True).add_to(m)
 
             # 監聽圖層切換事件，重新渲染 milsymbol 軍事符號
             # 原因：Leaflet DivIcon 在圖層重新加入地圖時會重置 innerHTML，

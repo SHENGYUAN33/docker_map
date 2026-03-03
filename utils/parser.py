@@ -2,6 +2,7 @@
 解析工具模組
 用途：提供 LLM Function Calling 參數解析和修正功能
 """
+import ast
 import json
 import logging
 
@@ -53,7 +54,66 @@ def parse_function_arguments(arguments):
                 try:
                     result[key] = json.loads(value)
                     logger.info("修正參數 %s: '%s' -> %s", key, value, result[key])
-                except:
-                    pass  # 如果解析失敗，保持原值
+                except (json.JSONDecodeError, ValueError):
+                    # json.loads 失敗（如單引號 "['055']"），嘗試 ast.literal_eval
+                    try:
+                        parsed_list = ast.literal_eval(value)
+                        if isinstance(parsed_list, list):
+                            result[key] = parsed_list
+                            logger.info("修正參數 %s（ast fallback）: '%s' -> %s", key, value, result[key])
+                    except (ValueError, SyntaxError):
+                        pass
 
     return result
+
+
+def normalize_llm_params(params, tools):
+    """
+    正規化 LLM 回傳的參數：修正錯誤欄位名稱 + 過濾 schema 外的欄位
+    用途：處理 Ollama 常見的欄位名稱錯誤（如 enemy_ships → enemy）和垃圾欄位（如 object, scenario）
+
+    參數:
+        params: LLM 回傳的參數字典
+        tools: tool schema 列表（用於提取期望的欄位名稱）
+
+    返回:
+        dict: 正規化後的參數字典
+    """
+    if not params or not isinstance(params, dict) or not tools:
+        return params
+
+    # 從 schema 提取期望的欄位名稱
+    expected_keys = set(
+        tools[0]['function'].get('parameters', {}).get('properties', {}).keys()
+    )
+    if not expected_keys:
+        return params
+
+    # LLM 常見的欄位名稱錯誤映射
+    name_mapping = {
+        'enemy_ships': 'enemy',
+        'roc_ships': 'roc',
+        'enemies': 'enemy',
+        'friendly': 'roc',
+        'ships_enemy': 'enemy',
+        'ships_roc': 'roc',
+    }
+
+    normalized = {}
+    for key, value in params.items():
+        # 先嘗試名稱映射，再檢查是否為期望欄位
+        mapped_key = name_mapping.get(key, key)
+        if mapped_key in expected_keys:
+            # 如果同一個 mapped_key 已存在，合併陣列值
+            if mapped_key in normalized and isinstance(normalized[mapped_key], list) and isinstance(value, list):
+                normalized[mapped_key].extend(value)
+            else:
+                normalized[mapped_key] = value
+        else:
+            logger.info("過濾 schema 外的欄位: %s = %s", key, value)
+
+    # 如果正規化後為空但原始參數有值，記錄警告
+    if not normalized and params:
+        logger.warning("正規化後參數為空，原始參數: %s", params)
+
+    return normalized

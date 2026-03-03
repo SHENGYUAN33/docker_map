@@ -112,8 +112,12 @@ def import_scenario():
             # 如果是空陣列（代表「所有敵軍」）
             if isinstance(enemy_ships, list) and len(enemy_ships) == 0:
                 if has_enemy_in_input:
-                    cleaned_params['enemy'] = []
-                    logger.info("保留 enemy:[] 參數（用戶要求所有敵軍）")
+                    # 修復：如果已有具體船艦（來自陣營修正），不用空陣列覆蓋
+                    if 'enemy' in cleaned_params and len(cleaned_params['enemy']) > 0:
+                        logger.info("跳過 enemy:[] — 已有修正的具體船艦: %s", cleaned_params['enemy'])
+                    else:
+                        cleaned_params['enemy'] = []
+                        logger.info("保留 enemy:[] 參數（用戶要求所有敵軍）")
                 else:
                     logger.info("移除 enemy:[] 參數（用戶未提到敵軍，LLM 誤判）")
 
@@ -153,8 +157,12 @@ def import_scenario():
             # 如果是空陣列（代表「所有我軍」）
             if isinstance(roc_ships, list) and len(roc_ships) == 0:
                 if has_roc_in_input:
-                    cleaned_params['roc'] = []
-                    logger.info("保留 roc:[] 參數（用戶要求所有我軍）")
+                    # 修復：如果已有具體船艦（來自陣營修正），不用空陣列覆蓋
+                    if 'roc' in cleaned_params and len(cleaned_params['roc']) > 0:
+                        logger.info("跳過 roc:[] — 已有修正的具體船艦: %s", cleaned_params['roc'])
+                    else:
+                        cleaned_params['roc'] = []
+                        logger.info("保留 roc:[] 參數（用戶要求所有我軍）")
                 else:
                     logger.info("移除 roc:[] 參數（用戶未提到我軍，LLM 誤判）")
 
@@ -418,7 +426,16 @@ def clear_map():
         })
     else:
         map_state.clear()
+
+        # 生成只有底圖的空白地圖（保留 LayerControl 底圖切換）
+        map_obj = map_state.create_map()
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        map_filename = f'clear_map_{timestamp}.html'
+        map_path = os.path.join(MAP_DIR, map_filename)
+        map_obj.save(map_path)
+
         return jsonify({
             'success': True,
-            'message': '地圖已清除'
+            'message': '地圖已清除',
+            'map_url': f'/maps/{map_filename}'
         })
