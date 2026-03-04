@@ -1,0 +1,31 @@
+# 不進映像的大型資源（改用 volume 掛載）
+static/cesium/
+tiles/
+logs/
+scenarios/
+geojson_layers/
+maps/
+cops/
+feedbacks/
+
+# Python 快取
+__pycache__/
+*.pyc
+*.pyo
+venv/
+
+# 版控與 IDE
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# 文件（不需要進映像）
+ARCHITECTURE.md
+CLAUDE.md
+DO_NOT_TOUCH.md
+README.md
+
+# 其他
+*.log
+.env

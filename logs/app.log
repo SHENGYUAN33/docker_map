@@ -16315,3 +16315,851 @@
 [2026-03-03 16:14:16] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:14:16] "[35m[1mGET /tiles/esri_satellite/6/56/26.png HTTP/1.1[0m" 204 -
 [2026-03-03 16:14:16] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:14:16] "[35m[1mGET /tiles/esri_satellite/6/56/27.png HTTP/1.1[0m" 204 -
 [2026-03-03 16:14:16] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:14:16] "[35m[1mGET /tiles/esri_satellite/6/56/28.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:18:21] INFO [routes.data_routes] [API 請求] /api/get_track
+[2026-03-03 16:18:21] INFO [routes.data_routes]   用戶指令: 顯示航跡
+[2026-03-03 16:18:21] INFO [routes.data_routes]   選擇模型: llama3.1:8b
+[2026-03-03 16:18:21] INFO [routes.data_routes]   Provider: ollama
+[2026-03-03 16:18:21] INFO [routes.data_routes]   配置名稱: 預設配置
+[2026-03-03 16:18:21] INFO [services.config_service] [System Prompt 獲取]
+[2026-03-03 16:18:21] INFO [services.config_service]   請求配置: 預設配置
+[2026-03-03 16:18:21] INFO [services.config_service]   請求功能: get_track
+[2026-03-03 16:18:21] INFO [services.config_service]   成功獲取 System Prompt
+[2026-03-03 16:18:21] INFO [services.config_service]   可編輯部分長度: 16 字元
+[2026-03-03 16:18:21] INFO [services.config_service]   固定部分長度: 340 字元
+[2026-03-03 16:18:21] INFO [services.config_service]   完整 Prompt 長度: 356 字元
+[2026-03-03 16:18:21] INFO [services.config_service]   Prompt 內容預覽 (前 200 字): 你是一個軍事船艦航跡繪製識別器。
+【規則】:
+識別以下觸發詞，如果匹配則返回航跡繪製指令：
+- "顯示航跡"
+- "顯示軌跡"
+- "繪製航跡"
+- "繪製軌跡"
+- "顯示航行軌跡"
+- "顯示航行路徑"
+- "顯示移動路徑"
+- "顯示船艦軌跡"
+
+【範例】:
+指令: 顯示航跡
+輸出: {"tool": "get_track", "parameters": {}}
+
+指令: 繪製軌跡
+輸出: ...
+[2026-03-03 16:18:21] INFO [routes.data_routes] System Prompt 已載入 (長度: 356 字元)
+[2026-03-03 16:20:02] INFO [routes.data_routes] [LLM 識別]: 航跡繪製
+[2026-03-03 16:20:02] INFO [routes.data_routes] 正在讀取航跡數據...
+[2026-03-03 16:20:02] INFO [services.api_mode_service] [API Mode: local] 呼叫端點: get_track
+[2026-03-03 16:20:02] INFO [services.api_mode_service]    URL: http://localhost:3000/api/v1/get_track
+[2026-03-03 16:20:02] INFO [services.api_mode_service]    Timeout: 300s
+[2026-03-03 16:20:02] INFO [services.api_mode_service]    Method: GET
+[2026-03-03 16:20:02] INFO [services.api_mode_service]    Response Status: 200
+[2026-03-03 16:20:02] INFO [services.api_mode_service]    Response Body: {
+  "ship": {
+    "enemy": {
+      "052": [
+        [
+          23.9429914,
+          125.8593584
+        ],
+        [
+          23.8324937,
+          125.5517412
+        ],
+        [
+          23.7922894,
+          125.2660967
+        ],
+        [
+          23.7721825,
+          124.9365068
+        ],
+        [
+          23.7922894,
+          124.5849443
+        ]
+      ],
+      "055": [
+        [
+          21.8693924,
+          125.5464584
+        ],
+        [
+          22.1037004,
+          125.0850326
+        ],
+        [
+          22.3477814,
+          124.7664291
+        ],
+        [
+          22.6522821,
+          124.5906479
+        ]
+      ]
+    },
+    "roc": {
+      "618": [
+        [
+          25.1728714,
+          122.151683
+        ],
+        [
+          24.8243734,
+          122.3384506
+        ]
+      ],
+      "619": [
+        [
+          24.788974,
+          121.9699026
+        ],
+        [
+          24.5093878,
+          121.9918753
+        ]
+      ]
+    }
+  }
+}
+[2026-03-03 16:20:02] INFO [routes.data_routes] [get_track] API 回應狀態碼: 200
+[2026-03-03 16:20:02] INFO [routes.data_routes] [get_track] API 原始回應 (前 2000 字): {
+  "ship": {
+    "enemy": {
+      "052": [
+        [
+          23.9429914,
+          125.8593584
+        ],
+        [
+          23.8324937,
+          125.5517412
+        ],
+        [
+          23.7922894,
+          125.2660967
+        ],
+        [
+          23.7721825,
+          124.9365068
+        ],
+        [
+          23.7922894,
+          124.5849443
+        ]
+      ],
+      "055": [
+        [
+          21.8693924,
+          125.5464584
+        ],
+        [
+          22.1037004,
+          125.0850326
+        ],
+        [
+          22.3477814,
+          124.7664291
+        ],
+        [
+          22.6522821,
+          124.5906479
+        ]
+      ]
+    },
+    "roc": {
+      "618": [
+        [
+          25.1728714,
+          122.151683
+        ],
+        [
+          24.8243734,
+          122.3384506
+        ]
+      ],
+      "619": [
+        [
+          24.788974,
+          121.9699026
+        ],
+        [
+          24.5093878,
+          121.9918753
+        ]
+      ]
+    }
+  }
+}
+[2026-03-03 16:20:02] INFO [routes.data_routes] [get_track] 解析後 api_data 的 keys: ['ship']
+[2026-03-03 16:20:02] INFO [routes.data_routes] [get_track] ship 的 keys: ['enemy', 'roc']
+[2026-03-03 16:20:02] INFO [routes.data_routes] [get_track] enemy 船艦: ['052', '055']
+[2026-03-03 16:20:02] INFO [routes.data_routes] [get_track] roc 船艦: ['618', '619']
+[2026-03-03 16:20:02] INFO [routes.data_routes] [數據載入成功]: 2 艘敵方船艦, 2 艘我方船艦
+[2026-03-03 16:20:02] INFO [routes.data_routes] 已清除舊的航跡圖層
+[2026-03-03 16:20:02] INFO [models.map_state] 正在繪製 4 條航跡線段...
+[2026-03-03 16:20:03] INFO [routes.data_routes] [get_track] 最終回傳給前端的資料:
+[2026-03-03 16:20:03] INFO [routes.data_routes]    success: True
+[2026-03-03 16:20:03] INFO [routes.data_routes]    answer: ✅ 已成功繪製 解放軍 2 艘 與 國軍 2 艘 的航行軌跡，共 4 艘船艦。
+📍 船艦圖示顯示當前位置，彩色線段顯示歷史航跡。
+地圖已更新，請查看。
+[2026-03-03 16:20:03] INFO [routes.data_routes]    map_url: /maps/track_map_20260303_162002.html
+[2026-03-03 16:20:03] INFO [routes.data_routes]    ship_count: 4
+[2026-03-03 16:20:03] INFO [routes.data_routes]    track_data 類型: <class 'dict'>
+[2026-03-03 16:20:03] INFO [routes.data_routes]    track_data 內容 (前 1000 字): {'ship': {'enemy': {'052': [[23.9429914, 125.8593584], [23.8324937, 125.5517412], [23.7922894, 125.2660967], [23.7721825, 124.9365068], [23.7922894, 124.5849443]], '055': [[21.8693924, 125.5464584], [22.1037004, 125.0850326], [22.3477814, 124.7664291], [22.6522821, 124.5906479]]}, 'roc': {'618': [[25.1728714, 122.151683], [24.8243734, 122.3384506]], '619': [[24.788974, 121.9699026], [24.5093878, 121.9918753]]}}}
+[2026-03-03 16:20:03] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:03] "POST /api/get_track HTTP/1.1" 200 -
+[2026-03-03 16:20:03] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:03] "GET /api/ships HTTP/1.1" 200 -
+[2026-03-03 16:20:03] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:03] "GET /maps/track_map_20260303_162002.html?t=1772526003107 HTTP/1.1" 200 -
+[2026-03-03 16:20:03] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:03] "[36mGET /static/cesium/Cesium/Assets/approximateTerrainHeights.json HTTP/1.1[0m" 304 -
+[2026-03-03 16:20:03] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:03] "[36mGET /static/cesium/Cesium/Assets/approximateTerrainHeights.json HTTP/1.1[0m" 304 -
+[2026-03-03 16:20:04] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:04] "[36mGET /static/cesium/Cesium/Assets/approximateTerrainHeights.json HTTP/1.1[0m" 304 -
+[2026-03-03 16:20:04] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:04] "GET /tiles/osm/7/108/54.png HTTP/1.1" 200 -
+[2026-03-03 16:20:04] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:04] "[36mGET /static/cesium/Cesium/Assets/approximateTerrainHeights.json HTTP/1.1[0m" 304 -
+[2026-03-03 16:20:04] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:04] "GET /tiles/osm/7/105/54.png HTTP/1.1" 200 -
+[2026-03-03 16:20:04] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:04] "GET /tiles/osm/7/108/55.png HTTP/1.1" 200 -
+[2026-03-03 16:20:04] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:04] "GET /tiles/osm/7/105/56.png HTTP/1.1" 200 -
+[2026-03-03 16:20:04] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:04] "GET /tiles/osm/7/108/56.png HTTP/1.1" 200 -
+[2026-03-03 16:20:04] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:04] "GET /tiles/osm/7/104/55.png HTTP/1.1" 200 -
+[2026-03-03 16:20:06] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:06] "[35m[1mGET /tiles/esri_satellite/7/110/54.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:20:07] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:07] "[35m[1mGET /tiles/esri_satellite/7/110/55.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:20:07] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:07] "[35m[1mGET /tiles/esri_satellite/7/110/56.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:20:07] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:07] "GET /tiles/esri_satellite/8/218/111.png HTTP/1.1" 200 -
+[2026-03-03 16:20:07] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:07] "GET /tiles/esri_satellite/8/218/110.png HTTP/1.1" 200 -
+[2026-03-03 16:20:07] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:07] "GET /tiles/esri_satellite/8/219/110.png HTTP/1.1" 200 -
+[2026-03-03 16:20:07] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:07] "GET /tiles/esri_satellite/8/219/111.png HTTP/1.1" 200 -
+[2026-03-03 16:20:07] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:07] "GET /tiles/esri_satellite/8/218/112.png HTTP/1.1" 200 -
+[2026-03-03 16:20:07] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:07] "GET /tiles/esri_satellite/8/218/109.png HTTP/1.1" 200 -
+[2026-03-03 16:20:07] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:07] "[35m[1mGET /tiles/esri_satellite/8/220/110.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:20:07] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:07] "[35m[1mGET /tiles/esri_satellite/8/220/111.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:20:07] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:07] "GET /tiles/esri_satellite/8/219/109.png HTTP/1.1" 200 -
+[2026-03-03 16:20:07] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:07] "GET /tiles/esri_satellite/8/219/112.png HTTP/1.1" 200 -
+[2026-03-03 16:20:07] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:07] "[35m[1mGET /tiles/esri_satellite/8/220/112.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:20:07] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:07] "[35m[1mGET /tiles/esri_satellite/8/220/109.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:20:07] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:07] "[35m[1mGET /tiles/esri_satellite/7/111/54.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:20:07] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:07] "[35m[1mGET /tiles/esri_satellite/7/111/55.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:20:07] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:07] "[35m[1mGET /tiles/esri_satellite/7/111/56.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:20:07] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:07] "[35m[1mGET /tiles/esri_satellite/6/56/26.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:20:08] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:08] "[35m[1mGET /tiles/esri_satellite/6/56/27.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:20:08] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:08] "[35m[1mGET /tiles/esri_satellite/6/56/28.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:20:08] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:08] "[35m[1mGET /tiles/esri_satellite/6/57/26.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:20:08] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:08] "[35m[1mGET /tiles/esri_satellite/6/57/27.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:20:08] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:08] "[35m[1mGET /tiles/esri_satellite/6/57/28.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:20:20] INFO [services.scenario_storage_service] 場景已儲存: scenarios\20260303_162020_可demo用.json
+[2026-03-03 16:20:20] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:20:20] "POST /api/scenarios/save HTTP/1.1" 200 -
+[2026-03-03 16:21:10] INFO [routes.cop_routes] [COP 截圖] 開始處理...
+[2026-03-03 16:21:10] INFO [routes.cop_routes] [使用地圖]: track_map_20260303_162002.html
+[2026-03-03 16:21:14] INFO [routes.cop_routes] [啟動 Selenium]...
+[2026-03-03 16:21:20] INFO [routes.cop_routes] [載入地圖]: file://C:\Users\User\Desktop\map - 20260302_v3\maps\track_map_20260303_162002.html
+[2026-03-03 16:21:23] INFO [routes.cop_routes] [截圖中]...
+[2026-03-03 16:21:23] INFO [routes.cop_routes] 找到地圖元素，截取地圖區域
+[2026-03-03 16:21:28] INFO [routes.cop_routes] 截圖成功: COP_20260303_162123.png
+[2026-03-03 16:21:28] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:21:28] "POST /api/save_cop HTTP/1.1" 200 -
+[2026-03-03 16:21:35] INFO [routes.cop_routes] [COP 截圖] 開始處理...
+[2026-03-03 16:21:35] INFO [routes.cop_routes] [使用地圖]: track_map_20260303_162002.html
+[2026-03-03 16:21:35] INFO [routes.cop_routes] [啟動 Selenium]...
+[2026-03-03 16:21:37] INFO [routes.cop_routes] [載入地圖]: file://C:\Users\User\Desktop\map - 20260302_v3\maps\track_map_20260303_162002.html
+[2026-03-03 16:21:41] INFO [routes.cop_routes] [截圖中]...
+[2026-03-03 16:21:41] INFO [routes.cop_routes] 找到地圖元素，截取地圖區域
+[2026-03-03 16:21:45] INFO [routes.cop_routes] 截圖成功: COP_20260303_162141.png
+[2026-03-03 16:21:45] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:21:45] "POST /api/save_cop HTTP/1.1" 200 -
+[2026-03-03 16:23:16] INFO [routes.feedback_routes] [收到反饋]
+[2026-03-03 16:23:16] INFO [routes.feedback_routes] 原始數據: {
+  "question": "雄三飛彈射程?",
+  "feedback_type": "positive",
+  "feedback_text": "12121212",
+  "answer": "雄三反艦飛彈是中華民國自行研發的超音速反艦飛彈，射程約150-400公里，具備掠海飛行能力。\\n該飛彈採用衝壓發動機技術，飛行速度可達2-3馬赫，是我國海軍主要的反艦武器之一。\\n雄三飛彈具備優異的突防能力，可在敵方防空網中執行精確打擊任務。",
+  "sources": [
+    {
+      "content": "雄三反艦飛彈是中華民國自行研發的超音速反艦飛彈，射程約150-400公里",
+      "index": 1,
+      "path": "/docs/weapon_systems/hf3_specs.pdf",
+      "score": 0.95
+    },
+    {
+      "content": "採用衝壓發動機技術，飛行速度可達2-3馬赫",
+      "index": 2,
+      "path": "/docs/weapon_systems/hf3_performance.pdf",
+      "score": 0.89
+    }
+  ],
+  "rag_id": "7861",
+  "datetime": "2026-03-03-08:12:31"
+}
+[2026-03-03 16:23:16] INFO [routes.feedback_routes] feedback_text 內容: '12121212'
+[2026-03-03 16:23:16] INFO [routes.feedback_routes] feedback_text 長度: 8
+[2026-03-03 16:23:16] INFO [routes.feedback_routes] 已保存反饋: feedback_20260303_162316_779672.json
+[2026-03-03 16:23:16] INFO [routes.feedback_routes]    feedback_text: '12121212'
+[2026-03-03 16:23:16] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:23:16] "POST /api/submit_feedback HTTP/1.1" 200 -
+[2026-03-03 16:38:18] INFO [werkzeug]  * Detected change in 'C:\\Users\\User\\Desktop\\map - 20260302_v3\\routes\\cop_routes.py', reloading
+[2026-03-03 16:38:19] INFO [werkzeug]  * Restarting with stat
+[2026-03-03 16:38:21] INFO [__main__] 正在初始化系統目錄...
+[2026-03-03 16:38:21] INFO [config] 目錄初始化完成: maps, feedbacks, cops, scenarios, tiles, geojson_layers
+[2026-03-03 16:38:21] INFO [services.config_service] 配置已保存到 config.json
+[2026-03-03 16:38:21] INFO [__main__] 正在註冊路由藍圖...
+[2026-03-03 16:38:21] INFO [routes] 所有路由藍圖註冊完成（共 12 個藍圖）
+[2026-03-03 16:38:21] INFO [__main__] 軍事兵推 AI 系統 v6.0 啟動中... 服務地址: http://0.0.0.0:5000
+[2026-03-03 16:38:21] WARNING [werkzeug]  * Debugger is active!
+[2026-03-03 16:38:21] INFO [werkzeug]  * Debugger PIN: 122-170-244
+[2026-03-03 16:38:24] INFO [werkzeug]  * Detected change in 'C:\\Users\\User\\Desktop\\map - 20260302_v3\\routes\\cop_routes.py', reloading
+[2026-03-03 16:38:24] INFO [werkzeug]  * Restarting with stat
+[2026-03-03 16:38:25] INFO [__main__] 正在初始化系統目錄...
+[2026-03-03 16:38:25] INFO [config] 目錄初始化完成: maps, feedbacks, cops, scenarios, tiles, geojson_layers
+[2026-03-03 16:38:25] INFO [services.config_service] 配置已保存到 config.json
+[2026-03-03 16:38:25] INFO [__main__] 正在註冊路由藍圖...
+[2026-03-03 16:38:25] INFO [routes] 所有路由藍圖註冊完成（共 12 個藍圖）
+[2026-03-03 16:38:25] INFO [__main__] 軍事兵推 AI 系統 v6.0 啟動中... 服務地址: http://0.0.0.0:5000
+[2026-03-03 16:38:25] WARNING [werkzeug]  * Debugger is active!
+[2026-03-03 16:38:25] INFO [werkzeug]  * Debugger PIN: 122-170-244
+[2026-03-03 16:38:59] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:38:59] "GET / HTTP/1.1" 200 -
+[2026-03-03 16:39:00] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:00] "[36mGET /static/js/html2canvas.min.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:00] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:00] "[36mGET /static/cesium/Cesium/Widgets/widgets.css HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:00] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:00] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:00] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:00] "[36mGET /static/js/milsymbol.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:00] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:00] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:00] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:00] "[36mGET /static/cesium/Cesium/Cesium.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:00] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:00] "[36mGET /static/js/utils/helpers.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:00] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:00] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:00] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:00] "[36mGET /static/js/modules/api-client.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:00] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:00] "[36mGET /static/js/utils/constants.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:00] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:00] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:00] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:00] "[36mGET /static/js/modules/file-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:01] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:01] "[36mGET /static/js/modules/map-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:01] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:01] "[36mGET /static/js/modules/ui-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:01] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:01] "GET /static/js/modules/message-manager.js HTTP/1.1" 200 -
+[2026-03-03 16:39:01] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:01] "[36mGET /static/js/modules/prompt-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:01] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:01] "[36mGET /static/js/modules/feedback-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:01] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:01] "[36mGET /static/js/modules/cop-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:01] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:01] "[36mGET /static/js/modules/layer-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:01] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:01] "[36mGET /static/js/modules/simulation-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:01] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:01] "[36mGET /static/js/modules/settings-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:01] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:01] "[36mGET /static/js/modules/cesium-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:01] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:01] "[36mGET /static/js/modules/search-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:01] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:01] "[36mGET /static/js/modules/scenario-save-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:01] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:01] "[36mGET /static/js/modules/ship-panel-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:02] INFO [services.config_loader] 已載入系統配置: system_config.json
+[2026-03-03 16:39:02] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:02] "GET /api/admin/settings HTTP/1.1" 200 -
+[2026-03-03 16:39:02] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:02] "GET /api/llm/models HTTP/1.1" 200 -
+[2026-03-03 16:39:02] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:02] "GET /api/custom_layers HTTP/1.1" 200 -
+[2026-03-03 16:39:02] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:02] "GET /api/prompts/list HTTP/1.1" 200 -
+[2026-03-03 16:39:02] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:02] "POST /api/clear_map HTTP/1.1" 200 -
+[2026-03-03 16:39:02] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:02] "[35m[1mGET /tiles/osm/6/50/27.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:09] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:09] "GET / HTTP/1.1" 200 -
+[2026-03-03 16:39:09] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:09] "[36mGET /static/js/html2canvas.min.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:09] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:09] "[36mGET /static/cesium/Cesium/Widgets/widgets.css HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:09] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:09] "[36mGET /static/cesium/Cesium/Cesium.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:09] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:09] "[36mGET /static/js/milsymbol.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:10] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:10] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:10] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:10] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:10] "[36mGET /static/js/utils/constants.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:10] "[36mGET /static/js/modules/file-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:10] "[36mGET /static/js/modules/ui-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:10] "[36mGET /static/js/utils/helpers.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:10] "[36mGET /static/js/modules/api-client.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:10] "[36mGET /static/js/modules/map-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:11] "[36mGET /static/js/modules/message-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:11] "[36mGET /static/js/modules/prompt-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:11] "[36mGET /static/js/modules/cop-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:11] "[36mGET /static/js/modules/feedback-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:11] "[36mGET /static/js/modules/settings-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:11] "[36mGET /static/js/modules/simulation-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:11] "[36mGET /static/js/modules/cesium-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:11] "[36mGET /static/js/modules/scenario-save-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:11] "[36mGET /static/js/modules/layer-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:11] "[36mGET /static/js/modules/search-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:11] "[36mGET /static/js/modules/ship-panel-manager.js HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:11] INFO [services.config_service] 配置已保存到 config.json
+[2026-03-03 16:39:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:11] "POST /api/admin/settings HTTP/1.1" 200 -
+[2026-03-03 16:39:12] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:12] "GET /api/admin/settings HTTP/1.1" 200 -
+[2026-03-03 16:39:12] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:12] "GET /api/llm/models HTTP/1.1" 200 -
+[2026-03-03 16:39:12] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:12] "GET /api/custom_layers HTTP/1.1" 200 -
+[2026-03-03 16:39:12] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:12] "GET /api/prompts/list HTTP/1.1" 200 -
+[2026-03-03 16:39:12] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:12] "POST /api/clear_map HTTP/1.1" 200 -
+[2026-03-03 16:39:13] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:13] "[35m[1mGET /tiles/osm/6/50/27.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:20] INFO [services.config_service] 配置已保存到 config.json
+[2026-03-03 16:39:20] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:20] "POST /api/admin/settings HTTP/1.1" 200 -
+[2026-03-03 16:39:21] INFO [services.config_service] 配置已保存到 config.json
+[2026-03-03 16:39:21] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:21] "POST /api/admin/settings HTTP/1.1" 200 -
+[2026-03-03 16:39:23] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:23] "[36mGET /static/cesium/Cesium/Assets/approximateTerrainHeights.json HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:23] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:23] "[36mGET /static/cesium/Cesium/Widgets/Images/ImageryProviders/openStreetMap.png HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:23] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:23] "[36mGET /static/cesium/Cesium/Widgets/Images/ImageryProviders/naturalEarthII.png HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:23] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:23] "[36mGET /static/cesium/Cesium/Widgets/InfoBox/InfoBoxDescription.css HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:23] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:23] "[36mGET /static/cesium/Cesium/Assets/IAU2006_XYS/IAU2006_XYS_18.json HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:23] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:23] "[36mGET /static/cesium/Cesium/Assets/Images/ion-credit.png HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:23] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:23] "[36mGET /static/cesium/Cesium/Assets/Textures/SkyBox/tycho2t3_80_px.jpg HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:23] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:23] "[36mGET /static/cesium/Cesium/Assets/Textures/SkyBox/tycho2t3_80_mx.jpg HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:23] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:23] "[36mGET /static/cesium/Cesium/Assets/Textures/SkyBox/tycho2t3_80_py.jpg HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:23] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:23] "[36mGET /static/cesium/Cesium/Assets/Textures/SkyBox/tycho2t3_80_my.jpg HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:24] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:24] "[36mGET /static/cesium/Cesium/Assets/Textures/SkyBox/tycho2t3_80_pz.jpg HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:24] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:24] "[36mGET /static/cesium/Cesium/Assets/Textures/SkyBox/tycho2t3_80_mz.jpg HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:24] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:24] "[35m[1mGET /tiles/esri_satellite/1/0/0.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:24] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:24] "[35m[1mGET /tiles/esri_satellite/1/1/1.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:24] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:24] "[35m[1mGET /tiles/esri_satellite/1/1/0.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:24] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:24] "[35m[1mGET /tiles/esri_satellite/1/0/1.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:24] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:24] "[35m[1mGET /tiles/esri_satellite/0/0/0.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:24] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:24] "[36mGET /static/cesium/Cesium/Assets/Textures/moonSmall.jpg HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:24] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:24] "[35m[1mGET /tiles/esri_satellite/2/3/1.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:24] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:24] "[35m[1mGET /tiles/esri_satellite/2/3/0.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:24] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:24] "[35m[1mGET /tiles/esri_satellite/2/0/0.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:24] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:24] "[35m[1mGET /tiles/esri_satellite/2/0/1.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:24] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:24] "[35m[1mGET /tiles/esri_satellite/2/2/0.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:24] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:24] "[35m[1mGET /tiles/esri_satellite/2/2/1.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:25] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:25] "[35m[1mGET /tiles/esri_satellite/6/57/23.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:25] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:25] "[35m[1mGET /tiles/esri_satellite/6/56/24.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:25] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:25] "[35m[1mGET /tiles/esri_satellite/6/56/23.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:25] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:25] "[35m[1mGET /tiles/esri_satellite/6/55/23.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:25] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:25] "[35m[1mGET /tiles/esri_satellite/6/57/24.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:25] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:25] "[35m[1mGET /tiles/esri_satellite/6/55/24.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:25] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:25] "[35m[1mGET /tiles/esri_satellite/6/55/25.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:25] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:25] "[35m[1mGET /tiles/esri_satellite/6/56/25.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:25] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:25] "[35m[1mGET /tiles/esri_satellite/6/57/25.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:25] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:25] "[35m[1mGET /tiles/esri_satellite/6/54/23.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:25] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:25] "[35m[1mGET /tiles/esri_satellite/6/54/24.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:25] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:25] "[35m[1mGET /tiles/esri_satellite/6/54/25.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:25] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:25] "[35m[1mGET /tiles/esri_satellite/6/55/26.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:25] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:25] "[35m[1mGET /tiles/esri_satellite/6/57/26.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:25] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:25] "[35m[1mGET /tiles/esri_satellite/6/53/24.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:25] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:25] "[35m[1mGET /tiles/esri_satellite/6/56/26.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:25] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:25] "[35m[1mGET /tiles/esri_satellite/6/53/25.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:25] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:25] "[35m[1mGET /tiles/esri_satellite/6/53/23.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:26] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:26] "[35m[1mGET /tiles/esri_satellite/6/52/24.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:26] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:26] "[35m[1mGET /tiles/esri_satellite/6/52/23.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:26] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:26] "[35m[1mGET /tiles/esri_satellite/6/52/25.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:26] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:26] "[35m[1mGET /tiles/esri_satellite/6/51/23.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:26] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:26] "[35m[1mGET /tiles/esri_satellite/6/51/25.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:26] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:26] "[35m[1mGET /tiles/esri_satellite/6/51/24.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:26] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:26] "[35m[1mGET /tiles/esri_satellite/7/108/51.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:26] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:26] "[35m[1mGET /tiles/esri_satellite/7/107/51.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:26] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:26] "[35m[1mGET /tiles/esri_satellite/7/106/51.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:26] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:26] "[35m[1mGET /tiles/esri_satellite/7/109/51.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:26] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:26] "[35m[1mGET /tiles/esri_satellite/7/105/51.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:26] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:26] "[35m[1mGET /tiles/esri_satellite/7/104/51.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:26] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:26] "[35m[1mGET /tiles/esri_satellite/6/50/23.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:26] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:26] "[35m[1mGET /tiles/esri_satellite/6/50/24.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:26] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:26] "[35m[1mGET /tiles/esri_satellite/6/50/25.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:26] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:26] "[35m[1mGET /tiles/esri_satellite/6/49/23.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:26] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:26] "[35m[1mGET /tiles/esri_satellite/6/49/24.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:31] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:31] "[35m[1mGET /tiles/esri_satellite/6/49/23.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:31] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:31] "[35m[1mGET /tiles/esri_satellite/6/49/24.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:31] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:31] "[35m[1mGET /tiles/esri_satellite/6/50/26.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:33] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:33] "[35m[1mGET /tiles/osm/6/50/27.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:33] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:33] "[35m[1mGET /tiles/osm/6/55/27.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:33] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:33] "[35m[1mGET /tiles/osm/6/50/26.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:33] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:33] "[35m[1mGET /tiles/osm/6/55/26.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:33] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:33] "[35m[1mGET /tiles/osm/6/50/28.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:33] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:33] "[35m[1mGET /tiles/osm/6/55/28.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:40] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:40] "GET /api/scenarios/list HTTP/1.1" 200 -
+[2026-03-03 16:39:41] INFO [services.scenario_storage_service] 場景已載入: 20260303_162020_可demo用.json
+[2026-03-03 16:39:42] INFO [models.map_state] 正在繪製 4 條航跡線段...
+[2026-03-03 16:39:42] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:42] "POST /api/scenarios/load HTTP/1.1" 200 -
+[2026-03-03 16:39:42] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:42] "GET /maps/scenario_load_20260303_163942.html?t=1772527182132 HTTP/1.1" 200 -
+[2026-03-03 16:39:52] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:52] "[36mGET /static/cesium/Cesium/Assets/approximateTerrainHeights.json HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:52] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:52] "[36mGET /static/cesium/Cesium/Assets/approximateTerrainHeights.json HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:52] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:52] "[36mGET /static/cesium/Cesium/Assets/approximateTerrainHeights.json HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:52] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:52] "[36mGET /static/cesium/Cesium/Assets/approximateTerrainHeights.json HTTP/1.1[0m" 304 -
+[2026-03-03 16:39:53] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:53] "[35m[1mGET /tiles/esri_satellite/6/55/27.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:53] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:53] "[35m[1mGET /tiles/esri_satellite/6/50/27.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:39:54] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:54] "GET /tiles/esri_satellite/8/217/107.png HTTP/1.1" 200 -
+[2026-03-03 16:39:55] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:39:55] "GET /tiles/esri_satellite/8/217/108.png HTTP/1.1" 200 -
+[2026-03-03 16:40:14] INFO [routes.answer_routes] [RAG 問答] 收到問題: 雄三飛彈射程?
+[2026-03-03 16:40:14] INFO [routes.answer_routes] [模式]: text_generation
+[2026-03-03 16:40:14] INFO [routes.answer_routes] [使用模型]: llama3.2:3b (來源: UI LLM 選單)
+[2026-03-03 16:40:14] INFO [routes.answer_routes] [Prompt 配置]: 預設配置 -> text_generation
+[2026-03-03 16:40:14] INFO [routes.answer_routes] [System Prompt]: 你是一位軍事專家，請生成軍事行動準據。行動準據範本如下：
+支隊行動準據↵
+任務：<任務內容>↵
+編組：<編組內容>↵
+指揮權責：<指揮權責內容>↵
+[2026-03-03 16:40:14] INFO [routes.answer_routes] [調用中科院 RAG API]: {"stream": 0, "model": "llama3.2:3b", "messages": [{"role": "system", "content": "你是一位軍事專家，請生成軍事行動準據。行動準據範本如下：\n支隊行動準據↵\n任務：<任務內容>↵\n編組：<編組內容>↵\n指揮權責：<指揮權責內容>↵"}, {"role": "user", "content": "雄三飛彈射程?"}]}
+[2026-03-03 16:40:14] INFO [services.api_mode_service] [API Mode: local] 呼叫端點: get_answer
+[2026-03-03 16:40:14] INFO [services.api_mode_service]    URL: http://localhost:3000/api/v1/get_answer
+[2026-03-03 16:40:14] INFO [services.api_mode_service]    Timeout: 300s
+[2026-03-03 16:40:14] INFO [services.api_mode_service]    Request Body: {"stream": 0, "model": "llama3.2:3b", "messages": [{"role": "system", "content": "你是一位軍事專家，請生成軍事行動準據。行動準據範本如下：\n支隊行動準據↵\n任務：<任務內容>↵\n編組：<編組內容>↵\n指揮權責：<指揮權責內容>↵"}, {"role": "user", "content": "雄三飛彈射程?"}]}
+[2026-03-03 16:40:14] INFO [services.api_mode_service]    Method: POST
+[2026-03-03 16:40:14] INFO [services.api_mode_service]    Response Status: 200
+[2026-03-03 16:40:14] INFO [services.api_mode_service]    Response Body: {
+  "id": 3078,
+  "datetime": "2026-03-03-08:40:14",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "雄三反艦飛彈是中華民國自行研發的超音速反艦飛彈，射程約150-400公里，具備掠海飛行能力。\\n該飛彈採用衝壓發動機技術，飛行速度可達2-3馬赫，是我國海軍主要的反艦武器之一。\\n雄三飛彈具備優異的突防能力，可在敵方防空網中執行精確打擊任務。"
+    }
+  ],
+  "finish_reason": "stop",
+  "sources": [
+    {
+      "chunk": "雄三反艦飛彈是中華民國自行研發的超音速反艦飛彈，射程約150-400公里",
+      "score": 0.95,
+      "path": "/docs/weapon_systems/hf3_specs.pdf"
+    },
+    {
+      "chunk": "採用衝壓發動機技術，飛行速度可達2-3馬赫",
+      "score": 0.89,
+      "path": "/docs/weapon_systems/hf3_performance.pdf"
+    }
+  ]
+}
+[2026-03-03 16:40:14] INFO [routes.answer_routes] [RAG 回應]: {"id": 3078, "datetime": "2026-03-03-08:40:14", "messages": [{"role": "assistant", "content": "雄三反艦飛彈是中華民國自行研發的超音速反艦飛彈，射程約150-400公里，具備掠海飛行能力。\\n該飛彈採用衝壓發動機技術，飛行速度可達2-3馬赫，是我國海軍主要的反艦武器之一。\\n雄三飛彈具備優異的突防能力...
+[2026-03-03 16:40:14] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:14] "POST /api/get_answer HTTP/1.1" 200 -
+[2026-03-03 16:40:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:49] "GET /tiles/osm/8/213/108.png HTTP/1.1" 200 -
+[2026-03-03 16:40:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:49] "GET /tiles/osm/9/425/219.png HTTP/1.1" 200 -
+[2026-03-03 16:40:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:49] "GET /tiles/osm/9/426/219.png HTTP/1.1" 200 -
+[2026-03-03 16:40:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:49] "GET /tiles/osm/9/426/220.png HTTP/1.1" 200 -
+[2026-03-03 16:40:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:49] "GET /tiles/osm/9/427/220.png HTTP/1.1" 200 -
+[2026-03-03 16:40:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:49] "GET /tiles/osm/9/425/220.png HTTP/1.1" 200 -
+[2026-03-03 16:40:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:49] "GET /tiles/osm/9/426/221.png HTTP/1.1" 200 -
+[2026-03-03 16:40:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:49] "GET /tiles/osm/10/853/440.png HTTP/1.1" 200 -
+[2026-03-03 16:40:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:49] "GET /tiles/osm/10/852/440.png HTTP/1.1" 200 -
+[2026-03-03 16:40:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:49] "GET /tiles/osm/10/852/441.png HTTP/1.1" 200 -
+[2026-03-03 16:40:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:49] "GET /tiles/osm/10/853/441.png HTTP/1.1" 200 -
+[2026-03-03 16:40:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:49] "GET /tiles/osm/10/852/439.png HTTP/1.1" 200 -
+[2026-03-03 16:40:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:49] "GET /tiles/osm/10/853/439.png HTTP/1.1" 200 -
+[2026-03-03 16:40:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:50] "[35m[1mGET /tiles/osm/11/1706/881.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:50] "[35m[1mGET /tiles/osm/11/1706/880.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:50] "[35m[1mGET /tiles/osm/11/1705/881.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:50] "[35m[1mGET /tiles/osm/11/1707/881.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:50] "[35m[1mGET /tiles/osm/11/1706/882.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:50] "[35m[1mGET /tiles/osm/11/1705/880.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:50] "[35m[1mGET /tiles/osm/12/3412/1762.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:50] "[35m[1mGET /tiles/osm/12/3413/1762.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:50] "[35m[1mGET /tiles/osm/12/3412/1763.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:50] "[35m[1mGET /tiles/osm/12/3413/1763.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:50] "[35m[1mGET /tiles/osm/12/3412/1761.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:50] "[35m[1mGET /tiles/osm/12/3413/1761.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:50] "[35m[1mGET /tiles/osm/12/3415/1762.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:50] "[35m[1mGET /tiles/osm/12/3411/1764.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:50] "[35m[1mGET /tiles/osm/12/3409/1763.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:50] "[35m[1mGET /tiles/osm/12/3416/1761.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:50] "[35m[1mGET /tiles/osm/12/3414/1763.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:50] "[35m[1mGET /tiles/osm/12/3414/1761.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/12/3415/1764.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/12/3412/1764.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/12/3416/1762.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/12/3413/1764.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/12/3410/1761.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/12/3409/1764.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/12/3416/1763.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/12/3410/1763.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/12/3409/1762.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/12/3414/1764.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/12/3415/1763.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/12/3409/1761.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/11/1707/880.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/11/1706/880.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/11/1706/881.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/11/1705/882.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/11/1704/881.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/11/1706/882.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/11/1707/882.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/11/1703/881.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/11/1708/881.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/11/1703/880.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:51] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:51] "[35m[1mGET /tiles/osm/11/1708/880.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:52] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:52] "[35m[1mGET /tiles/osm/11/1703/882.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:52] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:52] "[35m[1mGET /tiles/osm/11/1708/882.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:52] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:52] "[35m[1mGET /tiles/osm/11/1704/880.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:52] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:52] "[35m[1mGET /tiles/osm/11/1704/882.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:40:52] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:52] "GET /tiles/osm/10/855/440.png HTTP/1.1" 200 -
+[2026-03-03 16:40:52] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:52] "GET /tiles/osm/10/855/441.png HTTP/1.1" 200 -
+[2026-03-03 16:40:52] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:52] "GET /tiles/osm/10/850/441.png HTTP/1.1" 200 -
+[2026-03-03 16:40:52] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:52] "GET /tiles/osm/10/850/440.png HTTP/1.1" 200 -
+[2026-03-03 16:40:52] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:52] "GET /tiles/osm/10/855/439.png HTTP/1.1" 200 -
+[2026-03-03 16:40:52] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:52] "GET /tiles/osm/10/850/439.png HTTP/1.1" 200 -
+[2026-03-03 16:40:52] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:52] "GET /tiles/osm/10/851/440.png HTTP/1.1" 200 -
+[2026-03-03 16:40:52] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:52] "GET /tiles/osm/10/854/440.png HTTP/1.1" 200 -
+[2026-03-03 16:40:52] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:52] "GET /tiles/osm/10/851/441.png HTTP/1.1" 200 -
+[2026-03-03 16:40:52] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:52] "GET /tiles/osm/10/854/441.png HTTP/1.1" 200 -
+[2026-03-03 16:40:53] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:53] "GET /tiles/osm/9/424/219.png HTTP/1.1" 200 -
+[2026-03-03 16:40:53] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:53] "GET /tiles/osm/9/427/219.png HTTP/1.1" 200 -
+[2026-03-03 16:40:53] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:53] "GET /tiles/osm/9/428/220.png HTTP/1.1" 200 -
+[2026-03-03 16:40:53] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:53] "GET /tiles/osm/9/424/220.png HTTP/1.1" 200 -
+[2026-03-03 16:40:53] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:53] "GET /tiles/osm/9/423/219.png HTTP/1.1" 200 -
+[2026-03-03 16:40:53] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:53] "GET /tiles/osm/9/428/219.png HTTP/1.1" 200 -
+[2026-03-03 16:40:53] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:53] "GET /tiles/osm/9/423/220.png HTTP/1.1" 200 -
+[2026-03-03 16:40:54] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:40:54] "GET /tiles/osm/9/427/221.png HTTP/1.1" 200 -
+[2026-03-03 16:41:06] INFO [routes.cop_routes] [COP 截圖] 開始處理...
+[2026-03-03 16:41:06] INFO [routes.cop_routes] [使用地圖]: scenario_load_20260303_163942.html
+[2026-03-03 16:41:07] INFO [routes.cop_routes] [啟動 Selenium]...
+[2026-03-03 16:41:09] INFO [routes.cop_routes] [載入地圖]: http://localhost:5000/maps/scenario_load_20260303_163942.html
+[2026-03-03 16:41:09] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:09] "GET /maps/scenario_load_20260303_163942.html HTTP/1.1" 200 -
+[2026-03-03 16:41:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:10] "GET /tiles/osm/7/106/55.png HTTP/1.1" 200 -
+[2026-03-03 16:41:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:10] "GET /tiles/osm/7/107/55.png HTTP/1.1" 200 -
+[2026-03-03 16:41:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:10] "[35m[1mGET /tiles/osm/7/110/54.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:41:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:10] "GET /tiles/osm/7/105/54.png HTTP/1.1" 200 -
+[2026-03-03 16:41:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:10] "[35m[1mGET /tiles/osm/7/110/55.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:41:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:10] "GET /tiles/osm/7/107/57.png HTTP/1.1" 200 -
+[2026-03-03 16:41:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:10] "GET /tiles/osm/7/108/55.png HTTP/1.1" 200 -
+[2026-03-03 16:41:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:10] "GET /tiles/osm/7/103/56.png HTTP/1.1" 200 -
+[2026-03-03 16:41:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:10] "GET /tiles/osm/7/109/57.png HTTP/1.1" 200 -
+[2026-03-03 16:41:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:10] "GET /tiles/osm/7/103/57.png HTTP/1.1" 200 -
+[2026-03-03 16:41:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:10] "GET /tiles/osm/7/105/57.png HTTP/1.1" 200 -
+[2026-03-03 16:41:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:10] "GET /tiles/osm/7/104/54.png HTTP/1.1" 200 -
+[2026-03-03 16:41:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:10] "GET /tiles/osm/7/103/55.png HTTP/1.1" 200 -
+[2026-03-03 16:41:10] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:10] "GET /tiles/osm/7/109/53.png HTTP/1.1" 200 -
+[2026-03-03 16:41:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:11] "[35m[1mGET /tiles/osm/7/110/53.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:41:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:11] "GET /tiles/osm/7/104/53.png HTTP/1.1" 200 -
+[2026-03-03 16:41:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:11] "GET /tiles/osm/7/103/54.png HTTP/1.1" 200 -
+[2026-03-03 16:41:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:11] "GET /tiles/osm/7/104/55.png HTTP/1.1" 200 -
+[2026-03-03 16:41:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:11] "GET /tiles/osm/7/106/57.png HTTP/1.1" 200 -
+[2026-03-03 16:41:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:11] "GET /tiles/osm/7/105/53.png HTTP/1.1" 200 -
+[2026-03-03 16:41:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:11] "GET /tiles/osm/7/109/55.png HTTP/1.1" 200 -
+[2026-03-03 16:41:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:11] "GET /tiles/osm/7/109/56.png HTTP/1.1" 200 -
+[2026-03-03 16:41:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:11] "[35m[1mGET /tiles/osm/7/110/57.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:41:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:11] "GET /tiles/osm/7/108/54.png HTTP/1.1" 200 -
+[2026-03-03 16:41:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:11] "GET /tiles/osm/7/107/53.png HTTP/1.1" 200 -
+[2026-03-03 16:41:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:11] "GET /tiles/osm/7/103/53.png HTTP/1.1" 200 -
+[2026-03-03 16:41:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:11] "[35m[1mGET /tiles/osm/7/110/56.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:41:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:11] "GET /tiles/osm/7/108/56.png HTTP/1.1" 200 -
+[2026-03-03 16:41:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:11] "GET /tiles/osm/7/108/57.png HTTP/1.1" 200 -
+[2026-03-03 16:41:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:11] "GET /tiles/osm/7/106/53.png HTTP/1.1" 200 -
+[2026-03-03 16:41:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:11] "GET /tiles/osm/7/109/54.png HTTP/1.1" 200 -
+[2026-03-03 16:41:11] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:11] "GET /tiles/osm/7/104/56.png HTTP/1.1" 200 -
+[2026-03-03 16:41:12] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:12] "GET /tiles/osm/7/108/53.png HTTP/1.1" 200 -
+[2026-03-03 16:41:12] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:12] "GET /tiles/osm/7/104/57.png HTTP/1.1" 200 -
+[2026-03-03 16:41:12] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:12] "GET /tiles/osm/7/105/56.png HTTP/1.1" 200 -
+[2026-03-03 16:41:12] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:12] "GET /tiles/osm/7/106/54.png HTTP/1.1" 200 -
+[2026-03-03 16:41:12] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:12] "GET /tiles/osm/7/107/54.png HTTP/1.1" 200 -
+[2026-03-03 16:41:12] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:12] "GET /tiles/osm/7/106/56.png HTTP/1.1" 200 -
+[2026-03-03 16:41:12] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:12] "GET /tiles/osm/7/107/56.png HTTP/1.1" 200 -
+[2026-03-03 16:41:12] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:12] "GET /tiles/osm/7/105/55.png HTTP/1.1" 200 -
+[2026-03-03 16:41:12] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:12] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2026-03-03 16:41:15] INFO [routes.cop_routes] [截圖中]...
+[2026-03-03 16:41:15] INFO [routes.cop_routes] 找到地圖元素，截取地圖區域
+[2026-03-03 16:41:19] INFO [routes.cop_routes] 截圖成功: COP_20260303_164115.png
+[2026-03-03 16:41:19] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:41:19] "POST /api/save_cop HTTP/1.1" 200 -
+[2026-03-03 16:42:29] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:42:29] "POST /api/clear_map HTTP/1.1" 200 -
+[2026-03-03 16:42:29] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:42:29] "GET /maps/clear_map_20260303_164229.html?t=1772527349648 HTTP/1.1" 200 -
+[2026-03-03 16:42:32] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:42:32] "GET /tiles/esri_satellite/9/431/224.png HTTP/1.1" 200 -
+[2026-03-03 16:42:32] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:42:32] "GET /tiles/esri_satellite/9/431/225.png HTTP/1.1" 200 -
+[2026-03-03 16:42:32] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:42:32] "[35m[1mGET /tiles/esri_satellite/6/56/25.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:42:32] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:42:32] "[35m[1mGET /tiles/esri_satellite/6/56/26.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:42:32] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:42:32] "[35m[1mGET /tiles/esri_satellite/6/51/24.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:42:32] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:42:32] "[35m[1mGET /tiles/esri_satellite/6/50/23.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:42:33] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:42:33] "[35m[1mGET /tiles/esri_satellite/6/55/24.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:42:33] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:42:33] "[35m[1mGET /tiles/esri_satellite/6/50/24.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:42:41] INFO [routes.scenario_routes] [API 請求] /api/import_scenario
+[2026-03-03 16:42:41] INFO [routes.scenario_routes]   用戶指令: 繪製1101座標
+[2026-03-03 16:42:41] INFO [routes.scenario_routes]   選擇模型: llama3.2:3b
+[2026-03-03 16:42:41] INFO [routes.scenario_routes]   Provider: ollama
+[2026-03-03 16:42:41] INFO [routes.scenario_routes]   配置名稱: 預設配置
+[2026-03-03 16:42:41] INFO [services.config_service] [System Prompt 獲取]
+[2026-03-03 16:42:41] INFO [services.config_service]   請求配置: 預設配置
+[2026-03-03 16:42:41] INFO [services.config_service]   請求功能: import_scenario
+[2026-03-03 16:42:41] INFO [utils.ship_registry] [ship_registry] Loaded: C:\Users\User\Desktop\map - 20260302_v3\ship_registry.json
+[2026-03-03 16:42:41] INFO [services.config_service]   成功獲取 System Prompt
+[2026-03-03 16:42:41] INFO [services.config_service]   可編輯部分長度: 19 字元
+[2026-03-03 16:42:41] INFO [services.config_service]   固定部分長度: 1725 字元
+[2026-03-03 16:42:41] INFO [services.config_service]   完整 Prompt 長度: 2272 字元
+[2026-03-03 16:42:41] INFO [services.config_service]   Prompt 內容預覽 (前 200 字): 你是一個精確的軍事船艦座標參數提取器。
+【核心規則 - 必須嚴格遵守】
+1. **只提取指令中明確提到的船艦**
+2. **陣營判斷**：
+   - 解放軍/敵軍/中國/共軍/敵方 → enemy
+   - 國軍/我方/我軍/中華民國/友軍 → roc
+3. **空陣列 [] 的語義**：
+   - "所有敵軍" / "全部解放軍" → {"enemy": []}
+   - "所有國軍" / "全...
+[2026-03-03 16:42:41] INFO [routes.scenario_routes] System Prompt 已載入 (長度: 2272 字元)
+[2026-03-03 16:44:43] INFO [utils.parser] 修正參數 enemy: '[]' -> []
+[2026-03-03 16:44:43] INFO [utils.parser] 修正參數 roc: '["1101"]' -> ['1101']
+[2026-03-03 16:44:43] INFO [routes.scenario_routes] [LLM 原始輸出]: {'enemy': [], 'roc': ['1101']}
+[2026-03-03 16:44:43] INFO [routes.scenario_routes] 移除 enemy:[] 參數（用戶未提到敵軍，LLM 誤判）
+[2026-03-03 16:44:43] INFO [routes.scenario_routes] 保留 roc 參數: ['1101']
+[2026-03-03 16:44:43] INFO [routes.scenario_routes] [清理後參數]: {'roc': ['1101']}
+[2026-03-03 16:44:43] INFO [routes.scenario_routes] [參數預處理後]: {'roc': ['1101']}
+[2026-03-03 16:44:43] INFO [services.api_mode_service] [API Mode: local] 呼叫端點: import_scenario
+[2026-03-03 16:44:43] INFO [services.api_mode_service]    URL: http://localhost:3000/api/v1/import_scenario
+[2026-03-03 16:44:43] INFO [services.api_mode_service]    Timeout: 300s
+[2026-03-03 16:44:43] INFO [services.api_mode_service]    Request Body: {"roc": ["1101"]}
+[2026-03-03 16:44:43] INFO [services.api_mode_service]    Method: POST
+[2026-03-03 16:44:43] INFO [services.api_mode_service]    Response Status: 200
+[2026-03-03 16:44:43] INFO [services.api_mode_service]    Response Body: {
+  "roc": [
+    {
+      "么么零一": {
+        "location": [
+          23.093695,
+          121.567613
+        ]
+      }
+    },
+    {
+      "么么零一": {
+        "location": [
+          22.822306,
+          121.443169
+        ]
+      }
+    }
+  ]
+}
+[2026-03-03 16:44:43] INFO [routes.scenario_routes] [API 回傳數據]: {'roc': [{'么么零一': {'location': [23.093695, 121.567613]}}, {'么么零一': {'location': [22.822306, 121.443169]}}]}
+[2026-03-03 16:44:43] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:43] "POST /api/import_scenario HTTP/1.1" 200 -
+[2026-03-03 16:44:43] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:43] "GET /api/ships HTTP/1.1" 200 -
+[2026-03-03 16:44:43] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:43] "GET /maps/scenario_map_20260303_164443.html?t=1772527483183 HTTP/1.1" 200 -
+[2026-03-03 16:44:48] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:48] "[35m[1mGET /tiles/esri_satellite/6/55/28.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:44:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:49] "[35m[1mGET /tiles/esri_satellite/6/56/27.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:44:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:49] "[35m[1mGET /tiles/esri_satellite/6/57/25.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:44:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:49] "[35m[1mGET /tiles/esri_satellite/6/57/26.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:44:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:49] "[35m[1mGET /tiles/esri_satellite/6/56/28.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:44:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:49] "[35m[1mGET /tiles/esri_satellite/6/54/25.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:44:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:49] "[35m[1mGET /tiles/esri_satellite/6/55/26.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:44:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:49] "[35m[1mGET /tiles/esri_satellite/6/55/25.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:44:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:49] "[35m[1mGET /tiles/esri_satellite/6/56/25.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:44:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:49] "[35m[1mGET /tiles/esri_satellite/6/51/25.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:44:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:49] "[35m[1mGET /tiles/esri_satellite/6/50/25.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:44:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:49] "[35m[1mGET /tiles/esri_satellite/6/50/26.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:44:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:49] "[35m[1mGET /tiles/esri_satellite/6/55/24.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:44:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:49] "[35m[1mGET /tiles/esri_satellite/6/52/24.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:44:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:49] "[35m[1mGET /tiles/esri_satellite/6/51/24.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:44:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:49] "[35m[1mGET /tiles/esri_satellite/6/50/24.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:44:49] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:49] "[35m[1mGET /tiles/esri_satellite/7/110/53.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:44:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:50] "[35m[1mGET /tiles/esri_satellite/7/110/54.png HTTP/1.1[0m" 204 -
+[2026-03-03 16:44:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:50] "GET /tiles/esri_satellite/9/431/219.png HTTP/1.1" 200 -
+[2026-03-03 16:44:50] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:44:50] "GET /tiles/esri_satellite/9/431/218.png HTTP/1.1" 200 -
+[2026-03-03 16:47:17] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:47:17] "GET /api/scenarios/list HTTP/1.1" 200 -
+[2026-03-03 16:47:18] INFO [services.scenario_storage_service] 場景已載入: 20260303_162020_可demo用.json
+[2026-03-03 16:47:18] INFO [models.map_state] 正在繪製 4 條航跡線段...
+[2026-03-03 16:47:18] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:47:18] "POST /api/scenarios/load HTTP/1.1" 200 -
+[2026-03-03 16:47:19] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:47:19] "GET /maps/scenario_load_20260303_164718.html?t=1772527638775 HTTP/1.1" 200 -
+[2026-03-03 16:47:20] INFO [werkzeug] 127.0.0.1 - - [03/Mar/2026 16:47:20] "GET /api/ships HTTP/1.1" 200 -
+[2026-03-03 16:58:19] INFO [werkzeug]  * Detected change in 'C:\\Users\\User\\Desktop\\map - 20260302_v3\\models\\map_state.py', reloading
+[2026-03-03 16:58:20] INFO [werkzeug]  * Restarting with stat
+[2026-03-03 16:58:21] INFO [__main__] 正在初始化系統目錄...
+[2026-03-03 16:58:21] INFO [config] 目錄初始化完成: maps, feedbacks, cops, scenarios, tiles, geojson_layers
+[2026-03-03 16:58:21] INFO [services.config_service] 配置已保存到 config.json
+[2026-03-03 16:58:21] INFO [__main__] 正在註冊路由藍圖...
+[2026-03-03 16:58:21] INFO [routes] 所有路由藍圖註冊完成（共 12 個藍圖）
+[2026-03-03 16:58:21] INFO [__main__] 軍事兵推 AI 系統 v6.0 啟動中... 服務地址: http://0.0.0.0:5000
+[2026-03-03 16:58:21] WARNING [werkzeug]  * Debugger is active!
+[2026-03-03 16:58:21] INFO [werkzeug]  * Debugger PIN: 122-170-244
+[2026-03-03 16:58:26] INFO [werkzeug]  * Detected change in 'C:\\Users\\User\\Desktop\\map - 20260302_v3\\models\\map_state.py', reloading
+[2026-03-03 16:58:26] INFO [werkzeug]  * Restarting with stat
+[2026-03-03 16:58:27] INFO [__main__] 正在初始化系統目錄...
+[2026-03-03 16:58:27] INFO [config] 目錄初始化完成: maps, feedbacks, cops, scenarios, tiles, geojson_layers
+[2026-03-03 16:58:27] INFO [services.config_service] 配置已保存到 config.json
+[2026-03-03 16:58:27] INFO [__main__] 正在註冊路由藍圖...
+[2026-03-03 16:58:27] INFO [routes] 所有路由藍圖註冊完成（共 12 個藍圖）
+[2026-03-03 16:58:27] INFO [__main__] 軍事兵推 AI 系統 v6.0 啟動中... 服務地址: http://0.0.0.0:5000
+[2026-03-03 16:58:27] WARNING [werkzeug]  * Debugger is active!
+[2026-03-03 16:58:27] INFO [werkzeug]  * Debugger PIN: 122-170-244
+[2026-03-03 16:58:31] INFO [werkzeug]  * Detected change in 'C:\\Users\\User\\Desktop\\map - 20260302_v3\\models\\map_state.py', reloading
+[2026-03-03 16:58:31] INFO [werkzeug]  * Restarting with stat
+[2026-03-03 16:58:33] INFO [__main__] 正在初始化系統目錄...
+[2026-03-03 16:58:33] INFO [config] 目錄初始化完成: maps, feedbacks, cops, scenarios, tiles, geojson_layers
+[2026-03-03 16:58:33] INFO [services.config_service] 配置已保存到 config.json
+[2026-03-03 16:58:33] INFO [__main__] 正在註冊路由藍圖...
+[2026-03-03 16:58:33] INFO [routes] 所有路由藍圖註冊完成（共 12 個藍圖）
+[2026-03-03 16:58:33] INFO [__main__] 軍事兵推 AI 系統 v6.0 啟動中... 服務地址: http://0.0.0.0:5000
+[2026-03-03 16:58:33] WARNING [werkzeug]  * Debugger is active!
+[2026-03-03 16:58:33] INFO [werkzeug]  * Debugger PIN: 122-170-244
+[2026-03-04 02:42:41] INFO [__main__] 正在初始化系統目錄...
+[2026-03-04 02:42:41] INFO [config] 目錄初始化完成: maps, feedbacks, cops, scenarios, tiles, geojson_layers
+[2026-03-04 02:42:41] INFO [services.config_service] 配置已保存到 config.json
+[2026-03-04 02:42:41] INFO [__main__] 正在註冊路由藍圖...
+[2026-03-04 02:42:41] INFO [routes] 所有路由藍圖註冊完成（共 12 個藍圖）
+[2026-03-04 02:42:41] INFO [__main__] 軍事兵推 AI 系統 v6.0 啟動中... 服務地址: http://0.0.0.0:5000
+[2026-03-04 02:42:41] INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.0.107:5000
+[2026-03-04 02:42:41] INFO [werkzeug] [33mPress CTRL+C to quit[0m
+[2026-03-04 02:42:41] INFO [werkzeug]  * Restarting with stat
+[2026-03-04 02:42:44] INFO [__main__] 正在初始化系統目錄...
+[2026-03-04 02:42:44] INFO [config] 目錄初始化完成: maps, feedbacks, cops, scenarios, tiles, geojson_layers
+[2026-03-04 02:42:44] INFO [services.config_service] 配置已保存到 config.json
+[2026-03-04 02:42:44] INFO [__main__] 正在註冊路由藍圖...
+[2026-03-04 02:42:44] INFO [routes] 所有路由藍圖註冊完成（共 12 個藍圖）
+[2026-03-04 02:42:44] INFO [__main__] 軍事兵推 AI 系統 v6.0 啟動中... 服務地址: http://0.0.0.0:5000
+[2026-03-04 02:42:44] WARNING [werkzeug]  * Debugger is active!
+[2026-03-04 02:42:44] INFO [werkzeug]  * Debugger PIN: 122-170-244
+[2026-03-04 02:42:46] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:46] "GET / HTTP/1.1" 200 -
+[2026-03-04 02:42:47] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:47] "[36mGET /static/js/html2canvas.min.js HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:47] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:47] "[36mGET /static/cesium/Cesium/Widgets/widgets.css HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:47] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:47] "GET /static/js/main.js HTTP/1.1" 200 -
+[2026-03-04 02:42:47] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:47] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:47] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:47] "[36mGET /static/js/milsymbol.js HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:47] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:47] "[36mGET /static/cesium/Cesium/Cesium.js HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:48] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:48] "[36mGET /static/css/leaflet.css HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:48] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:48] "[36mGET /static/js/utils/constants.js HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:48] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:48] "[36mGET /static/js/utils/helpers.js HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:48] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:48] "GET /static/js/modules/file-manager.js HTTP/1.1" 200 -
+[2026-03-04 02:42:48] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:48] "[36mGET /static/js/modules/api-client.js HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:48] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:48] "[36mGET /static/js/modules/ui-manager.js HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:48] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:48] "[36mGET /static/js/modules/message-manager.js HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:48] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:48] "[36mGET /static/js/modules/map-manager.js HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:48] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:48] "[36mGET /static/js/modules/prompt-manager.js HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:48] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:48] "[36mGET /static/js/modules/feedback-manager.js HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:48] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:48] "[36mGET /static/js/modules/settings-manager.js HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:48] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:48] "[36mGET /static/js/modules/cop-manager.js HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:49] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:49] "[36mGET /static/js/modules/simulation-manager.js HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:49] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:49] "[36mGET /static/js/modules/cesium-manager.js HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:49] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:49] "[36mGET /static/js/modules/layer-manager.js HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:49] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:49] "[36mGET /static/js/modules/search-manager.js HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:49] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:49] "[36mGET /static/js/modules/ship-panel-manager.js HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:49] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:49] "[36mGET /static/js/modules/scenario-save-manager.js HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:49] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:49] "[36mGET /static/js/leaflet.js HTTP/1.1[0m" 304 -
+[2026-03-04 02:42:49] INFO [services.config_loader] 已載入系統配置: system_config.json
+[2026-03-04 02:42:49] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:49] "GET /api/admin/settings HTTP/1.1" 200 -
+[2026-03-04 02:42:49] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:49] "GET /api/llm/models HTTP/1.1" 200 -
+[2026-03-04 02:42:50] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:50] "GET /api/custom_layers HTTP/1.1" 200 -
+[2026-03-04 02:42:50] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:50] "GET /api/prompts/list HTTP/1.1" 200 -
+[2026-03-04 02:42:50] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:50] "POST /api/clear_map HTTP/1.1" 200 -
+[2026-03-04 02:42:50] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:42:50] "GET /maps/clear_map_20260304_024250.html?t=1772563370753 HTTP/1.1" 200 -
+[2026-03-04 02:43:10] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:10] "GET /api/scenarios/list HTTP/1.1" 200 -
+[2026-03-04 02:43:11] INFO [services.scenario_storage_service] 場景已載入: 20260303_162020_可demo用.json
+[2026-03-04 02:43:12] INFO [models.map_state] 正在繪製 4 條航跡線段...
+[2026-03-04 02:43:12] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:12] "POST /api/scenarios/load HTTP/1.1" 200 -
+[2026-03-04 02:43:13] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:13] "GET /maps/scenario_load_20260304_024312.html?t=1772563392916 HTTP/1.1" 200 -
+[2026-03-04 02:43:17] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:17] "GET /api/ships HTTP/1.1" 200 -
+[2026-03-04 02:43:26] INFO [routes.cop_routes] [COP 截圖] 開始處理...
+[2026-03-04 02:43:26] INFO [routes.cop_routes] [使用地圖]: scenario_load_20260304_024312.html
+[2026-03-04 02:43:29] INFO [routes.cop_routes] [啟動 Selenium]...
+[2026-03-04 02:43:38] INFO [routes.cop_routes] [載入地圖]: http://localhost:5000/maps/scenario_load_20260304_024312.html
+[2026-03-04 02:43:39] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:39] "GET /maps/scenario_load_20260304_024312.html HTTP/1.1" 200 -
+[2026-03-04 02:43:40] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:40] "[35m[1mGET /tiles/osm/7/110/55.png HTTP/1.1[0m" 204 -
+[2026-03-04 02:43:40] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:40] "[35m[1mGET /tiles/osm/7/110/54.png HTTP/1.1[0m" 204 -
+[2026-03-04 02:43:40] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:40] "GET /tiles/osm/7/107/57.png HTTP/1.1" 200 -
+[2026-03-04 02:43:40] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:40] "GET /tiles/osm/7/105/54.png HTTP/1.1" 200 -
+[2026-03-04 02:43:40] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:40] "GET /tiles/osm/7/103/56.png HTTP/1.1" 200 -
+[2026-03-04 02:43:40] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:40] "GET /tiles/osm/7/109/57.png HTTP/1.1" 200 -
+[2026-03-04 02:43:40] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:40] "GET /tiles/osm/7/105/57.png HTTP/1.1" 200 -
+[2026-03-04 02:43:40] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:40] "GET /tiles/osm/7/103/57.png HTTP/1.1" 200 -
+[2026-03-04 02:43:40] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:40] "GET /tiles/osm/7/104/54.png HTTP/1.1" 200 -
+[2026-03-04 02:43:40] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:40] "GET /tiles/osm/7/109/53.png HTTP/1.1" 200 -
+[2026-03-04 02:43:40] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:40] "GET /tiles/osm/7/103/55.png HTTP/1.1" 200 -
+[2026-03-04 02:43:40] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:40] "GET /tiles/osm/7/105/53.png HTTP/1.1" 200 -
+[2026-03-04 02:43:41] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:41] "GET /tiles/osm/7/106/57.png HTTP/1.1" 200 -
+[2026-03-04 02:43:41] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:41] "GET /tiles/osm/7/103/54.png HTTP/1.1" 200 -
+[2026-03-04 02:43:41] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:41] "GET /tiles/osm/7/108/55.png HTTP/1.1" 200 -
+[2026-03-04 02:43:41] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:41] "GET /tiles/osm/7/104/55.png HTTP/1.1" 200 -
+[2026-03-04 02:43:41] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:41] "GET /tiles/osm/7/104/53.png HTTP/1.1" 200 -
+[2026-03-04 02:43:41] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:41] "[35m[1mGET /tiles/osm/7/110/53.png HTTP/1.1[0m" 204 -
+[2026-03-04 02:43:41] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:41] "[35m[1mGET /tiles/osm/7/110/57.png HTTP/1.1[0m" 204 -
+[2026-03-04 02:43:41] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:41] "GET /tiles/osm/7/109/56.png HTTP/1.1" 200 -
+[2026-03-04 02:43:41] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:41] "GET /tiles/osm/7/109/55.png HTTP/1.1" 200 -
+[2026-03-04 02:43:41] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:41] "GET /tiles/osm/7/105/55.png HTTP/1.1" 200 -
+[2026-03-04 02:43:41] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:41] "GET /tiles/osm/7/108/54.png HTTP/1.1" 200 -
+[2026-03-04 02:43:41] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:41] "GET /tiles/osm/7/107/53.png HTTP/1.1" 200 -
+[2026-03-04 02:43:41] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:41] "[35m[1mGET /tiles/osm/7/110/56.png HTTP/1.1[0m" 204 -
+[2026-03-04 02:43:41] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:41] "GET /tiles/osm/7/108/56.png HTTP/1.1" 200 -
+[2026-03-04 02:43:41] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:41] "GET /tiles/osm/7/103/53.png HTTP/1.1" 200 -
+[2026-03-04 02:43:41] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:41] "GET /tiles/osm/7/108/57.png HTTP/1.1" 200 -
+[2026-03-04 02:43:41] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:41] "GET /tiles/osm/7/106/53.png HTTP/1.1" 200 -
+[2026-03-04 02:43:41] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:41] "GET /tiles/osm/7/109/54.png HTTP/1.1" 200 -
+[2026-03-04 02:43:42] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:42] "GET /tiles/osm/7/104/57.png HTTP/1.1" 200 -
+[2026-03-04 02:43:42] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:42] "GET /tiles/osm/7/108/53.png HTTP/1.1" 200 -
+[2026-03-04 02:43:42] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:42] "GET /tiles/osm/7/104/56.png HTTP/1.1" 200 -
+[2026-03-04 02:43:42] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:42] "GET /tiles/osm/7/105/56.png HTTP/1.1" 200 -
+[2026-03-04 02:43:42] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:42] "GET /tiles/osm/7/106/55.png HTTP/1.1" 200 -
+[2026-03-04 02:43:42] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:42] "GET /tiles/osm/7/107/55.png HTTP/1.1" 200 -
+[2026-03-04 02:43:42] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:42] "GET /tiles/osm/7/106/54.png HTTP/1.1" 200 -
+[2026-03-04 02:43:42] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:42] "GET /tiles/osm/7/107/54.png HTTP/1.1" 200 -
+[2026-03-04 02:43:42] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:42] "GET /tiles/osm/7/106/56.png HTTP/1.1" 200 -
+[2026-03-04 02:43:42] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:42] "GET /tiles/osm/7/107/56.png HTTP/1.1" 200 -
+[2026-03-04 02:43:42] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:42] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2026-03-04 02:43:45] INFO [routes.cop_routes] [截圖中]...
+[2026-03-04 02:43:45] INFO [routes.cop_routes] 找到地圖元素，截取地圖區域
+[2026-03-04 02:43:48] INFO [routes.cop_routes] 截圖成功: COP_20260304_024345.png
+[2026-03-04 02:43:48] INFO [werkzeug] 127.0.0.1 - - [04/Mar/2026 02:43:48] "POST /api/save_cop HTTP/1.1" 200 -

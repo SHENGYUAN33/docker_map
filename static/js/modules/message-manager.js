@@ -175,7 +175,7 @@ export class MessageManager {
    */
   copyAnswer(button) {
     const messageDiv = button.closest('.chat-message');
-    const answerText = messageDiv.dataset.answerText;
+    const answerText = messageDiv.dataset.answerText.replace(/\\n/g, '\n');
 
     navigator.clipboard.writeText(answerText).then(() => {
       this.uiManager.showNotification('✅ 已複製到剪貼簿', 'success');

@@ -272,7 +272,7 @@ class MapState:
             # 加入三種離線底圖（overlay=False 代表底圖，互斥切換）
             # 1. 街道地圖（預設顯示）
             folium.TileLayer(
-                tiles='/tiles/osm/{z}/{x}/{y}.png',
+                tiles='../tiles/osm/{z}/{x}/{y}.png',
                 attr='離線街道地圖',
                 name='街道地圖',
                 overlay=False,
@@ -283,7 +283,7 @@ class MapState:
 
             # 2. 衛星影像（預設隱藏）
             folium.TileLayer(
-                tiles='/tiles/esri_satellite/{z}/{x}/{y}.png',
+                tiles='../tiles/esri_satellite/{z}/{x}/{y}.png',
                 attr='離線衛星影像',
                 name='衛星影像',
                 overlay=False,
@@ -294,7 +294,7 @@ class MapState:
 
             # 3. 深色地圖（預設隱藏）
             folium.TileLayer(
-                tiles='/tiles/carto_dark/{z}/{x}/{y}.png',
+                tiles='../tiles/carto_dark/{z}/{x}/{y}.png',
                 attr='離線深色地圖',
                 name='深色地圖',
                 overlay=False,

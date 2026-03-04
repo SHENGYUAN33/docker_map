@@ -9,7 +9,7 @@ import json
 import base64
 import logging
 
-from config import COP_DIR, MAP_DIR, SELENIUM_WINDOW_WIDTH, SELENIUM_WINDOW_HEIGHT, COP_PAGE_LOAD_WAIT, COP_FILENAME_FORMAT
+from config import COP_DIR, MAP_DIR, SELENIUM_WINDOW_WIDTH, SELENIUM_WINDOW_HEIGHT, COP_PAGE_LOAD_WAIT, COP_FILENAME_FORMAT, FLASK_PORT
 from utils import get_map_state, cleanup_old_files
 
 logger = logging.getLogger(__name__)
@@ -91,9 +91,8 @@ def save_cop():
             # 創建 WebDriver
             driver = webdriver.Chrome(options=chrome_options)
 
-            # 載入地圖文件（使用 file:// 協議）
-            absolute_path = os.path.abspath(map_path)
-            map_url = f"file://{absolute_path}"
+            # 載入地圖文件（使用 http:// 協議，確保離線圖磚可正常載入）
+            map_url = f"http://localhost:{FLASK_PORT}/maps/{latest_map}"
 
             logger.info("[載入地圖]: %s", map_url)
             driver.get(map_url)

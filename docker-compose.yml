@@ -1,0 +1,87 @@
+version: "3.8"
+
+services:
+  # ==================== Ollama LLM ====================
+  ollama:
+    image: ollama/ollama:latest
+    container_name: wargame-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:11434/api/tags || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    # GPU 加速（可選）：若無 NVIDIA GPU 會自動退回 CPU
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  # ==================== Node.js API（模擬 CMO API）====================
+  node-api:
+    image: node:18-alpine
+    container_name: wargame-node-api
+    working_dir: /app
+    command: node server_v2_fixed.js
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./server_v2_fixed.js:/app/server_v2_fixed.js:ro
+      - ./db_v2.json:/app/db_v2.json
+      - ./track_data.json:/app/track_data.json:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ==================== Flask 後端 ====================
+  flask-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wargame-flask
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./tiles:/app/tiles:ro
+      - ./logs:/app/logs
+      - ./scenarios:/app/scenarios
+      - ./geojson_layers:/app/geojson_layers
+      - ./static/cesium:/app/static/cesium:ro
+    environment:
+      - ENV=production
+      - FLASK_HOST=0.0.0.0
+      - FLASK_PORT=5000
+      - FLASK_DEBUG=False
+      - OLLAMA_URL=http://ollama:11434/api/chat
+      - NODE_API_BASE=http://node-api:3000/api/v1
+      - DEFAULT_LLM_MODEL=llama3.2:3b
+      - LLM_API_TIMEOUT=300
+      - CORS_ORIGINS=*
+    depends_on:
+      ollama:
+        condition: service_healthy
+      node-api:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:5000/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  ollama_data:
+    name: wargame-ollama-models

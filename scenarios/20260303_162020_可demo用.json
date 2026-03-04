@@ -1,0 +1,604 @@
+{
+  "name": "可demo用",
+  "saved_at": "2026-03-03T16:20:20.717293",
+  "state": {
+    "markers": [
+      {
+        "id": "marker_0",
+        "location": [
+          23.093695,
+          121.567613
+        ],
+        "popup": "<b>國軍: 么么零一</b>",
+        "color": "blue",
+        "icon": "ship",
+        "shape": "circle",
+        "layer": "scenario"
+      },
+      {
+        "id": "marker_1",
+        "location": [
+          22.822306,
+          121.443169
+        ],
+        "popup": "<b>國軍: 么么零一</b>",
+        "color": "blue",
+        "icon": "ship",
+        "shape": "circle",
+        "layer": "scenario"
+      },
+      {
+        "id": "marker_2",
+        "location": [
+          24.289367,
+          119.955817
+        ],
+        "popup": "<div style=\"min-width:220px;font-family:sans-serif;font-size:13px;\"><div style=\"font-weight:700;font-size:15px;border-bottom:2px solid #e74c3c;padding-bottom:5px;margin-bottom:6px;\">🔴 大型驅逐艦</div><div><b>英文：</b>052D</div><div><b>艦級：</b>未知</div><div><b>座標：</b>24.2894°N, 119.9558°E</div></div>",
+        "color": "red",
+        "icon": "ship",
+        "shape": "diamond",
+        "layer": "scenario"
+      },
+      {
+        "id": "marker_3",
+        "location": [
+          24.49995,
+          120.133091
+        ],
+        "popup": "<div style=\"min-width:220px;font-family:sans-serif;font-size:13px;\"><div style=\"font-weight:700;font-size:15px;border-bottom:2px solid #e74c3c;padding-bottom:5px;margin-bottom:6px;\">🔴 大型驅逐艦</div><div><b>英文：</b>052D</div><div><b>艦級：</b>未知</div><div><b>座標：</b>24.4999°N, 120.1331°E</div></div>",
+        "color": "red",
+        "icon": "ship",
+        "shape": "diamond",
+        "layer": "scenario"
+      },
+      {
+        "id": "marker_4",
+        "location": [
+          25.212642,
+          121.804246
+        ],
+        "popup": "<div style=\"min-width:220px;font-family:sans-serif;font-size:13px;\"><div style=\"font-weight:700;font-size:15px;border-bottom:2px solid #2196F3;padding-bottom:5px;margin-bottom:6px;\">🔵 Yung Yang</div><div><b>舷號：</b>1306</div><div><b>艦級：</b>濟陽級巡防艦</div><div><b>座標：</b>25.2126°N, 121.8042°E</div><div><b>武裝：</b>標準一型, ASROC</div></div>",
+        "color": "blue",
+        "icon": "ship",
+        "shape": "circle",
+        "layer": "scenario"
+      },
+      {
+        "id": "marker_5",
+        "location": [
+          23.093695,
+          121.567613
+        ],
+        "popup": "<div style=\"min-width:220px;font-family:sans-serif;font-size:13px;\"><div style=\"font-weight:700;font-size:15px;border-bottom:2px solid #2196F3;padding-bottom:5px;margin-bottom:6px;\">🔵 成功艦</div><div><b>舷號：</b>1101</div><div><b>英文：</b>Cheng Kung</div><div><b>艦級：</b>成功級巡防艦</div><div><b>座標：</b>23.0937°N, 121.5676°E</div><div><b>武裝：</b>雄風二型, 標準一型, 76mm艦砲</div></div>",
+        "color": "blue",
+        "icon": "ship",
+        "shape": "circle",
+        "layer": "wta"
+      },
+      {
+        "id": "marker_6",
+        "location": [
+          23.280819,
+          119.038618
+        ],
+        "popup": "<b>解放軍: 052D-1</b>",
+        "color": "red",
+        "icon": "ship",
+        "shape": "diamond",
+        "layer": "wta"
+      },
+      {
+        "id": "marker_7",
+        "location": [
+          22.822306,
+          121.443169
+        ],
+        "popup": "<b>國軍: 1101-2</b>",
+        "color": "blue",
+        "icon": "ship",
+        "shape": "circle",
+        "layer": "wta"
+      },
+      {
+        "id": "marker_8",
+        "location": [
+          23.046975,
+          118.946128
+        ],
+        "popup": "<b>解放軍: 052D-2</b>",
+        "color": "red",
+        "icon": "ship",
+        "shape": "diamond",
+        "layer": "wta"
+      },
+      {
+        "id": "marker_9",
+        "location": [
+          23.173509,
+          119.936744
+        ],
+        "popup": "<b>國軍: PGG-1</b>",
+        "color": "blue",
+        "icon": "ship",
+        "shape": "circle",
+        "layer": "wta"
+      },
+      {
+        "id": "marker_10",
+        "location": [
+          22.841139,
+          119.015496
+        ],
+        "popup": "<b>解放軍: 052D-3</b>",
+        "color": "red",
+        "icon": "ship",
+        "shape": "diamond",
+        "layer": "wta"
+      },
+      {
+        "id": "marker_11",
+        "location": [
+          22.677343,
+          119.962941
+        ],
+        "popup": "<b>國軍: PGG-2</b>",
+        "color": "blue",
+        "icon": "ship",
+        "shape": "circle",
+        "layer": "wta"
+      },
+      {
+        "id": "marker_12",
+        "location": [
+          23.937619,
+          119.863327
+        ],
+        "popup": "<b>解放軍: 054A-1</b>",
+        "color": "red",
+        "icon": "ship",
+        "shape": "diamond",
+        "layer": "wta"
+      },
+      {
+        "id": "marker_13",
+        "location": [
+          22.36247,
+          120.21498
+        ],
+        "popup": "<b>國軍: Chien Kung</b>",
+        "color": "blue",
+        "icon": "ship",
+        "shape": "circle",
+        "layer": "wta"
+      },
+      {
+        "id": "marker_14",
+        "location": [
+          24.289367,
+          119.955817
+        ],
+        "popup": "<b>解放軍: 055-1</b>",
+        "color": "red",
+        "icon": "ship",
+        "shape": "diamond",
+        "layer": "wta"
+      },
+      {
+        "id": "marker_15",
+        "location": [
+          25.212642,
+          121.804246
+        ],
+        "popup": "<div style=\"min-width:220px;font-family:sans-serif;font-size:13px;\"><div style=\"font-weight:700;font-size:15px;border-bottom:2px solid #2196F3;padding-bottom:5px;margin-bottom:6px;\">🔵 1306</div><div><b>舷號：</b>1306</div><div><b>英文：</b>Yung Feng</div><div><b>艦級：</b>濟陽級巡防艦</div><div><b>座標：</b>25.2126°N, 121.8042°E</div><div><b>武裝：</b>標準一型, ASROC</div></div>",
+        "color": "blue",
+        "icon": "ship",
+        "shape": "circle",
+        "layer": "wta"
+      },
+      {
+        "id": "marker_16",
+        "location": [
+          24.49995,
+          120.133091
+        ],
+        "popup": "<b>解放軍: 055-2</b>",
+        "color": "red",
+        "icon": "ship",
+        "shape": "diamond",
+        "layer": "wta"
+      },
+      {
+        "id": "marker_17",
+        "location": [
+          23.173509,
+          119.936744
+        ],
+        "popup": "<b>國軍: PGG-1</b>",
+        "color": "blue",
+        "icon": "ship",
+        "shape": "circle",
+        "layer": "wta"
+      },
+      {
+        "id": "marker_18",
+        "location": [
+          23.280819,
+          119.038618
+        ],
+        "popup": "<b>解放軍: 052D-1</b>",
+        "color": "red",
+        "icon": "ship",
+        "shape": "diamond",
+        "layer": "wta"
+      },
+      {
+        "id": "marker_19",
+        "location": [
+          22.36247,
+          120.21498
+        ],
+        "popup": "<b>國軍: Chien Kung</b>",
+        "color": "blue",
+        "icon": "ship",
+        "shape": "circle",
+        "layer": "wta"
+      },
+      {
+        "id": "marker_20",
+        "location": [
+          23.937619,
+          119.863327
+        ],
+        "popup": "<b>解放軍: 054A-1</b>",
+        "color": "red",
+        "icon": "ship",
+        "shape": "diamond",
+        "layer": "wta"
+      },
+      {
+        "id": "marker_21",
+        "location": [
+          22.822306,
+          121.443169
+        ],
+        "popup": "<b>國軍: Tuo Chiang-2</b>",
+        "color": "blue",
+        "icon": "ship",
+        "shape": "circle",
+        "layer": "wta"
+      },
+      {
+        "id": "marker_22",
+        "location": [
+          24.289367,
+          119.955817
+        ],
+        "popup": "<b>解放軍: 055-1</b>",
+        "color": "red",
+        "icon": "ship",
+        "shape": "diamond",
+        "layer": "wta"
+      },
+      {
+        "id": "marker_23",
+        "location": [
+          22.677343,
+          119.962941
+        ],
+        "popup": "<b>國軍: PGG-2</b>",
+        "color": "blue",
+        "icon": "ship",
+        "shape": "circle",
+        "layer": "wta"
+      },
+      {
+        "id": "marker_24",
+        "location": [
+          24.49995,
+          120.133091
+        ],
+        "popup": "<b>解放軍: 052D-2</b>",
+        "color": "red",
+        "icon": "ship",
+        "shape": "diamond",
+        "layer": "wta"
+      },
+      {
+        "id": "marker_25",
+        "location": [
+          23.7922894,
+          124.5849443
+        ],
+        "popup": "<b>解放軍: 052</b>",
+        "color": "red",
+        "icon": "ship",
+        "shape": "diamond",
+        "layer": "tracks"
+      },
+      {
+        "id": "marker_26",
+        "location": [
+          22.6522821,
+          124.5906479
+        ],
+        "popup": "<div style=\"min-width:220px;font-family:sans-serif;font-size:13px;\"><div style=\"font-weight:700;font-size:15px;border-bottom:2px solid #e74c3c;padding-bottom:5px;margin-bottom:6px;\">🔴 055</div><div><b>艦級：</b>未知</div><div><b>座標：</b>22.6523°N, 124.5906°E</div></div>",
+        "color": "red",
+        "icon": "ship",
+        "shape": "diamond",
+        "layer": "tracks"
+      },
+      {
+        "id": "marker_27",
+        "location": [
+          24.8243734,
+          122.3384506
+        ],
+        "popup": "<b>國軍: 618</b>",
+        "color": "blue",
+        "icon": "ship",
+        "shape": "circle",
+        "layer": "tracks"
+      },
+      {
+        "id": "marker_28",
+        "location": [
+          24.5093878,
+          121.9918753
+        ],
+        "popup": "<b>國軍: 619</b>",
+        "color": "blue",
+        "icon": "ship",
+        "shape": "circle",
+        "layer": "tracks"
+      }
+    ],
+    "lines": [
+      {
+        "start": [
+          23.093695,
+          121.567613
+        ],
+        "end": [
+          23.280819,
+          119.038618
+        ],
+        "color": "#FF0000",
+        "popup": "第1波<br>雄三飛彈 x 4枚<br>14:56",
+        "weight": 4,
+        "dash_array": null,
+        "layer": "wta"
+      },
+      {
+        "start": [
+          22.822306,
+          121.443169
+        ],
+        "end": [
+          23.046975,
+          118.946128
+        ],
+        "color": "#FF6600",
+        "popup": "第1波<br>雄風二型 x 4枚<br>14:56",
+        "weight": 4,
+        "dash_array": null,
+        "layer": "wta"
+      },
+      {
+        "start": [
+          23.173509,
+          119.936744
+        ],
+        "end": [
+          22.841139,
+          119.015496
+        ],
+        "color": "#9900CC",
+        "popup": "第1波<br>天劍飛彈 x 2枚<br>14:57",
+        "weight": 4,
+        "dash_array": null,
+        "layer": "wta"
+      },
+      {
+        "start": [
+          22.677343,
+          119.962941
+        ],
+        "end": [
+          23.937619,
+          119.863327
+        ],
+        "color": "#FF0000",
+        "popup": "第2波<br>雄三飛彈 x 4枚<br>14:58",
+        "weight": 4,
+        "dash_array": null,
+        "layer": "wta"
+      },
+      {
+        "start": [
+          22.36247,
+          120.21498
+        ],
+        "end": [
+          24.289367,
+          119.955817
+        ],
+        "color": "#00CC66",
+        "popup": "第2波<br>魚叉飛彈 x 2枚<br>14:59",
+        "weight": 4,
+        "dash_array": null,
+        "layer": "wta"
+      },
+      {
+        "start": [
+          25.212642,
+          121.804246
+        ],
+        "end": [
+          24.49995,
+          120.133091
+        ],
+        "color": "#FF0000",
+        "popup": "第2波<br>雄三飛彈 x 4枚<br>15:00",
+        "weight": 4,
+        "dash_array": null,
+        "layer": "wta"
+      },
+      {
+        "start": [
+          23.173509,
+          119.936744
+        ],
+        "end": [
+          23.280819,
+          119.038618
+        ],
+        "color": "#0066FF",
+        "popup": "第3波<br>標準二型飛彈 x 2枚<br>15:02",
+        "weight": 4,
+        "dash_array": null,
+        "layer": "wta"
+      },
+      {
+        "start": [
+          22.36247,
+          120.21498
+        ],
+        "end": [
+          23.937619,
+          119.863327
+        ],
+        "color": "#FF6600",
+        "popup": "第3波<br>雄風二型 x 2枚<br>15:03",
+        "weight": 4,
+        "dash_array": null,
+        "layer": "wta"
+      },
+      {
+        "start": [
+          22.822306,
+          121.443169
+        ],
+        "end": [
+          24.289367,
+          119.955817
+        ],
+        "color": "#FF0000",
+        "popup": "第3波<br>雄三飛彈 x 4枚<br>15:04",
+        "weight": 4,
+        "dash_array": null,
+        "layer": "wta"
+      },
+      {
+        "start": [
+          22.677343,
+          119.962941
+        ],
+        "end": [
+          24.49995,
+          120.133091
+        ],
+        "color": "#FF0000",
+        "popup": "第3波<br>雄三飛彈 x 4枚<br>15:05",
+        "weight": 4,
+        "dash_array": null,
+        "layer": "wta"
+      }
+    ],
+    "tracks": [
+      {
+        "type": "enemy",
+        "ship_name": "052",
+        "coordinates": [
+          [
+            23.9429914,
+            125.8593584
+          ],
+          [
+            23.8324937,
+            125.5517412
+          ],
+          [
+            23.7922894,
+            125.2660967
+          ],
+          [
+            23.7721825,
+            124.9365068
+          ],
+          [
+            23.7922894,
+            124.5849443
+          ]
+        ],
+        "color": "#FF5252",
+        "weight": 3,
+        "layer": "tracks"
+      },
+      {
+        "type": "enemy",
+        "ship_name": "055",
+        "coordinates": [
+          [
+            21.8693924,
+            125.5464584
+          ],
+          [
+            22.1037004,
+            125.0850326
+          ],
+          [
+            22.3477814,
+            124.7664291
+          ],
+          [
+            22.6522821,
+            124.5906479
+          ]
+        ],
+        "color": "#FF5252",
+        "weight": 3,
+        "layer": "tracks"
+      },
+      {
+        "type": "roc",
+        "ship_name": "618",
+        "coordinates": [
+          [
+            25.1728714,
+            122.151683
+          ],
+          [
+            24.8243734,
+            122.3384506
+          ]
+        ],
+        "color": "#1A237E",
+        "weight": 3,
+        "layer": "tracks"
+      },
+      {
+        "type": "roc",
+        "ship_name": "619",
+        "coordinates": [
+          [
+            24.788974,
+            121.9699026
+          ],
+          [
+            24.5093878,
+            121.9918753
+          ]
+        ],
+        "color": "#1A237E",
+        "weight": 3,
+        "layer": "tracks"
+      }
+    ],
+    "wta_animation_data": null,
+    "layers": [
+      "scenario",
+      "tracks",
+      "wta"
+    ]
+  }
+}

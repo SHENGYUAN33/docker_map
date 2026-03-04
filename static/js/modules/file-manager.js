@@ -20,10 +20,6 @@ export class FileManager {
    */
   async pickSaveDirectory() {
     if (!window.showDirectoryPicker) {
-      this.uiManager.showNotification(
-        '❌ 你的瀏覽器不支援「選資料夾並寫入」功能（請用 Chrome/Edge，並用 localhost 開啟）',
-        'error'
-      );
       return null;
     }
 
@@ -31,7 +27,7 @@ export class FileManager {
       const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
       return dirHandle;
     } catch (e) {
-      // 使用者取消
+      // 使用者取消或權限不足
       return null;
     }
   }
@@ -62,6 +58,21 @@ export class FileManager {
     const writable = await fileHandle.createWritable();
     await writable.write(blob);
     await writable.close();
+  }
+
+  /**
+   * Fallback 下載：透過瀏覽器下載機制儲存檔案
+   * @param {string} dataUrl - Data URL 格式的檔案內容
+   * @param {string} filename - 檔案名稱
+   */
+  _fallbackDownload(dataUrl, filename) {
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    this.uiManager.showNotification(`✅ COP 已透過瀏覽器下載: ${filename}`, 'success');
   }
 
   /**
@@ -103,8 +114,9 @@ export class FileManager {
       this.saveDirHandle = null;
       const dirHandle = await this.pickSaveDirectory();
       if (!dirHandle) {
-        this.uiManager.showNotification('⚠️ 已取消選擇資料夾', 'warning');
-        return false;
+        // Fallback：使用瀏覽器下載
+        this._fallbackDownload(imageBase64, filename);
+        return true;
       }
 
       // 保存圖片
@@ -124,9 +136,9 @@ export class FileManager {
       this.uiManager.showNotification(`✅ COP 已儲存到選擇的資料夾: ${filename}`, 'success');
       return true;
     } catch (e) {
-      this.uiManager.showNotification('❌ 儲存失敗：' + (e.message || e), 'error');
-      console.error('儲存錯誤:', e);
-      return false;
+      // Fallback：使用瀏覽器下載
+      this._fallbackDownload(imageBase64, filename);
+      return true;
     }
   }
 }

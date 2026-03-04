@@ -128,7 +128,10 @@ class Application {
    */
   async clearMapState() {
     try {
-      await apiClient.clearMap();
+      const result = await apiClient.clearMap();
+      if (result && result.map_url) {
+        this.mapManager.showMap(result.map_url);
+      }
       console.log('🧹 已清空本分頁地圖狀態 (client_id=', window.CLIENT_ID, ')');
     } catch (error) {
       console.log('🧹 清空地圖狀態失敗 (可能後端尚未啟動)');
