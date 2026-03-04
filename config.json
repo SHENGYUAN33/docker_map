@@ -1,7 +1,7 @@
 {
   "show_source_btn": false,
   "enable_animation": false,
-  "enable_3d_globe": false,
+  "enable_3d_globe": true,
   "enable_measurement": true,
   "cesium_offline_mode": true,
   "cesium_ion_token": "",

@@ -54,11 +54,9 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./tiles:/app/tiles:ro
       - ./logs:/app/logs
       - ./scenarios:/app/scenarios
       - ./geojson_layers:/app/geojson_layers
-      - ./static/cesium:/app/static/cesium:ro
     environment:
       - ENV=production
       - FLASK_HOST=0.0.0.0

@@ -1,6 +1,5 @@
 # 不進映像的大型資源（改用 volume 掛載）
-static/cesium/
-tiles/
+# static/cesium/ 和 tiles/ 已移入映像，確保離線 3D 模式可用
 logs/
 scenarios/
 geojson_layers/
